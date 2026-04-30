@@ -36,12 +36,12 @@ body.light{
   --purple:#8250df;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
+html,body{height:100%}
 body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-.app{display:flex;height:100vh}
+.app{display:flex;height:100vh;overflow:hidden}
 .nav{width:var(--nav-w);background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
 .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .page{display:none;padding:28px 32px;min-height:100%}
@@ -672,19 +672,6 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     Postavke
   </div>
-  <div style="padding:12px 18px;border-top:1px solid var(--border)">
-    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px" data-i18n="language">Jezik / Language</div>
-    <div style="display:flex;gap:6px;margin-bottom:12px">
-      <button class="btn btn-xs" id="lang-hr-btn" onclick="setAppLang('hr')" style="flex:1">HR</button>
-      <button class="btn btn-xs" id="lang-de-btn" onclick="setAppLang('de')" style="flex:1">DE</button>
-      <button class="btn btn-xs" id="lang-en-btn" onclick="setAppLang('en')" style="flex:1">EN</button>
-    </div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px" data-i18n="theme">Tema</div>
-    <div style="display:flex;gap:6px;margin-bottom:12px">
-      <button class="btn btn-xs" id="theme-dark-btn" onclick="setTheme('dark')" style="flex:1">&#9790; Tamna</button>
-      <button class="btn btn-xs" id="theme-light-btn" onclick="setTheme('light')" style="flex:1">&#9728; Svijetla</button>
-    </div>
-  </div>
   <div class="nav-bottom" style="display:flex;justify-content:space-between;align-items:center">v1.3 &middot; ShopFlow<span onclick="goToLanding()" style="cursor:pointer;color:var(--accent);font-size:12px" title="Pocetna stranica">&#8962;</span></div>
 </nav>
 
@@ -1020,6 +1007,26 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
     <div class="field"><label>Default napomena na invoiceu</label><textarea id="s-note" rows="2"></textarea></div>
   </div>
   <div class="settings-section">
+    <h3>Izgled i jezik</h3>
+    <div class="grid2">
+      <div class="field">
+        <label data-i18n="language">Jezik / Language</label>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="lang-hr-btn" onclick="setAppLang('hr')" style="flex:1">HR</button>
+          <button class="btn" id="lang-de-btn" onclick="setAppLang('de')" style="flex:1">DE</button>
+          <button class="btn" id="lang-en-btn" onclick="setAppLang('en')" style="flex:1">EN</button>
+        </div>
+      </div>
+      <div class="field">
+        <label data-i18n="theme">Tema</label>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="theme-dark-btn" onclick="setTheme('dark')" style="flex:1">&#9790; Tamna</button>
+          <button class="btn" id="theme-light-btn" onclick="setTheme('light')" style="flex:1">&#9728; Svijetla</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="settings-section">
     <h3>Backup podataka</h3>
     <div class="field"><label>Claude API Key (za AI generiranje emailova)</label><input id="s-claude-key" type="password" placeholder="sk-ant-..."></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1270,6 +1277,7 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
 function openApp(){
   document.getElementById('landing-page').style.display='none';
   document.getElementById('app-page').style.display='block';
+  document.body.style.overflow='hidden';
   document.title='ShopFlow — App';
   window.scrollTo(0,0);
   if(!window._appInit){window._appInit=true;initApp();}
@@ -1277,6 +1285,7 @@ function openApp(){
 function goToLanding(){
   document.getElementById('app-page').style.display='none';
   document.getElementById('landing-page').style.display='block';
+  document.body.style.overflow='';
   document.title='ShopFlow';
 }
 

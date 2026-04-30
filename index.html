@@ -409,54 +409,44 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
     Compallo
   </a>
   <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#compare">Compare</a>
-    <a href="#pricing">Pricing</a>
+    <a href="#features" data-lp="nav-features">Features</a>
+    <a href="#compare" data-lp="nav-compare">Compare</a>
+    <a href="#pricing" data-lp="nav-pricing">Pricing</a>
     <button id="lang-hr-btn" onclick="setAppLang('hr')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 10px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s">HR</button>
     <button id="lang-de-btn" onclick="setAppLang('de')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 10px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s">DE</button>
     <button id="lang-en-btn" onclick="setAppLang('en')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 10px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s">EN</button>
-    <a href="#" class="nav-cta" onclick="openApp();return false;">Start free →</a>
+    <button id="theme-dark-btn" onclick="setTheme('dark')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 9px;border-radius:5px;font-size:14px;cursor:pointer;transition:all .2s" title="Dark">🌙</button>
+    <button id="theme-light-btn" onclick="setTheme('light')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 9px;border-radius:5px;font-size:14px;cursor:pointer;transition:all .2s" title="Light">☀️</button>
+    <a href="#" class="nav-cta" data-lp="nav-cta" onclick="openApp();return false;">Start free →</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-eyebrow">Now in beta — free for early users</div>
+  <div class="hero-eyebrow" data-lp="hero-eyebrow">Now in beta — free for early users</div>
   <h1>
-    <span class="line-white">Completely</span>
-    <span class="line-yellow">all apps</span>
-    <span class="line-white">in one. Finally.</span>
+    <span class="line-white" data-lp="h1-1">Completely</span>
+    <span class="line-yellow" data-lp="h1-2">all apps</span>
+    <span class="line-white" data-lp="h1-3">in one. Finally.</span>
   </h1>
-  <p class="hero-sub">Compallo replaces <strong>Clockify, Trello, Lexoffice, Apollo, Brevo</strong> and 7 more tools — in one product built for freelancers and small teams who are done juggling subscriptions.</p>
+  <p class="hero-sub" data-lp="hero-sub">Compallo replaces <strong>Clockify, Trello, Lexoffice, Apollo, Brevo</strong> and 7 more tools — in one product built for freelancers and small teams who are done juggling subscriptions.</p>
   <div class="hero-actions">
-    <a href="#" class="btn-yellow" onclick="openApp();return false;">Get started free →</a>
-    <a href="#features" class="btn-ghost">See what's inside</a>
+    <a href="#" class="btn-yellow" data-lp="hero-cta" onclick="openApp();return false;">Get started free →</a>
+    <a href="#features" class="btn-ghost" data-lp="hero-ghost">See what's inside</a>
   </div>
-  <p class="hero-note">No credit card. Works in your browser. Takes 30 seconds.</p>
+  <p class="hero-note" data-lp="hero-note">No credit card. Works in your browser. Takes 30 seconds.</p>
   <div class="hero-stats">
-    <div>
-      <div class="stat-num">12+</div>
-      <div class="stat-label">tools replaced</div>
-    </div>
-    <div>
-      <div class="stat-num">€160</div>
-      <div class="stat-label">saved per month</div>
-    </div>
-    <div>
-      <div class="stat-num">6</div>
-      <div class="stat-label">modules in one</div>
-    </div>
-    <div>
-      <div class="stat-num">3</div>
-      <div class="stat-label">languages supported</div>
-    </div>
+    <div><div class="stat-num">12+</div><div class="stat-label" data-lp="stat-1">tools replaced</div></div>
+    <div><div class="stat-num">€160</div><div class="stat-label" data-lp="stat-2">saved per month</div></div>
+    <div><div class="stat-num">6</div><div class="stat-label" data-lp="stat-3">modules in one</div></div>
+    <div><div class="stat-num">3</div><div class="stat-label" data-lp="stat-4">languages supported</div></div>
   </div>
 </section>
 
 <!-- REPLACING -->
 <section class="replacing fade-up">
-  <div class="section-tag yellow">The problem</div>
-  <h2 class="replacing-title">You're paying for<br>too many apps.</h2>
+  <div class="section-tag yellow" data-lp="rep-tag">The problem</div>
+  <h2 class="replacing-title" data-lp="rep-title">You're paying for<br>too many apps.</h2>
   <div class="tools-scroll">
     <div class="tool-pill"><span class="tool-pill-name">Clockify</span><span class="tool-pill-price">€10/mo</span></div>
     <div class="tool-pill"><span class="tool-pill-name">Toggl</span><span class="tool-pill-price">€10/mo</span></div>
@@ -471,71 +461,59 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
     <div class="tool-pill"><span class="tool-pill-name">Instantly</span><span class="tool-pill-price">€37/mo</span></div>
     <div class="tool-pill"><span class="tool-pill-name">Brevo</span><span class="tool-pill-price">€9/mo</span></div>
   </div>
-  <div class="replacing-arrow">One tool does it all</div>
+  <div class="replacing-arrow" data-lp="rep-arrow">One tool does it all</div>
   <div>
     <div class="shopflow-pill">
       ✦ Compallo
-      <span>— everything above, one price</span>
+      <span data-lp="rep-pill">— everything above, one price</span>
     </div>
   </div>
   <div style="margin-top:20px">
-    <div class="saving-badge">Save up to <strong>&nbsp;€180/month&nbsp;</strong> vs. using all of the above</div>
+    <div class="saving-badge" data-lp="rep-save">Save up to <strong>&nbsp;€180/month&nbsp;</strong> vs. using all of the above</div>
   </div>
 </section>
 
 <!-- FEATURES -->
 <section class="features fade-up" id="features">
   <div class="features-header">
-    <h2 class="features-title">Six tools.<br><span style="color:var(--yellow)">One login.</span><br>Zero chaos.</h2>
-    <p class="features-subtitle">Every module is connected — time tracked flows into invoices, leads become clients, clients become projects.</p>
+    <h2 class="features-title" data-lp="feat-h">Six tools.<br><span style="color:var(--yellow)">One login.</span><br>Zero chaos.</h2>
+    <p class="features-subtitle" data-lp="feat-sub">Every module is connected — time tracked flows into invoices, leads become clients, clients become projects.</p>
   </div>
   <div class="features-grid">
     <div class="feat">
-      <div class="feat-accent y"></div>
-      <div class="feat-num">01</div>
-      <span class="feat-icon">⏱</span>
-      <div class="feat-name">Time Tracking</div>
-      <p class="feat-desc">One-click timer, manual entry, project-based logging with hourly rates. See what your time is actually worth.</p>
+      <div class="feat-accent y"></div><div class="feat-num">01</div><span class="feat-icon">⏱</span>
+      <div class="feat-name" data-lp="f1-name">Time Tracking</div>
+      <p class="feat-desc" data-lp="f1-desc">One-click timer, manual entry, project-based logging with hourly rates. See what your time is actually worth.</p>
       <p class="feat-replaces">Replaces <span>Clockify</span> <span>Toggl</span> <span>Harvest</span></p>
     </div>
     <div class="feat">
-      <div class="feat-accent b"></div>
-      <div class="feat-num">02</div>
-      <span class="feat-icon">📋</span>
-      <div class="feat-name">Project Management</div>
-      <p class="feat-desc">Kanban with 5 stages, Gantt timeline, project pipeline from inquiry to payment. Everything tracked in one place.</p>
+      <div class="feat-accent b"></div><div class="feat-num">02</div><span class="feat-icon">📋</span>
+      <div class="feat-name" data-lp="f2-name">Project Management</div>
+      <p class="feat-desc" data-lp="f2-desc">Kanban with 5 stages, Gantt timeline, project pipeline from inquiry to payment. Everything tracked in one place.</p>
       <p class="feat-replaces">Replaces <span>Trello</span> <span>Asana</span> <span>Monday.com</span></p>
     </div>
     <div class="feat">
-      <div class="feat-accent y"></div>
-      <div class="feat-num">03</div>
-      <span class="feat-icon">🧾</span>
-      <div class="feat-name">Invoicing</div>
-      <p class="feat-desc">Professional invoices in 3 languages, PDF export, SEPA QR code, PayPal & Revolut. History with payment tracking and recurring invoices.</p>
+      <div class="feat-accent y"></div><div class="feat-num">03</div><span class="feat-icon">🧾</span>
+      <div class="feat-name" data-lp="f3-name">Invoicing</div>
+      <p class="feat-desc" data-lp="f3-desc">Professional invoices in 3 languages, PDF export, SEPA QR code, PayPal &amp; Revolut. History with payment tracking and recurring invoices.</p>
       <p class="feat-replaces">Replaces <span>Lexoffice</span> <span>Sevdesk</span> <span>FastBill</span></p>
     </div>
     <div class="feat">
-      <div class="feat-accent b"></div>
-      <div class="feat-num">04</div>
-      <span class="feat-icon">👥</span>
-      <div class="feat-name">CRM</div>
-      <p class="feat-desc">Client profiles with full history — projects, tracked hours, revenue, emails sent. Your entire relationship in one view.</p>
+      <div class="feat-accent b"></div><div class="feat-num">04</div><span class="feat-icon">👥</span>
+      <div class="feat-name" data-lp="f4-name">CRM</div>
+      <p class="feat-desc" data-lp="f4-desc">Client profiles with full history — projects, tracked hours, revenue, emails sent. Your entire relationship in one view.</p>
       <p class="feat-replaces">Replaces <span>HubSpot</span> <span>Pipedrive</span></p>
     </div>
     <div class="feat">
-      <div class="feat-accent y"></div>
-      <div class="feat-num">05</div>
-      <span class="feat-icon">🔍</span>
-      <div class="feat-name">Lead Prospecting</div>
-      <p class="feat-desc">Search companies via Google or Maps. Auto-extracts contact emails from websites and Impressum pages. Built-in outreach pipeline.</p>
+      <div class="feat-accent y"></div><div class="feat-num">05</div><span class="feat-icon">🔍</span>
+      <div class="feat-name" data-lp="f5-name">Lead Prospecting</div>
+      <p class="feat-desc" data-lp="f5-desc">Search companies via Google or Maps. Auto-extracts contact emails from websites and Impressum pages. Built-in outreach pipeline.</p>
       <p class="feat-replaces">Replaces <span>Apollo.io</span> <span>Hunter.io</span> <span>LinkedIn Sales</span></p>
     </div>
     <div class="feat">
-      <div class="feat-accent b"></div>
-      <div class="feat-num">06</div>
-      <span class="feat-icon">✉️</span>
-      <div class="feat-name">AI Email Outreach</div>
-      <p class="feat-desc">AI reads company websites and writes personalized cold emails. Auto-fills contact address. Send directly. Track follow-ups.</p>
+      <div class="feat-accent b"></div><div class="feat-num">06</div><span class="feat-icon">✉️</span>
+      <div class="feat-name" data-lp="f6-name">AI Email Outreach</div>
+      <p class="feat-desc" data-lp="f6-desc">AI reads company websites and writes personalized cold emails. Auto-fills contact address. Send directly. Track follow-ups.</p>
       <p class="feat-replaces">Replaces <span>Instantly</span> <span>Lemlist</span> <span>Brevo</span></p>
     </div>
   </div>
@@ -544,23 +522,23 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
 <!-- COMPARISON -->
 <section class="comparison fade-up" id="compare">
   <div class="comparison-inner">
-    <div class="section-tag" style="color:#888" style="margin-bottom:24px">The honest comparison</div>
-    <h2 style="font-family:var(--display);font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:56px;line-height:1.05">Compallo vs. the<br>alternative chaos</h2>
+    <div class="section-tag" style="color:#888;margin-bottom:24px" data-lp="comp-tag">The honest comparison</div>
+    <h2 style="font-family:var(--display);font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:56px;line-height:1.05" data-lp="comp-h">Compallo vs. the<br>alternative chaos</h2>
     <div class="comp-header-row">
-      <div class="comp-h">Feature</div>
-      <div class="comp-h">5 separate apps</div>
+      <div class="comp-h" data-lp="comp-col1">Feature</div>
+      <div class="comp-h" data-lp="comp-col2">5 separate apps</div>
       <div class="comp-h hl">Compallo</div>
     </div>
-    <div class="comp-row"><div class="comp-feat">Time tracking</div><div class="comp-val yes">✓</div><div class="comp-val yes">✓</div></div>
-    <div class="comp-row"><div class="comp-feat">Invoicing + PDF export</div><div class="comp-val yes">✓</div><div class="comp-val yes">✓</div></div>
-    <div class="comp-row"><div class="comp-feat">CRM + client history</div><div class="comp-val yes">✓</div><div class="comp-val yes">✓</div></div>
-    <div class="comp-row"><div class="comp-feat">Lead prospecting</div><div class="comp-val" style="text-align:center;color:#666;font-size:14px">~ extra tool</div><div class="comp-val yes">✓</div></div>
-    <div class="comp-row"><div class="comp-feat">AI email writing</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
-    <div class="comp-row"><div class="comp-feat">Auto-extract contact emails</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
-    <div class="comp-row"><div class="comp-feat">Data connected across modules</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
-    <div class="comp-row"><div class="comp-feat">DE / EN / HR language support</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat" data-lp="comp-r1">Time tracking</div><div class="comp-val yes">✓</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat" data-lp="comp-r2">Invoicing + PDF export</div><div class="comp-val yes">✓</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat" data-lp="comp-r3">CRM + client history</div><div class="comp-val yes">✓</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat" data-lp="comp-r4">Lead prospecting</div><div class="comp-val" style="text-align:center;color:#666;font-size:14px">~ extra tool</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat" data-lp="comp-r5">AI email writing</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat" data-lp="comp-r6">Auto-extract contact emails</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat" data-lp="comp-r7">Data connected across modules</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat" data-lp="comp-r8">DE / EN / HR language support</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
     <div class="comp-row">
-      <div class="comp-feat" style="font-weight:600;color:var(--text)">Monthly cost</div>
+      <div class="comp-feat" style="font-weight:600;color:var(--text)" data-lp="comp-cost">Monthly cost</div>
       <div class="comp-price-bad">€100–180/mo</div>
       <div class="comp-price-good">€19/mo</div>
     </div>
@@ -569,32 +547,32 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
 
 <!-- PRICING -->
 <section class="pricing fade-up" id="pricing">
-  <div class="section-tag yellow">Pricing</div>
-  <h2 style="font-family:var(--display);font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.05;max-width:500px">One plan.<br>No surprises.</h2>
+  <div class="section-tag yellow" data-lp="pr-tag">Pricing</div>
+  <h2 style="font-family:var(--display);font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.05;max-width:500px" data-lp="pr-h">One plan.<br>No surprises.</h2>
   <div class="pricing-grid">
     <div class="price-info">
-      <h3 class="price-info-title">Everything your<br>business needs.</h3>
-      <p class="price-info-sub">No feature tiers. No add-ons. No "contact us for enterprise pricing". Just one honest price for everything, forever.</p>
+      <h3 class="price-info-title" data-lp="pr-info-title">Everything your<br>business needs.</h3>
+      <p class="price-info-sub" data-lp="pr-info-sub">No feature tiers. No add-ons. No "contact us for enterprise pricing". Just one honest price for everything, forever.</p>
       <ul class="price-features">
-        <li><span class="chk">✓</span> Time tracking + manual entry</li>
-        <li><span class="chk">✓</span> Project management (Kanban + Gantt)</li>
-        <li><span class="chk">✓</span> Professional invoicing with PDF + SEPA</li>
-        <li><span class="chk">✓</span> Expense tracking by category</li>
-        <li><span class="chk">✓</span> Full CRM with client history</li>
-        <li><span class="chk">✓</span> Lead prospecting (Google + Maps)</li>
-        <li><span class="chk">✓</span> AI-powered email outreach</li>
-        <li><span class="chk">✓</span> Invoice history + recurring invoices</li>
-        <li><span class="chk">✓</span> DE / EN / HR languages</li>
-        <li><span class="chk">✓</span> Dark &amp; light mode</li>
-        <li><span class="chk">✓</span> Export CSV, PDF, JSON backup</li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l1">Time tracking + manual entry</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l2">Project management (Kanban + Gantt)</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l3">Professional invoicing with PDF + SEPA</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l4">Expense tracking by category</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l5">Full CRM with client history</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l6">Lead prospecting (Google + Maps)</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l7">AI-powered email outreach</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l8">Invoice history + recurring invoices</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l9">DE / EN / HR languages</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l10">Dark &amp; light mode</span></li>
+        <li><span class="chk">✓</span> <span data-lp="pr-l11">Export CSV, PDF, JSON backup</span></li>
       </ul>
     </div>
     <div class="price-box">
-      <div class="price-badge">Early access</div>
+      <div class="price-badge" data-lp="pr-badge">Early access</div>
       <div class="price-amount"><sup>€</sup>19</div>
-      <p class="price-period">per month · cancel anytime</p>
-      <a href="#" class="price-cta" onclick="openApp();return false;">Start 14-day free trial →</a>
-      <p class="price-trial">No credit card required</p>
+      <p class="price-period" data-lp="pr-period">per month · cancel anytime</p>
+      <a href="#" class="price-cta" data-lp="pr-cta" onclick="openApp();return false;">Start 14-day free trial →</a>
+      <p class="price-trial" data-lp="pr-trial">No credit card required</p>
     </div>
   </div>
 </section>
@@ -602,18 +580,14 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
 <!-- FINAL CTA -->
 <section class="final-cta fade-up">
   <div class="final-cta-bg"></div>
-  <h2 class="final-title">
-    Stop switching<br>
-    <span class="y">tabs.</span> Start<br>
-    <span style="color:#f0f4f8">working.</span>
-  </h2>
-  <p class="final-sub">Everything your business needs, finally in one place.</p>
-  <a href="#" class="btn-yellow" onclick="openApp();return false;" style="font-size:16px;padding:18px 40px">Get started free →</a>
+  <h2 class="final-title" data-lp="cta-h">Stop switching<br><span class="y">tabs.</span> Start<br><span style="color:#f0f4f8">working.</span></h2>
+  <p class="final-sub" data-lp="cta-sub">Everything your business needs, finally in one place.</p>
+  <a href="#" class="btn-yellow" data-lp="cta-btn" onclick="openApp();return false;" style="font-size:16px;padding:18px 40px">Get started free →</a>
 </section>
 
 <footer>
   <div class="footer-logo">Compallo</div>
-  <p>Built for freelancers and small teams who mean business.</p>
+  <p data-lp="footer-sub">Built for freelancers and small teams who mean business.</p>
   <p>© 2026 Compallo. All rights reserved.</p>
 </footer>
 
@@ -1436,11 +1410,134 @@ var TRANSLATIONS = {
 
 function t(key){ return (TRANSLATIONS[APP_LANG]||TRANSLATIONS.hr)[key]||key; }
 
+var LP={
+  en:{
+    'nav-features':'Features','nav-compare':'Compare','nav-pricing':'Pricing','nav-cta':'Start free →',
+    'hero-eyebrow':'Now in beta — free for early users',
+    'h1-1':'Completely','h1-2':'all apps','h1-3':'in one. Finally.',
+    'hero-sub':'Compallo replaces <strong>Clockify, Trello, Lexoffice, Apollo, Brevo</strong> and 7 more tools — in one product built for freelancers and small teams who are done juggling subscriptions.',
+    'hero-cta':'Get started free →','hero-ghost':"See what's inside",
+    'hero-note':'No credit card. Works in your browser. Takes 30 seconds.',
+    'stat-1':'tools replaced','stat-2':'saved per month','stat-3':'modules in one','stat-4':'languages supported',
+    'rep-tag':'The problem','rep-title':"You're paying for<br>too many apps.",
+    'rep-arrow':'One tool does it all','rep-pill':'— everything above, one price',
+    'rep-save':'Save up to <strong>&nbsp;€180/month&nbsp;</strong> vs. using all of the above',
+    'feat-h':'Six tools.<br><span style="color:var(--yellow)">One login.</span><br>Zero chaos.',
+    'feat-sub':'Every module is connected — time tracked flows into invoices, leads become clients, clients become projects.',
+    'f1-name':'Time Tracking','f1-desc':'One-click timer, manual entry, project-based logging with hourly rates. See what your time is actually worth.',
+    'f2-name':'Project Management','f2-desc':'Kanban with 5 stages, Gantt timeline, project pipeline from inquiry to payment. Everything tracked in one place.',
+    'f3-name':'Invoicing','f3-desc':'Professional invoices in 3 languages, PDF export, SEPA QR code, PayPal &amp; Revolut. History with payment tracking and recurring invoices.',
+    'f4-name':'CRM','f4-desc':'Client profiles with full history — projects, tracked hours, revenue, emails sent. Your entire relationship in one view.',
+    'f5-name':'Lead Prospecting','f5-desc':'Search companies via Google or Maps. Auto-extracts contact emails from websites and Impressum pages. Built-in outreach pipeline.',
+    'f6-name':'AI Email Outreach','f6-desc':'AI reads company websites and writes personalized cold emails. Auto-fills contact address. Send directly. Track follow-ups.',
+    'comp-tag':'The honest comparison','comp-h':'Compallo vs. the<br>alternative chaos',
+    'comp-col1':'Feature','comp-col2':'5 separate apps',
+    'comp-r1':'Time tracking','comp-r2':'Invoicing + PDF export','comp-r3':'CRM + client history',
+    'comp-r4':'Lead prospecting','comp-r5':'AI email writing','comp-r6':'Auto-extract contact emails',
+    'comp-r7':'Data connected across modules','comp-r8':'DE / EN / HR language support','comp-cost':'Monthly cost',
+    'pr-tag':'Pricing','pr-h':'One plan.<br>No surprises.',
+    'pr-info-title':'Everything your<br>business needs.',
+    'pr-info-sub':'No feature tiers. No add-ons. No "contact us for enterprise pricing". Just one honest price for everything, forever.',
+    'pr-l1':'Time tracking + manual entry','pr-l2':'Project management (Kanban + Gantt)','pr-l3':'Professional invoicing with PDF + SEPA',
+    'pr-l4':'Expense tracking by category','pr-l5':'Full CRM with client history','pr-l6':'Lead prospecting (Google + Maps)',
+    'pr-l7':'AI-powered email outreach','pr-l8':'Invoice history + recurring invoices','pr-l9':'DE / EN / HR languages',
+    'pr-l10':'Dark &amp; light mode','pr-l11':'Export CSV, PDF, JSON backup',
+    'pr-badge':'Early access','pr-period':'per month · cancel anytime',
+    'pr-cta':'Start 14-day free trial →','pr-trial':'No credit card required',
+    'cta-h':'Stop switching<br><span class="y">tabs.</span> Start<br><span style="color:#f0f4f8">working.</span>',
+    'cta-sub':'Everything your business needs, finally in one place.','cta-btn':'Get started free →',
+    'footer-sub':'Built for freelancers and small teams who mean business.'
+  },
+  hr:{
+    'nav-features':'Funkcije','nav-compare':'Usporedi','nav-pricing':'Cijene','nav-cta':'Počni besplatno →',
+    'hero-eyebrow':'Beta verzija — besplatno za prve korisnike',
+    'h1-1':'Kompletno','h1-2':'sve aplikacije','h1-3':'u jednoj. Konačno.',
+    'hero-sub':'Compallo zamjenjuje <strong>Clockify, Trello, Lexoffice, Apollo, Brevo</strong> i još 7 alata — u jednom proizvodu za freelancere i male timove koji su umorni od žongliranja pretplatama.',
+    'hero-cta':'Počni besplatno →','hero-ghost':'Pogledaj što nudi',
+    'hero-note':'Bez kreditne kartice. Radi u pregledniku. 30 sekundi.',
+    'stat-1':'zamijenjenih alata','stat-2':'ušteda mjesečno','stat-3':'modula u jednom','stat-4':'podržanih jezika',
+    'rep-tag':'Problem','rep-title':'Plaćaš previše<br>aplikacija.',
+    'rep-arrow':'Jedan alat za sve','rep-pill':'— sve gore navedeno, jedna cijena',
+    'rep-save':'Uštedi do <strong>&nbsp;€180/mj.&nbsp;</strong> umjesto korištenja svih gore navedenih',
+    'feat-h':'Šest alata.<br><span style="color:var(--yellow)">Jedna prijava.</span><br>Nula kaosa.',
+    'feat-sub':'Svaki modul je povezan — praćeno vrijeme ulazi u račune, leadi postaju klijenti, klijenti postaju projekti.',
+    'f1-name':'Praćenje vremena','f1-desc':'Timer na jedan klik, ručni unos, projektno logiranje s hourly ratama. Vidi koliko vrijedi tvoje vrijeme.',
+    'f2-name':'Upravljanje projektima','f2-desc':'Kanban s 5 faza, Gantt timeline, projektni pipeline od upita do plaćanja. Sve praćeno na jednom mjestu.',
+    'f3-name':'Fakturiranje','f3-desc':'Profesionalni računi na 3 jezika, PDF export, SEPA QR kod, PayPal i Revolut. Historija s praćenjem plaćanja i ponavljajući računi.',
+    'f4-name':'CRM','f4-desc':'Profili klijenata s punom historijom — projekti, praćeni sati, prihodi, poslani emailovi. Cijeli odnos na jednom pogledu.',
+    'f5-name':'Pronalazak leadova','f5-desc':'Pretraži tvrtke putem Googlea ili Mapsa. Automatski izvlači kontakt emailove s web stranica i Impressum stranica. Ugrađeni outreach pipeline.',
+    'f6-name':'AI Email Outreach','f6-desc':'AI čita web stranice tvrtki i piše personalizirane hladne emailove. Automatski popunjava adresu. Pošalji direktno. Prati follow-upove.',
+    'comp-tag':'Poštena usporedba','comp-h':'Compallo vs.<br>alternativni kaos',
+    'comp-col1':'Funkcija','comp-col2':'5 zasebnih aplikacija',
+    'comp-r1':'Praćenje vremena','comp-r2':'Fakturiranje + PDF export','comp-r3':'CRM + historija klijenata',
+    'comp-r4':'Pronalazak leadova','comp-r5':'AI pisanje emailova','comp-r6':'Auto-ekstrakcija kontakt emailova',
+    'comp-r7':'Podaci povezani između modula','comp-r8':'Podrška za DE / EN / HR jezik','comp-cost':'Mjesečni trošak',
+    'pr-tag':'Cijene','pr-h':'Jedan plan.<br>Bez iznenađenja.',
+    'pr-info-title':'Sve što tvoj<br>posao treba.',
+    'pr-info-sub':'Nema nivoa funkcija. Nema dodataka. Nema "kontaktirajte nas za enterprise cijene". Samo jedna poštena cijena za sve, zauvijek.',
+    'pr-l1':'Praćenje vremena + ručni unos','pr-l2':'Upravljanje projektima (Kanban + Gantt)','pr-l3':'Profesionalno fakturiranje s PDF + SEPA',
+    'pr-l4':'Praćenje troškova po kategoriji','pr-l5':'Puni CRM s historijom klijenata','pr-l6':'Pronalazak leadova (Google + Maps)',
+    'pr-l7':'AI email outreach','pr-l8':'Historija računa + ponavljajući računi','pr-l9':'DE / EN / HR jezici',
+    'pr-l10':'Tamni i svijetli način rada','pr-l11':'Export CSV, PDF, JSON backup',
+    'pr-badge':'Rani pristup','pr-period':'po mjesecu · otkažite kada želite',
+    'pr-cta':'Počni 14-dnevno besplatno →','pr-trial':'Nije potrebna kreditna kartica',
+    'cta-h':'Prestani mijenjati<br><span class="y">tabove.</span> Počni<br><span style="color:#f0f4f8">raditi.</span>',
+    'cta-sub':'Sve što tvoj posao treba, konačno na jednom mjestu.','cta-btn':'Počni besplatno →',
+    'footer-sub':'Napravljeno za freelancere i male timove koji to ozbiljno shvaćaju.'
+  },
+  de:{
+    'nav-features':'Funktionen','nav-compare':'Vergleich','nav-pricing':'Preise','nav-cta':'Kostenlos starten →',
+    'hero-eyebrow':'Jetzt in der Beta — kostenlos für frühe Nutzer',
+    'h1-1':'Komplett','h1-2':'alle Apps','h1-3':'in einer. Endlich.',
+    'hero-sub':'Compallo ersetzt <strong>Clockify, Trello, Lexoffice, Apollo, Brevo</strong> und 7 weitere Tools — in einem Produkt für Freelancer und kleine Teams, die es satt haben, Abonnements zu jonglieren.',
+    'hero-cta':'Kostenlos starten →','hero-ghost':'Was steckt drin',
+    'hero-note':'Keine Kreditkarte. Läuft im Browser. In 30 Sekunden.',
+    'stat-1':'ersetzte Tools','stat-2':'gespart pro Monat','stat-3':'Module in einem','stat-4':'unterstützte Sprachen',
+    'rep-tag':'Das Problem','rep-title':'Du zahlst für zu<br>viele Apps.',
+    'rep-arrow':'Ein Tool für alles','rep-pill':'— alles oben, ein Preis',
+    'rep-save':'Spare bis zu <strong>&nbsp;€180/Monat&nbsp;</strong> im Vergleich zu all dem oben',
+    'feat-h':'Sechs Tools.<br><span style="color:var(--yellow)">Ein Login.</span><br>Null Chaos.',
+    'feat-sub':'Jedes Modul ist verbunden — getrackte Zeit fließt in Rechnungen, Leads werden Kunden, Kunden werden Projekte.',
+    'f1-name':'Zeiterfassung','f1-desc':'Ein-Klick-Timer, manuelle Eingabe, projektbasiertes Logging mit Stundensätzen. Sieh, was deine Zeit wirklich wert ist.',
+    'f2-name':'Projektmanagement','f2-desc':'Kanban mit 5 Stufen, Gantt-Timeline, Projekt-Pipeline von der Anfrage bis zur Zahlung. Alles an einem Ort.',
+    'f3-name':'Rechnungsstellung','f3-desc':'Professionelle Rechnungen in 3 Sprachen, PDF-Export, SEPA-QR-Code, PayPal &amp; Revolut. Verlauf mit Zahlungsverfolgung und wiederkehrenden Rechnungen.',
+    'f4-name':'CRM','f4-desc':'Kundenprofile mit vollständiger Historie — Projekte, erfasste Stunden, Umsatz, gesendete E-Mails. Die gesamte Beziehung in einer Ansicht.',
+    'f5-name':'Lead-Akquise','f5-desc':'Unternehmen über Google oder Maps suchen. Kontakt-E-Mails werden automatisch von Websites und Impressumsseiten extrahiert. Integrierte Outreach-Pipeline.',
+    'f6-name':'KI E-Mail Outreach','f6-desc':'KI liest Unternehmenswebsites und schreibt personalisierte Kalt-E-Mails. Füllt Kontaktadresse automatisch aus. Direkt senden. Follow-ups verfolgen.',
+    'comp-tag':'Der ehrliche Vergleich','comp-h':'Compallo vs.<br>das alternative Chaos',
+    'comp-col1':'Funktion','comp-col2':'5 separate Apps',
+    'comp-r1':'Zeiterfassung','comp-r2':'Rechnungsstellung + PDF-Export','comp-r3':'CRM + Kundenverlauf',
+    'comp-r4':'Lead-Akquise','comp-r5':'KI-E-Mail-Schreiben','comp-r6':'Auto-Extraktion von Kontakt-E-Mails',
+    'comp-r7':'Daten über Module hinweg verbunden','comp-r8':'DE / EN / HR Sprachunterstützung','comp-cost':'Monatliche Kosten',
+    'pr-tag':'Preise','pr-h':'Ein Plan.<br>Keine Überraschungen.',
+    'pr-info-title':'Alles was dein<br>Unternehmen braucht.',
+    'pr-info-sub':'Keine Funktionsstufen. Keine Add-ons. Kein "Kontaktieren Sie uns für Enterprise-Preise". Nur ein ehrlicher Preis für alles, für immer.',
+    'pr-l1':'Zeiterfassung + manuelle Eingabe','pr-l2':'Projektmanagement (Kanban + Gantt)','pr-l3':'Professionelle Rechnungsstellung mit PDF + SEPA',
+    'pr-l4':'Ausgabenverfolgung nach Kategorie','pr-l5':'Vollständiges CRM mit Kundenverlauf','pr-l6':'Lead-Akquise (Google + Maps)',
+    'pr-l7':'KI-gestützter E-Mail-Outreach','pr-l8':'Rechnungsverlauf + wiederkehrende Rechnungen','pr-l9':'DE / EN / HR Sprachen',
+    'pr-l10':'Dunkel- &amp; Hellmodus','pr-l11':'CSV, PDF, JSON Backup exportieren',
+    'pr-badge':'Früher Zugang','pr-period':'pro Monat · jederzeit kündbar',
+    'pr-cta':'14 Tage kostenlos testen →','pr-trial':'Keine Kreditkarte erforderlich',
+    'cta-h':'Hör auf,<br><span class="y">Tabs</span> zu wechseln.<br><span style="color:#f0f4f8">Fang an zu arbeiten.</span>',
+    'cta-sub':'Alles was dein Unternehmen braucht, endlich an einem Ort.','cta-btn':'Kostenlos starten →',
+    'footer-sub':'Gemacht für Freiberufler und kleine Teams, die es ernst meinen.'
+  }
+};
+
+function applyLandingTranslations(){
+  var T=LP[APP_LANG]||LP.en;
+  document.querySelectorAll('[data-lp]').forEach(function(e){
+    var k=e.getAttribute('data-lp');
+    if(T[k]!==undefined)e.innerHTML=T[k];
+  });
+}
+
 function setAppLang(lang){
   APP_LANG=lang;
   S.settings.appLang=lang;
   save();
   applyTranslations();
+  applyLandingTranslations();
   updateLangButtons();
   // Update email lang hidden input
   var el_lang=el('email-lang');
@@ -2490,9 +2587,14 @@ function initApp(){
   el('idue').value=due.toISOString().split('T')[0];
   APP_LANG=S.settings.appLang||'hr';
   APP_THEME=S.settings.appTheme||'dark';
-  applyTheme();updateLangButtons();updateThemeButtons();applyTranslations();
+  applyTheme();updateLangButtons();updateThemeButtons();applyTranslations();applyLandingTranslations();
   refreshProjSel();refreshClSel();refreshTemplateSelect();renderDash();
 }
+// Apply saved lang/theme to landing page on first load
+(function(){
+  try{var d=localStorage.getItem('shopflow_v1');if(d){var p=JSON.parse(d);if(p.settings){APP_LANG=p.settings.appLang||'hr';APP_THEME=p.settings.appTheme||'dark';}}}catch(e){}
+  applyTheme();updateLangButtons();updateThemeButtons();applyLandingTranslations();
+})();
 </script>
 </body>
 </html>

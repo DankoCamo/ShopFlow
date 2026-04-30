@@ -412,7 +412,9 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
     <a href="#features">Features</a>
     <a href="#compare">Compare</a>
     <a href="#pricing">Pricing</a>
-    <a href="#" onclick="openApp();showPage('settings');return false;">Postavke</a>
+    <button id="lang-hr-btn" onclick="setAppLang('hr')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 10px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s">HR</button>
+    <button id="lang-de-btn" onclick="setAppLang('de')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 10px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s">DE</button>
+    <button id="lang-en-btn" onclick="setAppLang('en')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 10px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s">EN</button>
     <a href="#" class="nav-cta" onclick="openApp();return false;">Start free →</a>
   </div>
 </nav>
@@ -421,9 +423,9 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
 <section class="hero">
   <div class="hero-eyebrow">Now in beta — free for early users</div>
   <h1>
-    <span class="line-dim">Run your</span>
-    <span class="line-yellow">business.</span>
-    <span class="line-dim" style="color:#555">Not your apps.</span>
+    <span class="line-white">Completely</span>
+    <span class="line-yellow">all apps</span>
+    <span class="line-white">in one. Finally.</span>
   </h1>
   <p class="hero-sub">Compallo replaces <strong>Clockify, Trello, Lexoffice, Apollo, Brevo</strong> and 7 more tools — in one product built for freelancers and small teams who are done juggling subscriptions.</p>
   <div class="hero-actions">
@@ -1006,26 +1008,6 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
       </div>
     </div>
     <div class="field"><label>Default napomena na invoiceu</label><textarea id="s-note" rows="2"></textarea></div>
-  </div>
-  <div class="settings-section">
-    <h3>Izgled i jezik</h3>
-    <div class="grid2">
-      <div class="field">
-        <label data-i18n="language">Jezik / Language</label>
-        <div style="display:flex;gap:8px">
-          <button class="btn" id="lang-hr-btn" onclick="setAppLang('hr')" style="flex:1">HR</button>
-          <button class="btn" id="lang-de-btn" onclick="setAppLang('de')" style="flex:1">DE</button>
-          <button class="btn" id="lang-en-btn" onclick="setAppLang('en')" style="flex:1">EN</button>
-        </div>
-      </div>
-      <div class="field">
-        <label data-i18n="theme">Tema</label>
-        <div style="display:flex;gap:8px">
-          <button class="btn" id="theme-dark-btn" onclick="setTheme('dark')" style="flex:1">&#9790; Tamna</button>
-          <button class="btn" id="theme-light-btn" onclick="setTheme('light')" style="flex:1">&#9728; Svijetla</button>
-        </div>
-      </div>
-    </div>
   </div>
   <div class="settings-section">
     <h3>Backup podataka</h3>

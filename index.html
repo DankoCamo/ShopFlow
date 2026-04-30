@@ -1561,6 +1561,24 @@ function closeModal(id){el(id).classList.remove('open');}
 function renderDash(){
   var now=new Date();
   el('dash-date').textContent=now.toLocaleDateString('de-AT',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  if(S.projects.length===0&&S.clients.length===0&&S.timeLogs.length===0){
+    el('dash-stats').innerHTML='<div style="grid-column:1/-1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:52px 32px;text-align:center">'
+      +'<div style="font-size:26px;font-weight:600;margin-bottom:10px">Dobrošao, Danko! 👋</div>'
+      +'<div style="font-size:14px;color:var(--text2);margin-bottom:32px">Sve je postavljeno. Odaberi gdje krenuti:</div>'
+      +'<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">'
+      +'<button class="btn btn-primary" onclick="openKbModal()">➕ Dodaj prvi projekt</button>'
+      +'<button class="btn" onclick="openClientModal()">👤 Dodaj prvog klijenta</button>'
+      +'<button class="btn" onclick="showPage(\'tracker\')">⏱ Pokreni timer</button>'
+      +'</div></div>';
+    el('dash-projects').innerHTML='';
+    el('dash-logs').innerHTML='';
+    el('dash-revenue').innerHTML='';
+    el('dash-invoices').innerHTML='';
+    el('dash-th').textContent='';
+    el('dash-unpaid-total').textContent='';
+    renderFollowups();
+    return;
+  }
   var ap=S.projects.filter(function(p){return p.status<3;}).length;
   var ts=S.timeLogs.reduce(function(a,l){return a+l.duration;},0);
   var bil=S.timeLogs.reduce(function(a,l){var p=gp(l.projectId);return a+(p&&p.rate?p.rate*(l.duration/3600):0);},0);

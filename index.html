@@ -1,0 +1,2449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopFlow</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* APP STYLES - loaded first, unscoped */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;
+  --border:#30363d;--border2:#3d444d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#545d68;
+  --accent:#1D9E75;--accent2:#0F6E56;--accent-dim:#1D9E7520;
+  --red:#f85149;--red-dim:#f8514920;
+  --yellow:#d29922;--yellow-dim:#d2992220;
+  --blue:#388bfd;--blue-dim:#388bfd20;
+  --purple:#a371f7;
+  --nav-w:220px;--r:8px;
+  --font:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+body.light{
+  --bg:#f6f8fa;--bg2:#ffffff;--bg3:#f0f2f5;
+  --border:#d0d7de;--border2:#c1cad3;
+  --text:#1f2328;--text2:#656d76;--text3:#9198a1;
+  --accent:#1D9E75;--accent2:#0F6E56;--accent-dim:#1D9E7515;
+  --red:#cf222e;--red-dim:#cf222e15;
+  --yellow:#9a6700;--yellow-dim:#9a670015;
+  --blue:#0969da;--blue-dim:#0969da15;
+  --purple:#8250df;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.app{display:flex;height:100vh}
+.nav{width:var(--nav-w);background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.main{flex:1;overflow-y:auto}
+.page{display:none;padding:28px 32px;min-height:100vh}
+.page.active{display:block}
+.nav-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.nav-logo-title{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.nav-logo-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)}
+.nav-sect{padding:16px 18px 6px;font-size:10px;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;font-weight:500}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;font-size:13px;color:var(--text2);border-left:2px solid transparent}
+.nav-item:hover{background:var(--bg2);color:var(--text)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim);font-weight:500}
+.nav-bottom{margin-top:auto;padding:14px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:var(--mono)}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.page-title{font-size:20px;font-weight:600;letter-spacing:-.4px}
+.page-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{padding:7px 14px;border-radius:var(--r);font-size:13px;cursor:pointer;font-family:var(--font);font-weight:500;border:1px solid var(--border2);background:var(--bg3);color:var(--text);white-space:nowrap}
+.btn:hover{background:var(--bg2)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px}
+.btn-danger{color:var(--red);border-color:var(--red);background:transparent}
+.btn-danger:hover{background:var(--red-dim)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px}
+.card-title{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{font-size:12px;color:var(--text2);font-weight:500}
+.field input,.field select,.field textarea{font-size:13px;padding:8px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field select option{background:var(--bg3)}
+.field textarea{resize:vertical;min-height:60px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:flex-start;justify-content:center;padding-top:50px}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:20px;letter-spacing:-.3px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-weight:500}
+.stat-val{font-size:24px;font-weight:600;font-family:var(--mono);letter-spacing:-.5px}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
+/* KANBAN */
+.kanban{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;min-height:400px}
+.kb-col{min-width:200px;width:200px;flex-shrink:0;display:flex;flex-direction:column}
+.kb-col-header{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 10px}
+.kb-col-name{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.8px}
+.kb-col-count{background:var(--bg3);color:var(--text3);border-radius:10px;padding:1px 7px;font-size:11px;font-family:var(--mono)}
+.kb-cards{flex:1;display:flex;flex-direction:column;gap:8px}
+.kb-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer}
+.kb-card:hover{border-color:var(--border2)}
+.kb-card-client{font-size:11px;color:var(--accent);margin-bottom:4px;font-weight:500}
+.kb-card-title{font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.3}
+.kb-card-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap}
+.kb-add{margin-top:8px;font-size:12px;color:var(--text3);cursor:pointer;padding:8px;border-radius:6px;text-align:center;border:1px dashed var(--border)}
+.kb-add:hover{background:var(--bg2);color:var(--text2);border-color:var(--border2)}
+/* TRACKER */
+.timer-hero{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.timer-display{font-size:42px;font-weight:400;font-family:var(--mono);letter-spacing:2px;min-width:140px}
+.timer-display.running{color:var(--accent)}
+.timer-right{display:flex;gap:10px;align-items:center;flex:1;flex-wrap:wrap}
+.timer-right select,.timer-right input{flex:1;min-width:140px;font-size:13px;padding:9px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);outline:none}
+.timer-right select:focus,.timer-right input:focus{border-color:var(--accent)}
+.btn-timer{width:44px;height:44px;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0}
+.btn-timer.stopped{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-timer.stopped:hover{background:var(--accent2)}
+.btn-timer.running{background:var(--red);border-color:var(--red);color:#fff}
+/* TABLES */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;font-size:11px;color:var(--text3);padding:0 10px 10px;border-bottom:1px solid var(--border);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.data-table td{padding:10px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--bg3)}
+/* GANTT */
+.gantt-bar-cell{position:relative;height:32px;min-width:200px}
+.gantt-bg{position:absolute;inset:6px 0;background:var(--bg3);border-radius:3px}
+.gantt-bar{position:absolute;top:6px;bottom:6px;border-radius:3px;min-width:4px}
+.gantt-bar.active{background:var(--accent)}
+.gantt-bar.done{background:var(--text3)}
+.gantt-bar.late{background:var(--red)}
+.gantt-today{position:absolute;top:0;bottom:0;width:1px;background:var(--yellow);opacity:.8}
+/* INVOICE */
+.inv-hdr{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.inv-table{width:100%;border-collapse:collapse;font-size:13px}
+.inv-table th{text-align:left;font-size:11px;color:var(--text3);padding:0 8px 10px;border-bottom:1px solid var(--border);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.inv-table td{padding:6px 4px;vertical-align:middle;border-bottom:1px solid var(--border)}
+.inv-table tr:last-child td{border-bottom:none}
+.inv-table td input{font-size:13px;padding:7px 9px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);width:100%;font-family:var(--font);outline:none}
+.inv-table td input:focus{border-color:var(--accent)}
+.totals-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:16px}
+.trow{display:flex;gap:24px;font-size:13px}
+.trow .tl{color:var(--text2);min-width:80px}
+.trow .ta{font-family:var(--mono);font-weight:500;min-width:90px;text-align:right}
+.trow.grand .tl,.trow.grand .ta{font-size:16px;color:var(--text)}
+.tdiv{width:220px;height:1px;background:var(--border);margin:4px 0}
+.toast{display:none;padding:10px 16px;border-radius:8px;font-size:13px;text-align:center;margin-top:12px}
+.toast.ok{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent);display:block}
+.toast.err{background:var(--red-dim);color:var(--red);border:1px solid var(--red);display:block}
+/* EXPENSE */
+.exp-cat{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500}
+.exp-cat.gorivo{background:var(--yellow-dim);color:var(--yellow)}
+.exp-cat.materijal{background:var(--blue-dim);color:var(--blue)}
+.exp-cat.softver{background:#a371f720;color:var(--purple)}
+.exp-cat.putovanje{background:var(--accent-dim);color:var(--accent)}
+.exp-cat.ostalo{background:#8b949e20;color:var(--text2)}
+/* INVOICE STATUS */
+.inv-status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500;cursor:pointer}
+.inv-status.draft{background:var(--bg3);color:var(--text2)}
+.inv-status.sent{background:var(--blue-dim);color:var(--blue)}
+.inv-status.paid{background:var(--accent-dim);color:var(--accent)}
+.inv-status.overdue{background:var(--red-dim);color:var(--red)}
+/* SETTINGS */
+.settings-section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px}
+.settings-section h3{font-size:14px;font-weight:600;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+/* PROSPECTING */
+.pros-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.pros-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer}
+.pros-card:hover{border-color:var(--border2)}
+.pros-card-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.3}
+.pros-card-url{font-size:12px;color:var(--accent);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pros-card-desc{font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pros-card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border)}
+.pros-lead-status{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;cursor:pointer}
+.pros-lead-status.novi{background:var(--bg3);color:var(--text2)}
+.pros-lead-status.kontaktiran{background:var(--blue-dim);color:var(--blue)}
+.pros-lead-status.zainteresiran{background:var(--accent-dim);color:var(--accent)}
+.pros-lead-status.odbijenica{background:var(--red-dim);color:var(--red)}
+.pros-lead-status.nije-odgovorio{background:var(--yellow-dim);color:var(--yellow)}
+.pros-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pros-tab{padding:8px 4px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px}
+.pros-tab.active{border-bottom-color:var(--accent);color:var(--accent)}
+.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px}
+
+
+/* LANDING STYLES - fully scoped under #landing-page */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;
+  --bg2:#0f0f0f;
+  --bg3:#161616;
+  --border:#222;
+  --border2:#2a2a2a;
+  --text:#f5f5f0;
+  --text2:#888;
+  --text3:#444;
+  --yellow:#f5c800;
+  --yellow2:#d4a900;
+  --yellow-dim:#f5c80015;
+  --blue:#f5c800;
+  --blue2:#d4a900;
+  --blue-dim:#f5c80018;
+  --font:'Inter',sans-serif;
+  --display:'Syne',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+#landing-page /* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:64px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid transparent;transition:all .3s}
+#landing-page nav.scrolled{background:rgba(8,8,8,.95);backdrop-filter:blur(16px);border-bottom-color:var(--border)}
+#landing-page .nav-logo{font-family:var(--display);font-size:20px;font-weight:800;color:var(--text);text-decoration:none;letter-spacing:-0.5px;display:flex;align-items:center;gap:8px}
+#landing-page .nav-logo-mark{width:24px;height:24px;background:var(--yellow);border-radius:4px;display:flex;align-items:center;justify-content:center}
+#landing-page .nav-logo-mark svg{width:14px;height:14px}
+#landing-page .nav-links{display:flex;gap:32px;align-items:center}
+#landing-page .nav-links a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+#landing-page .nav-links a:hover{color:var(--text)}
+#landing-page .nav-cta{background:var(--yellow);color:#000;padding:9px 20px;border-radius:6px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s}
+#landing-page .nav-cta:hover{background:var(--yellow2);transform:translateY(-1px)}
+#landing-page /* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:100px 48px 80px;position:relative;overflow:hidden;max-width:1300px;margin:0 auto}
+#landing-page .hero-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+#landing-page .hero-bg-circle1{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,#f5c80010 0%,transparent 70%);top:-200px;right:-100px}
+#landing-page .hero-bg-circle2{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,#f5c80008 0%,transparent 70%);bottom:-100px;left:-100px}
+#landing-page .hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(#ffffff04 1px,transparent 1px),linear-gradient(90deg,#ffffff04 1px,transparent 1px);background-size:80px 80px}
+#landing-page .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--yellow);margin-bottom:32px}
+#landing-page .hero-eyebrow::before{content:'';display:block;width:32px;height:2px;background:var(--yellow)}
+#landing-page h1{font-family:var(--display);font-size:clamp(56px,8vw,110px);font-weight:800;line-height:.95;letter-spacing:-3px;margin-bottom:32px;max-width:800px}
+#landing-page h1 .line-white{color:#f0f4f8;display:block}
+#landing-page h1 .line-yellow{color:var(--yellow);display:block}
+#landing-page h1 .line-dim{color:var(--text2);display:block}
+#landing-page .hero-sub{font-size:18px;color:var(--text2);max-width:520px;margin-bottom:48px;line-height:1.75;font-weight:300}
+#landing-page .hero-sub strong{color:var(--text);font-weight:500}
+#landing-page .hero-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+#landing-page .btn-yellow{background:var(--yellow);color:#000;padding:16px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px;letter-spacing:-.2px}
+#landing-page .btn-yellow:hover{background:var(--yellow2);transform:translateY(-2px);box-shadow:0 12px 40px #f5c80030}
+#landing-page .btn-ghost{color:var(--text2);padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;text-decoration:none;border:1px solid var(--border2);transition:all .2s}
+#landing-page .btn-ghost:hover{color:var(--yellow);border-color:var(--yellow)}
+#landing-page .hero-note{font-size:13px;color:var(--text3);margin-top:20px}
+#landing-page .hero-stats{display:flex;gap:48px;margin-top:80px;padding-top:48px;border-top:1px solid var(--border)}
+#landing-page .stat-num{font-family:var(--display);font-size:36px;font-weight:800;color:var(--yellow);letter-spacing:-1px}
+#landing-page .stat-label{font-size:13px;color:var(--text3);margin-top:4px}
+#landing-page /* REPLACING */
+.replacing{padding:0 48px 100px;max-width:1300px;margin:0 auto}
+#landing-page .section-tag{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px}
+#landing-page .section-tag.yellow{color:var(--yellow)}
+#landing-page .section-tag.white{color:#f0f4f8}
+#landing-page .section-tag::before{content:'';display:block;width:20px;height:2px}
+#landing-page .section-tag.yellow::before{background:var(--yellow)}
+#landing-page .section-tag.white::before{background:#f0f4f8}
+#landing-page .replacing-title{font-family:var(--display);font-size:clamp(28px,3.5vw,48px);font-weight:800;letter-spacing:-1.5px;margin-bottom:40px;line-height:1.1}
+#landing-page .tools-scroll{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px}
+#landing-page .tool-pill{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:500;position:relative;overflow:hidden}
+#landing-page .tool-pill-name{color:var(--text2);text-decoration:line-through;text-decoration-color:var(--border2)}
+#landing-page .tool-pill-price{font-family:var(--mono);font-size:11px;color:#666;background:var(--bg3);padding:2px 8px;border-radius:4px}
+#landing-page .replacing-arrow{display:flex;align-items:center;gap:16px;margin:32px 0;color:var(--text3);font-size:13px}
+#landing-page .replacing-arrow::before, #landing-page .replacing-arrow::after{content:'';flex:1;height:1px;background:var(--border)}
+#landing-page .shopflow-pill{display:inline-flex;align-items:center;gap:12px;padding:20px 36px;border:2px solid var(--yellow);border-radius:12px;font-family:var(--display);font-size:22px;font-weight:800;color:var(--yellow);letter-spacing:-0.5px}
+#landing-page .shopflow-pill span{font-family:var(--mono);font-size:13px;font-weight:400;color:var(--text3);letter-spacing:0}
+#landing-page .saving-badge{display:inline-flex;align-items:center;gap:8px;margin-top:24px;padding:12px 24px;background:var(--yellow-dim);border:1px solid #f5c80030;border-radius:8px;font-size:14px;color:var(--text2)}
+#landing-page .saving-badge strong{color:var(--yellow);font-family:var(--mono);font-size:18px}
+#landing-page /* FEATURES */
+.features{padding:100px 48px;max-width:1300px;margin:0 auto}
+#landing-page .features-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:64px;flex-wrap:wrap;gap:24px}
+#landing-page .features-title{font-family:var(--display);font-size:clamp(32px,4vw,56px);font-weight:800;letter-spacing:-2px;line-height:1.05;max-width:500px}
+#landing-page .features-title .accent{color:var(--yellow)}
+#landing-page .features-subtitle{font-size:15px;color:var(--text2);max-width:320px;text-align:right;line-height:1.7}
+#landing-page .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+#landing-page .feat{background:var(--bg);padding:40px 36px;position:relative;overflow:hidden;transition:background .2s}
+#landing-page .feat:hover{background:var(--bg2)}
+#landing-page .feat-accent{position:absolute;top:0;left:0;right:0;height:2px;transform:scaleX(0);transform-origin:left;transition:transform .3s}
+#landing-page .feat:hover .feat-accent{transform:scaleX(1)}
+#landing-page .feat-accent.y{background:var(--yellow)}
+#landing-page .feat-accent.b{background:#f0f4f8}
+#landing-page .feat-num{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:20px;letter-spacing:1px}
+#landing-page .feat-icon{font-size:28px;margin-bottom:16px;display:block}
+#landing-page .feat-name{font-family:var(--display);font-size:20px;font-weight:800;margin-bottom:12px;letter-spacing:-.5px}
+#landing-page .feat-desc{font-size:13px;color:var(--text2);line-height:1.7}
+#landing-page .feat-replaces{font-size:11px;color:var(--text3);margin-top:20px;font-family:var(--mono);letter-spacing:.5px}
+#landing-page .feat-replaces span{color:#555;text-decoration:line-through}
+#landing-page /* COMPARISON */
+.comparison{padding:100px 48px;border-top:1px solid var(--border)}
+#landing-page .comparison-inner{max-width:900px;margin:0 auto}
+#landing-page .comp-header-row{display:grid;grid-template-columns:2fr 1fr 1fr;padding:0 0 16px;border-bottom:2px solid var(--border)}
+#landing-page .comp-h{font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:center;padding:0 16px}
+#landing-page .comp-h:first-child{text-align:left;padding-left:0}
+#landing-page .comp-h.hl{color:var(--yellow)}
+#landing-page .comp-row{display:grid;grid-template-columns:2fr 1fr 1fr;padding:16px 0;border-bottom:1px solid var(--border);align-items:center}
+#landing-page .comp-row:last-child{border-bottom:none}
+#landing-page .comp-feat{font-size:14px;color:var(--text2)}
+#landing-page .comp-val{text-align:center;font-size:18px}
+#landing-page .comp-val.yes{color:var(--yellow)}
+#landing-page .comp-val.no{color:var(--text3)}
+#landing-page .comp-val.partial{color:#888}
+#landing-page .comp-price-bad{text-align:center;font-family:var(--mono);font-size:15px;color:#666;text-decoration:line-through}
+#landing-page .comp-price-good{text-align:center;font-family:var(--mono);font-size:20px;font-weight:700;color:var(--yellow)}
+#landing-page /* PRICING */
+.pricing{padding:100px 48px;max-width:1300px;margin:0 auto}
+#landing-page .pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:64px}
+#landing-page .price-info{background:var(--bg2);padding:64px 56px}
+#landing-page .price-box{background:var(--bg3);padding:64px 56px;position:relative;overflow:hidden}
+#landing-page .price-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--yellow);opacity:.8}
+#landing-page .price-badge{display:inline-block;background:var(--yellow);color:#000;font-size:11px;font-weight:700;padding:4px 12px;border-radius:4px;letter-spacing:1px;text-transform:uppercase;margin-bottom:32px}
+#landing-page .price-amount{font-family:var(--display);font-size:80px;font-weight:800;line-height:1;letter-spacing:-3px;color:var(--text);margin-bottom:4px}
+#landing-page .price-amount sup{font-size:32px;vertical-align:top;margin-top:16px;font-family:var(--font);font-weight:300}
+#landing-page .price-period{color:var(--text3);font-size:14px;font-family:var(--mono);margin-bottom:40px}
+#landing-page .price-cta{display:block;background:var(--yellow);color:#000;padding:16px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;text-align:center;transition:all .2s;margin-bottom:16px}
+#landing-page .price-cta:hover{background:var(--yellow2);transform:translateY(-1px)}
+#landing-page .price-trial{font-size:12px;color:var(--text3);text-align:center}
+#landing-page .price-info-title{font-family:var(--display);font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:16px;line-height:1.1}
+#landing-page .price-info-sub{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:40px}
+#landing-page .price-features{list-style:none}
+#landing-page .price-features li{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2)}
+#landing-page .price-features li:last-child{border-bottom:none}
+#landing-page .price-features li .chk{color:var(--yellow);font-size:16px;flex-shrink:0;margin-top:1px}
+#landing-page /* FINAL CTA */
+.final-cta{padding:120px 48px;text-align:center;position:relative;overflow:hidden;border-top:1px solid var(--border)}
+#landing-page .final-cta-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 100%,#f5c80008,transparent)}
+#landing-page .final-title{font-family:var(--display);font-size:clamp(48px,7vw,96px);font-weight:800;letter-spacing:-3px;line-height:.95;margin-bottom:32px;position:relative}
+#landing-page .final-title .y{color:var(--yellow)}
+#landing-page .final-title .b{color:var(--blue)}
+#landing-page .final-sub{font-size:18px;color:var(--text2);margin-bottom:48px;position:relative;font-weight:300}
+#landing-page /* FOOTER */
+footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+#landing-page .footer-logo{font-family:var(--display);font-size:18px;font-weight:800;color:var(--text3);letter-spacing:-.5px}
+#landing-page footer p{font-size:13px;color:var(--text3)}
+#landing-page /* ANIM */
+.fade-up{opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease}
+#landing-page .fade-up.visible{opacity:1;transform:none}
+@media(max-width:900px){#landing-page nav{padding:0 24px}
+#landing-page .hero, #landing-page .replacing, #landing-page .features, #landing-page .pricing, #landing-page .final-cta{padding-left:24px;padding-right:24px}
+#landing-page h1{letter-spacing:-2px}
+#landing-page .features-grid{grid-template-columns:1fr 1fr}
+#landing-page .pricing-grid{grid-template-columns:1fr}
+#landing-page .features-header{flex-direction:column}
+#landing-page .features-subtitle{text-align:left;max-width:100%}
+#landing-page .hero-stats{gap:32px}
+#landing-page footer{flex-direction:column;text-align:center}
+#landing-page .comparison{padding:60px 24px}
+
+}
+@media(max-width:600px){#landing-page .features-grid{grid-template-columns:1fr}
+#landing-page .nav-links a:not(.nav-cta){display:none}
+
+}
+
+
+
+/* LAYOUT */
+#landing-page{display:block;overflow-x:hidden}
+.nav-logo:hover .nav-logo-sub{color:var(--accent);transition:color .2s}
+#app-page{display:none}
+#app-page .app{height:100vh;overflow:hidden}
+</style>
+</head>
+<body>
+
+<div id="landing-page">
+
+
+<div class="hero-bg">
+  <div class="hero-bg-circle1"></div>
+  <div class="hero-bg-circle2"></div>
+  <div class="hero-bg-grid"></div>
+</div>
+
+<nav id="main-nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2v10" stroke="#000" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </div>
+    ShopFlow
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#compare">Compare</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#" class="nav-cta" onclick="openApp();return false;">Start free →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Now in beta — free for early users</div>
+  <h1>
+    <span class="line-dim">Run your</span>
+    <span class="line-yellow">business.</span>
+    <span class="line-dim" style="color:#555">Not your apps.</span>
+  </h1>
+  <p class="hero-sub">ShopFlow replaces <strong>Clockify, Trello, Lexoffice, Apollo, Brevo</strong> and 7 more tools — in one product built for freelancers and small teams who are done juggling subscriptions.</p>
+  <div class="hero-actions">
+    <a href="#" class="btn-yellow" onclick="openApp();return false;">Get started free →</a>
+    <a href="#features" class="btn-ghost">See what's inside</a>
+  </div>
+  <p class="hero-note">No credit card. Works in your browser. Takes 30 seconds.</p>
+  <div class="hero-stats">
+    <div>
+      <div class="stat-num">12+</div>
+      <div class="stat-label">tools replaced</div>
+    </div>
+    <div>
+      <div class="stat-num">€160</div>
+      <div class="stat-label">saved per month</div>
+    </div>
+    <div>
+      <div class="stat-num">6</div>
+      <div class="stat-label">modules in one</div>
+    </div>
+    <div>
+      <div class="stat-num">3</div>
+      <div class="stat-label">languages supported</div>
+    </div>
+  </div>
+</section>
+
+<!-- REPLACING -->
+<section class="replacing fade-up">
+  <div class="section-tag yellow">The problem</div>
+  <h2 class="replacing-title">You're paying for<br>too many apps.</h2>
+  <div class="tools-scroll">
+    <div class="tool-pill"><span class="tool-pill-name">Clockify</span><span class="tool-pill-price">€10/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Toggl</span><span class="tool-pill-price">€10/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Harvest</span><span class="tool-pill-price">€12/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Trello</span><span class="tool-pill-price">€5/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Monday.com</span><span class="tool-pill-price">€19/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Asana</span><span class="tool-pill-price">€10/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Lexoffice</span><span class="tool-pill-price">€8/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Sevdesk</span><span class="tool-pill-price">€14/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">HubSpot</span><span class="tool-pill-price">€15/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Apollo.io</span><span class="tool-pill-price">€49/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Instantly</span><span class="tool-pill-price">€37/mo</span></div>
+    <div class="tool-pill"><span class="tool-pill-name">Brevo</span><span class="tool-pill-price">€9/mo</span></div>
+  </div>
+  <div class="replacing-arrow">One tool does it all</div>
+  <div>
+    <div class="shopflow-pill">
+      ✦ ShopFlow
+      <span>— everything above, one price</span>
+    </div>
+  </div>
+  <div style="margin-top:20px">
+    <div class="saving-badge">Save up to <strong>&nbsp;€180/month&nbsp;</strong> vs. using all of the above</div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features fade-up" id="features">
+  <div class="features-header">
+    <h2 class="features-title">Six tools.<br><span style="color:var(--yellow)">One login.</span><br>Zero chaos.</h2>
+    <p class="features-subtitle">Every module is connected — time tracked flows into invoices, leads become clients, clients become projects.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-accent y"></div>
+      <div class="feat-num">01</div>
+      <span class="feat-icon">⏱</span>
+      <div class="feat-name">Time Tracking</div>
+      <p class="feat-desc">One-click timer, manual entry, project-based logging with hourly rates. See what your time is actually worth.</p>
+      <p class="feat-replaces">Replaces <span>Clockify</span> <span>Toggl</span> <span>Harvest</span></p>
+    </div>
+    <div class="feat">
+      <div class="feat-accent b"></div>
+      <div class="feat-num">02</div>
+      <span class="feat-icon">📋</span>
+      <div class="feat-name">Project Management</div>
+      <p class="feat-desc">Kanban with 5 stages, Gantt timeline, project pipeline from inquiry to payment. Everything tracked in one place.</p>
+      <p class="feat-replaces">Replaces <span>Trello</span> <span>Asana</span> <span>Monday.com</span></p>
+    </div>
+    <div class="feat">
+      <div class="feat-accent y"></div>
+      <div class="feat-num">03</div>
+      <span class="feat-icon">🧾</span>
+      <div class="feat-name">Invoicing</div>
+      <p class="feat-desc">Professional invoices in 3 languages, PDF export, SEPA QR code, PayPal & Revolut. History with payment tracking and recurring invoices.</p>
+      <p class="feat-replaces">Replaces <span>Lexoffice</span> <span>Sevdesk</span> <span>FastBill</span></p>
+    </div>
+    <div class="feat">
+      <div class="feat-accent b"></div>
+      <div class="feat-num">04</div>
+      <span class="feat-icon">👥</span>
+      <div class="feat-name">CRM</div>
+      <p class="feat-desc">Client profiles with full history — projects, tracked hours, revenue, emails sent. Your entire relationship in one view.</p>
+      <p class="feat-replaces">Replaces <span>HubSpot</span> <span>Pipedrive</span></p>
+    </div>
+    <div class="feat">
+      <div class="feat-accent y"></div>
+      <div class="feat-num">05</div>
+      <span class="feat-icon">🔍</span>
+      <div class="feat-name">Lead Prospecting</div>
+      <p class="feat-desc">Search companies via Google or Maps. Auto-extracts contact emails from websites and Impressum pages. Built-in outreach pipeline.</p>
+      <p class="feat-replaces">Replaces <span>Apollo.io</span> <span>Hunter.io</span> <span>LinkedIn Sales</span></p>
+    </div>
+    <div class="feat">
+      <div class="feat-accent b"></div>
+      <div class="feat-num">06</div>
+      <span class="feat-icon">✉️</span>
+      <div class="feat-name">AI Email Outreach</div>
+      <p class="feat-desc">AI reads company websites and writes personalized cold emails. Auto-fills contact address. Send directly. Track follow-ups.</p>
+      <p class="feat-replaces">Replaces <span>Instantly</span> <span>Lemlist</span> <span>Brevo</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="comparison fade-up" id="compare">
+  <div class="comparison-inner">
+    <div class="section-tag" style="color:#888" style="margin-bottom:24px">The honest comparison</div>
+    <h2 style="font-family:var(--display);font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:56px;line-height:1.05">ShopFlow vs. the<br>alternative chaos</h2>
+    <div class="comp-header-row">
+      <div class="comp-h">Feature</div>
+      <div class="comp-h">5 separate apps</div>
+      <div class="comp-h hl">ShopFlow</div>
+    </div>
+    <div class="comp-row"><div class="comp-feat">Time tracking</div><div class="comp-val yes">✓</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat">Invoicing + PDF export</div><div class="comp-val yes">✓</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat">CRM + client history</div><div class="comp-val yes">✓</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat">Lead prospecting</div><div class="comp-val" style="text-align:center;color:#666;font-size:14px">~ extra tool</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat">AI email writing</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat">Auto-extract contact emails</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat">Data connected across modules</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row"><div class="comp-feat">DE / EN / HR language support</div><div class="comp-val no">✗</div><div class="comp-val yes">✓</div></div>
+    <div class="comp-row">
+      <div class="comp-feat" style="font-weight:600;color:var(--text)">Monthly cost</div>
+      <div class="comp-price-bad">€100–180/mo</div>
+      <div class="comp-price-good">€19/mo</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing fade-up" id="pricing">
+  <div class="section-tag yellow">Pricing</div>
+  <h2 style="font-family:var(--display);font-size:clamp(32px,4vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.05;max-width:500px">One plan.<br>No surprises.</h2>
+  <div class="pricing-grid">
+    <div class="price-info">
+      <h3 class="price-info-title">Everything your<br>business needs.</h3>
+      <p class="price-info-sub">No feature tiers. No add-ons. No "contact us for enterprise pricing". Just one honest price for everything, forever.</p>
+      <ul class="price-features">
+        <li><span class="chk">✓</span> Time tracking + manual entry</li>
+        <li><span class="chk">✓</span> Project management (Kanban + Gantt)</li>
+        <li><span class="chk">✓</span> Professional invoicing with PDF + SEPA</li>
+        <li><span class="chk">✓</span> Expense tracking by category</li>
+        <li><span class="chk">✓</span> Full CRM with client history</li>
+        <li><span class="chk">✓</span> Lead prospecting (Google + Maps)</li>
+        <li><span class="chk">✓</span> AI-powered email outreach</li>
+        <li><span class="chk">✓</span> Invoice history + recurring invoices</li>
+        <li><span class="chk">✓</span> DE / EN / HR languages</li>
+        <li><span class="chk">✓</span> Dark &amp; light mode</li>
+        <li><span class="chk">✓</span> Export CSV, PDF, JSON backup</li>
+      </ul>
+    </div>
+    <div class="price-box">
+      <div class="price-badge">Early access</div>
+      <div class="price-amount"><sup>€</sup>19</div>
+      <p class="price-period">per month · cancel anytime</p>
+      <a href="#" class="price-cta" onclick="openApp();return false;">Start 14-day free trial →</a>
+      <p class="price-trial">No credit card required</p>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta fade-up">
+  <div class="final-cta-bg"></div>
+  <h2 class="final-title">
+    Stop switching<br>
+    <span class="y">tabs.</span> Start<br>
+    <span style="color:#f0f4f8">working.</span>
+  </h2>
+  <p class="final-sub">Everything your business needs, finally in one place.</p>
+  <a href="#" class="btn-yellow" onclick="openApp();return false;" style="font-size:16px;padding:18px 40px">Get started free →</a>
+</section>
+
+<footer>
+  <div class="footer-logo">ShopFlow</div>
+  <p>Built for freelancers and small teams who mean business.</p>
+  <p>© 2026 ShopFlow. All rights reserved.</p>
+</footer>
+
+
+</div>
+
+<div id="app-page" style="display:none;flex-direction:row;height:100vh">
+
+<div class="app">
+<nav class="nav">
+  <div class="nav-logo" onclick="goToLanding()" style="cursor:pointer" title="Natrag na pocetnu">
+    <div class="nav-logo-title">ShopFlow</div>
+    <div class="nav-logo-sub">productivity suite</div>
+  </div>
+  <div class="nav-sect">Glavni</div>
+  <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </div>
+  <div class="nav-sect">Alati</div>
+  <div class="nav-item" id="nav-kanban" onclick="showPage('kanban')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+    Projekti
+  </div>
+  <div class="nav-item" id="nav-tracker" onclick="showPage('tracker')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+    Time tracker
+  </div>
+  <div class="nav-item" id="nav-expenses" onclick="showPage('expenses')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+    Troškovi
+  </div>
+  <div class="nav-item" id="nav-gantt" onclick="showPage('gantt')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+    Gantt
+  </div>
+  <div class="nav-item" id="nav-invoice" onclick="showPage('invoice')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
+    Invoice
+  </div>
+  <div class="nav-item" id="nav-invhistory" onclick="showPage('invhistory')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+    Historija računa
+  </div>
+  <div class="nav-item" id="nav-templates" onclick="showPage('templates')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+    Predlosci emaila
+  </div>
+  <div class="nav-item" id="nav-prospecting" onclick="showPage('prospecting')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Prospecting
+  </div>
+  <div class="nav-sect">Ostalo</div>
+  <div class="nav-item" id="nav-clients" onclick="showPage('clients')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Klijenti
+  </div>
+  <div class="nav-item" id="nav-settings" onclick="showPage('settings')">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Postavke
+  </div>
+  <div style="padding:12px 18px;border-top:1px solid var(--border)">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px" data-i18n="language">Jezik / Language</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="btn btn-xs" id="lang-hr-btn" onclick="setAppLang('hr')" style="flex:1">HR</button>
+      <button class="btn btn-xs" id="lang-de-btn" onclick="setAppLang('de')" style="flex:1">DE</button>
+      <button class="btn btn-xs" id="lang-en-btn" onclick="setAppLang('en')" style="flex:1">EN</button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px" data-i18n="theme">Tema</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="btn btn-xs" id="theme-dark-btn" onclick="setTheme('dark')" style="flex:1">&#9790; Tamna</button>
+      <button class="btn btn-xs" id="theme-light-btn" onclick="setTheme('light')" style="flex:1">&#9728; Svijetla</button>
+    </div>
+  </div>
+  <div class="nav-bottom" style="display:flex;justify-content:space-between;align-items:center">v1.3 &middot; ShopFlow<span onclick="goToLanding()" style="cursor:pointer;color:var(--accent);font-size:12px" title="Pocetna stranica">&#8962;</span></div>
+</nav>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <div class="page-title">Dashboard</div>
+    <span id="dash-date" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></span>
+  </div>
+  <div class="summary-grid" id="dash-stats"></div>
+  <div class="grid2" style="gap:16px">
+    <div class="card"><div class="card-title">Aktivni projekti</div><div id="dash-projects"></div></div>
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between">
+        Nedavno praćeno
+        <span id="dash-th" style="font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:400;text-transform:none;letter-spacing:0"></span>
+      </div>
+      <div id="dash-logs"></div>
+    </div>
+  </div>
+  <div class="card" id="dash-followups-card" style="display:none"><div class="card-title" style="color:var(--yellow)">&#9888; Follow-up danas</div><div id="dash-followups"></div></div>
+  <div class="grid2" style="gap:16px">
+    <div class="card"><div class="card-title">Prihod po projektu</div><div id="dash-revenue"></div></div>
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between">
+        Neplaćeni računi
+        <span id="dash-unpaid-total" style="font-family:var(--mono);font-size:12px;color:var(--yellow);font-weight:400;text-transform:none;letter-spacing:0"></span>
+      </div>
+      <div id="dash-invoices"></div>
+    </div>
+  </div>
+</div>
+
+<!-- KANBAN -->
+<div class="page" id="page-kanban">
+  <div class="page-header">
+    <div class="page-title">Projekti</div>
+    <div class="page-actions">
+      <input id="kb-search" placeholder="Pretraži..." oninput="renderKanban()" style="font-size:13px;padding:6px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);outline:none;width:160px">
+      <button class="btn btn-sm btn-primary" onclick="openKbModal()">+ Novi projekt</button>
+    </div>
+  </div>
+  <div class="kanban" id="kanban-board"></div>
+</div>
+
+<!-- TRACKER -->
+<div class="page" id="page-tracker">
+  <div class="page-header">
+    <div class="page-title">Time tracker</div>
+    <div class="page-actions">
+      <button class="btn btn-sm" onclick="exportLogs()">&#8595; CSV</button>
+      <button class="btn btn-sm btn-danger" onclick="clearLogs()">Obri&#353;i sve</button>
+    </div>
+  </div>
+  <div class="timer-hero">
+    <div class="timer-display" id="timer-display">00:00:00</div>
+    <div class="timer-right">
+      <select id="timer-project"></select>
+      <input id="timer-note" placeholder="Opis rada...">
+      <button class="btn btn-timer stopped" id="timer-btn" onclick="toggleTimer()">&#9654;</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      Evidencija rada
+      <div style="display:flex;gap:12px;align-items:center">
+        <button class="btn btn-sm" onclick="openManualEntry()" style="font-size:11px">+ Ru&#269;ni unos</button>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--text3)">
+          Sati: <span id="tt-h" style="color:var(--accent)">0.00</span> &nbsp;&middot;&nbsp;
+          Vrijednost: <span id="tt-eur" style="color:var(--yellow)">&#8364;0</span>
+        </span>
+      </div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Projekt</th><th>Opis</th><th>Datum</th><th>Trajanje</th><th>Vrijednost</th><th></th></tr></thead>
+      <tbody id="log-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- EXPENSES -->
+<div class="page" id="page-expenses">
+  <div class="page-header">
+    <div class="page-title">Tro&#353;kovi</div>
+    <div class="page-actions">
+      <button class="btn btn-sm" onclick="exportExpenses()">&#8595; CSV</button>
+      <button class="btn btn-sm btn-primary" onclick="openExpenseModal()">+ Novi tro&#353;ak</button>
+    </div>
+  </div>
+  <div class="summary-grid" id="exp-stats"></div>
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      Svi tro&#353;kovi
+      <div style="display:flex;gap:8px">
+        <select id="exp-filter-proj" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="renderExpenses()"><option value="">Svi projekti</option></select>
+        <select id="exp-filter-cat" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="renderExpenses()">
+          <option value="">Sve kategorije</option>
+          <option value="gorivo">Gorivo</option>
+          <option value="materijal">Materijal</option>
+          <option value="softver">Softver</option>
+          <option value="putovanje">Putovanje</option>
+          <option value="ostalo">Ostalo</option>
+        </select>
+      </div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Opis</th><th>Projekt</th><th>Kategorija</th><th>Datum</th><th>Iznos</th><th></th></tr></thead>
+      <tbody id="exp-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- GANTT -->
+<div class="page" id="page-gantt">
+  <div class="page-header">
+    <div class="page-title">Gantt</div>
+    <button class="btn btn-sm btn-primary" onclick="openGanttModal()">+ Dodaj zadatak</button>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <table class="data-table" style="min-width:700px">
+      <thead><tr><th style="width:20%">Zadatak</th><th style="width:16%">Projekt</th><th style="width:9%">Po&#269;etak</th><th style="width:9%">Kraj</th><th style="width:9%">Status</th><th>Timeline</th><th style="width:4%"></th></tr></thead>
+      <tbody id="gantt-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- INVOICE -->
+<div class="page" id="page-invoice">
+  <div class="page-header">
+    <div class="page-title">Invoice</div>
+    <div class="page-actions">
+      <select id="inv-lang" class="btn btn-sm" style="cursor:pointer"><option value="de">DE</option><option value="en">EN</option><option value="hr">HR</option></select>
+      <button class="btn btn-sm" onclick="importHours()">&#8635; Uvezi sate</button>
+      <button class="btn btn-sm" onclick="previewInvoice()">Pregled</button>
+      <button class="btn btn-sm btn-primary" onclick="generatePDF()">&#8595; PDF</button>
+    </div>
+  </div>
+  <div class="inv-hdr">
+    <div class="card">
+      <div class="card-title">Izdava&#269;</div>
+      <div class="field"><label>Naziv</label><input id="ifn"></div>
+      <div class="field"><label>Adresa</label><input id="ifa"></div>
+      <div class="field"><label>Email</label><input id="ife"></div>
+      <div class="field"><label>UID / Steuernummer</label><input id="ifu" placeholder="ATU12345678"></div>
+      <div class="field"><label>IBAN</label><input id="ifib" placeholder="AT12 3456 7890 1234 5678"></div>
+      <div class="field"><label>BIC / SWIFT</label><input id="ifbic" placeholder="RLNWATWW"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        Klijent
+        <select id="inv-client-sel" class="btn btn-sm" style="font-size:11px;cursor:pointer" onchange="fillClientFromSel()"><option value="">Popuni iz klijenta...</option></select>
+      </div>
+      <div class="field"><label>Naziv</label><input id="itn" placeholder="Mustermann GmbH"></div>
+      <div class="field"><label>Adresa</label><input id="ita"></div>
+      <div class="field"><label>Email</label><input id="ite"></div>
+      <div class="field"><label>UID klijenta</label><input id="itu"></div>
+      <div class="grid2">
+        <div class="field"><label>Br. ra&#269;una</label><input id="inum" value="2024-001"></div>
+        <div class="field"><label>Valuta</label>
+          <select id="icur" onchange="renderInvTotals()">
+            <option value="EUR">EUR &#8364;</option><option value="CHF">CHF Fr.</option><option value="USD">USD $</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Datum</label><input id="idate" type="date"></div>
+        <div class="field"><label>Rok pla&#263;anja</label><input id="idue" type="date"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      Stavke
+      <button class="btn btn-sm" onclick="addInvRow()">+ Dodaj</button>
+    </div>
+    <table class="inv-table">
+      <thead><tr><th style="width:38%">Opis</th><th style="width:10%">Sati</th><th style="width:17%">Cijena/h</th><th style="width:10%">PDV%</th><th style="width:17%">Iznos</th><th style="width:8%"></th></tr></thead>
+      <tbody id="inv-body"></tbody>
+    </table>
+    <div class="totals-wrap" id="inv-totals"></div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      Opcije pla&#263;anja
+      <div style="display:flex;gap:10px">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0"><input type="checkbox" id="pay-sepa" style="accent-color:var(--accent)"> SEPA QR</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0"><input type="checkbox" id="pay-paypal" style="accent-color:var(--accent)"> PayPal</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0"><input type="checkbox" id="pay-revolut" style="accent-color:var(--accent)"> Revolut</label>
+      </div>
+    </div>
+    <div id="pay-paypal-row" style="display:none" class="field"><label>PayPal link / email</label><input id="pay-paypal-val" placeholder="https://paypal.me/..."></div>
+    <div id="pay-revolut-row" style="display:none" class="field"><label>Revolut link</label><input id="pay-revolut-val" placeholder="https://revolut.me/..."></div>
+    <div id="pay-empty" style="font-size:12px;color:var(--text3)">Odaberi opcije pla&#263;anja.</div>
+  </div>
+  <div class="card"><div class="card-title">Napomena</div><div class="field" style="margin:0"><textarea id="inote" rows="2" placeholder="Kleinunternehmer gem. &#167; 6 Abs. 1 Z 27 UStG &#8211; keine Umsatzsteuer"></textarea></div></div>
+  <div id="inv-toast" class="toast"></div>
+</div>
+
+<!-- INVOICE HISTORY -->
+<div class="page" id="page-invhistory">
+  <div class="page-header">
+    <div class="page-title">Historija ra&#269;una</div>
+    <button class="btn btn-sm btn-primary" onclick="saveCurrentInvoice()">+ Spremi trenutni ra&#269;un</button>
+  </div>
+  <div class="summary-grid" id="invh-stats"></div>
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      Svi ra&#269;uni
+      <select id="invh-filter" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="renderInvHistory()">
+        <option value="">Svi statusi</option>
+        <option value="draft">Nacrt</option>
+        <option value="sent">Poslano</option>
+        <option value="paid">Pla&#263;eno</option>
+        <option value="overdue">Kasni</option>
+      </select>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Br. ra&#269;una</th><th>Klijent</th><th>Datum</th><th>Rok</th><th>Iznos</th><th>Status</th><th></th></tr></thead>
+      <tbody id="invh-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TEMPLATES -->
+<div class="page" id="page-templates">
+  <div class="page-header">
+    <div class="page-title">Predlosci emaila</div>
+    <button class="btn btn-sm btn-primary" onclick="openTemplateModal()">+ Novi predlozak</button>
+  </div>
+  <div id="templates-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
+</div>
+
+<!-- PROSPECTING -->
+<div class="page" id="page-prospecting">
+  <div class="page-header">
+    <div class="page-title">Prospecting</div>
+    <div class="page-actions">
+      <button class="btn btn-sm btn-danger" onclick="clearAllLeads()">Obri&#353;i sve leadove</button>
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:500;margin-bottom:14px">Pretra&#382;i firme</div>
+    <div class="grid3" style="margin-bottom:12px">
+      <div class="field" style="margin:0"><label id="label-keyword">Djelatnost / klju&#269;na rije&#269;</label><input id="pros-query" placeholder="CNC Fr&#228;sen, Maschinenbau..."></div>
+      <div class="field" style="margin:0"><label id="label-city">Grad / regija</label><input id="pros-location" placeholder="Graz, Bayern, &#214;sterreich..."></div>
+      <div class="field" style="margin:0"><label id="label-country">Zemlja</label>
+        <select id="pros-country">
+          <option value="at">Austrija</option><option value="de">Njema&#269;ka</option>
+          <option value="ch">&#352;vicarska</option><option value="hr">Hrvatska</option><option value="ba">BiH</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2" style="margin-bottom:14px">
+      <div class="field" style="margin:0"><label id="label-searchtype">Tip pretrage</label>
+        <select id="pros-type">
+          <option value="general">Firme (op&#263;enito)</option>
+          <option value="contact">Firme + kontakt email</option>
+          <option value="maps">Google Maps (lokalne firme)</option>
+          <option value="jobs">Job oglasi (tko treba CAM)</option>
+          <option value="linkedin">LinkedIn profili</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0"><label id="label-numresults">Broj rezultata</label>
+        <select id="pros-num"><option value="10">10</option><option value="20">20</option><option value="30">30</option></select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn btn-primary" id="pros-btn" onclick="runSearch()">Pretra&#382;i</button>
+      <span id="pros-status" style="font-size:12px;color:var(--text3)"></span>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:16px;margin-bottom:16px;border-bottom:1px solid var(--border)">
+    <div class="pros-tab active" id="tab-results" onclick="switchTab('results')">Rezultati</div>
+    <div class="pros-tab" id="tab-leads" onclick="switchTab('leads')">
+      Leadi <span id="leads-count" style="font-family:var(--mono);font-size:11px;background:var(--bg3);padding:1px 6px;border-radius:10px;margin-left:4px">0</span>
+    </div>
+  </div>
+
+  <div id="tab-content-results">
+    <div id="pros-results-grid" class="pros-grid">
+      <div class="empty" style="grid-column:1/-1">Upi&#353;i djelatnost i grad pa klikni Pretra&#382;i.</div>
+    </div>
+  </div>
+
+  <div id="tab-content-leads" style="display:none">
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap" id="lead-filters">
+      <button class="btn btn-sm" onclick="setLeadFilter('')">Svi</button>
+      <button class="btn btn-sm" onclick="setLeadFilter('novi')">Novi</button>
+      <button class="btn btn-sm" onclick="setLeadFilter('kontaktiran')">Kontaktirani</button>
+      <button class="btn btn-sm" onclick="setLeadFilter('zainteresiran')">Zainteresirani</button>
+      <button class="btn btn-sm" onclick="setLeadFilter('nije-odgovorio')">Nije odgovorio</button>
+      <button class="btn btn-sm" onclick="setLeadFilter('odbijenica')">Odbio</button>
+    </div>
+    <div id="pros-leads-grid" class="pros-grid"></div>
+  </div>
+</div>
+
+<!-- CLIENTS -->
+<div class="page" id="page-clients">
+  <div class="page-header">
+    <div class="page-title">Klijenti</div>
+    <button class="btn btn-sm btn-primary" onclick="openClientModal()">+ Novi klijent</button>
+  </div>
+  <div id="clients-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-header"><div class="page-title">Postavke</div></div>
+  <div class="settings-section">
+    <h3>Moji podaci</h3>
+    <div class="grid2">
+      <div class="field"><label>Naziv tvrtke</label><input id="s-name"></div>
+      <div class="field"><label>Email</label><input id="s-email"></div>
+      <div class="field"><label>Adresa</label><input id="s-addr"></div>
+      <div class="field"><label>UID / Steuernummer</label><input id="s-uid"></div>
+      <div class="field"><label>IBAN</label><input id="s-iban"></div>
+      <div class="field"><label>BIC / SWIFT</label><input id="s-bic"></div>
+    </div>
+  </div>
+  <div class="settings-section">
+    <h3>Defaults</h3>
+    <div class="grid3">
+      <div class="field"><label>Default hourly rate (&#8364;/h)</label><input id="s-rate" type="number" value="75" min="0"></div>
+      <div class="field"><label>Default PDV %</label><input id="s-vat" type="number" value="20" min="0"></div>
+      <div class="field"><label>Default valuta</label>
+        <select id="s-currency"><option value="EUR">EUR &#8364;</option><option value="CHF">CHF Fr.</option><option value="USD">USD $</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Default napomena na invoiceu</label><textarea id="s-note" rows="2"></textarea></div>
+  </div>
+  <div class="settings-section">
+    <h3>Backup podataka</h3>
+    <div class="field"><label>Claude API Key (za AI generiranje emailova)</label><input id="s-claude-key" type="password" placeholder="sk-ant-..."></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="exportData()">&#8595; Export JSON</button>
+      <button class="btn" onclick="document.getElementById('import-file').click()">&#8593; Import JSON</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-danger" onclick="resetAll()">Obri&#353;i sve podatke</button>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-top:4px">
+    <button class="btn btn-primary" onclick="saveSettings()">Spremi postavke</button>
+  </div>
+  <div id="settings-toast" class="toast" style="max-width:400px;margin-left:auto"></div>
+</div>
+
+</div><!-- /main -->
+
+<!-- MODALS -->
+<div class="modal-bg" id="modal-kb">
+  <div class="modal">
+    <div class="modal-title" id="kb-mtitle">Novi projekt</div>
+    <div class="field"><label>Naziv projekta</label><input id="kb-title"></div>
+    <div class="grid2">
+      <div class="field"><label>Klijent</label><select id="kb-client"></select></div>
+      <div class="field"><label>Hourly rate (&#8364;/h)</label><input id="kb-rate" type="number" min="0"></div>
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="kb-status">
+        <option value="0">Upit</option><option value="1">U izradi</option>
+        <option value="2">Isporu&#269;eno</option><option value="3">Fakturirano</option><option value="4">Pla&#263;eno</option>
+      </select>
+    </div>
+    <div class="field"><label>Napomena</label><textarea id="kb-note" rows="2"></textarea></div>
+    <input type="hidden" id="kb-id">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-kb')">Odustani</button>
+      <button class="btn btn-xs btn-danger" id="kb-del" style="display:none" onclick="deleteProject()">Obri&#353;i</button>
+      <button class="btn btn-primary" onclick="saveProject()">Spremi</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-gantt">
+  <div class="modal">
+    <div class="modal-title">Novi zadatak</div>
+    <div class="field"><label>Naziv</label><input id="gt-title"></div>
+    <div class="field"><label>Projekt</label><select id="gt-proj"></select></div>
+    <div class="grid2">
+      <div class="field"><label>Po&#269;etak</label><input id="gt-start" type="date"></div>
+      <div class="field"><label>Kraj</label><input id="gt-end" type="date"></div>
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="gt-status"><option value="active">U tijeku</option><option value="done">Zavr&#353;eno</option><option value="late">Kasni</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-gantt')">Odustani</button>
+      <button class="btn btn-primary" onclick="saveGanttTask()">Spremi</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-client">
+  <div class="modal">
+    <div class="modal-title" id="cl-mtitle">Novi klijent</div>
+    <div class="grid2">
+      <div class="field"><label>Naziv tvrtke</label><input id="cl-name"></div>
+      <div class="field"><label>Kontakt osoba</label><input id="cl-contact"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Email</label><input id="cl-email" type="email"></div>
+      <div class="field"><label>Telefon</label><input id="cl-phone"></div>
+    </div>
+    <div class="field"><label>Adresa</label><input id="cl-addr"></div>
+    <div class="grid2">
+      <div class="field"><label>Zemlja</label>
+        <select id="cl-country">
+          <option value="AT">Austrija</option><option value="DE">Njema&#269;ka</option>
+          <option value="CH">&#352;vicarska</option><option value="HR">Hrvatska</option><option value="BA">BiH</option>
+        </select>
+      </div>
+      <div class="field"><label>Default rate (&#8364;/h)</label><input id="cl-rate" type="number" min="0"></div>
+    </div>
+    <div class="field"><label>UID / Steuernummer</label><input id="cl-uid"></div>
+    <div class="field"><label>Napomena</label><textarea id="cl-note" rows="2"></textarea></div>
+    <input type="hidden" id="cl-id">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-client')">Odustani</button>
+      <button class="btn btn-xs btn-danger" id="cl-del" style="display:none" onclick="deleteClient()">Obri&#353;i</button>
+      <button class="btn btn-primary" onclick="saveClient()">Spremi</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-manual">
+  <div class="modal">
+    <div class="modal-title" id="manual-title">Ru&#269;ni unos vremena</div>
+    <div class="field"><label>Projekt</label><select id="manual-project"></select></div>
+    <div class="field"><label>Opis rada</label><input id="manual-note" placeholder="Opis..."></div>
+    <div class="grid3">
+      <div class="field"><label>Sati</label><input id="manual-h" type="number" value="0" min="0" max="24" oninput="updateManualPreview()"></div>
+      <div class="field"><label>Minute</label><input id="manual-m" type="number" value="0" min="0" max="59" oninput="updateManualPreview()"></div>
+      <div class="field"><label>Datum</label><input id="manual-date" type="date"></div>
+    </div>
+    <div style="padding:10px 12px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--text3);margin-top:4px">
+      Trajanje: <span id="manual-preview" style="color:var(--accent);font-family:var(--mono)">00:00:00</span>
+    </div>
+    <input type="hidden" id="manual-id">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-manual')">Odustani</button>
+      <button class="btn btn-xs btn-danger" id="manual-del" style="display:none" onclick="deleteManualLog()">Obri&#353;i</button>
+      <button class="btn btn-primary" onclick="saveManualEntry()">Spremi</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-expense">
+  <div class="modal">
+    <div class="modal-title" id="exp-mtitle">Novi tro&#353;ak</div>
+    <div class="field"><label>Opis</label><input id="exp-desc" placeholder="Npr. Gorivo za odlazak klijentu"></div>
+    <div class="grid2">
+      <div class="field"><label>Projekt</label><select id="exp-project"></select></div>
+      <div class="field"><label>Kategorija</label>
+        <select id="exp-cat">
+          <option value="gorivo">Gorivo</option><option value="materijal">Materijal</option>
+          <option value="softver">Softver</option><option value="putovanje">Putovanje</option><option value="ostalo">Ostalo</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Iznos (&#8364;)</label><input id="exp-amount" type="number" min="0" step="0.01"></div>
+      <div class="field"><label>Datum</label><input id="exp-date" type="date"></div>
+    </div>
+    <div class="field"><label>Napomena</label><textarea id="exp-note" rows="2"></textarea></div>
+    <input type="hidden" id="exp-id">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-expense')">Odustani</button>
+      <button class="btn btn-xs btn-danger" id="exp-del" style="display:none" onclick="deleteExpense()">Obri&#353;i</button>
+      <button class="btn btn-primary" onclick="saveExpense()">Spremi</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-invh">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">Detalji ra&#269;una</div>
+    <div id="invh-detail"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-invh')">Zatvori</button>
+      <button class="btn btn-sm" onclick="recurringFromSaved()">&#8635; Novi iz ovoga</button>
+      <button class="btn btn-sm btn-primary" onclick="regenPDF()">&#8595; PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-lead">
+  <div class="modal">
+    <div class="modal-title" id="lead-mtitle">Detalji leada</div>
+    <div id="lead-detail"></div>
+    <div class="field"><label>Napomena</label><textarea id="lead-note" rows="2" placeholder="Bilješka o firmi..."></textarea></div>
+    <div class="field"><label>Follow-up datum</label>
+      <input id="lead-followup" type="date" style="font-size:13px;padding:8px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);outline:none;width:100%">
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="lead-status">
+        <option value="novi">Novi</option>
+        <option value="kontaktiran">Kontaktiran</option>
+        <option value="zainteresiran">Zainteresiran</option>
+        <option value="nije-odgovorio">Nije odgovorio</option>
+        <option value="odbijenica">Odbio</option>
+      </select>
+    </div>
+    <div id="lead-email-history" style="display:none">
+      <div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Poslani emailovi</div>
+      <div id="lead-email-history-list"></div>
+    </div>
+    <input type="hidden" id="lead-id">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-lead')">Zatvori</button>
+      <button class="btn btn-xs btn-danger" onclick="deleteLead()">Obri&#353;i</button>
+      <button class="btn btn-sm" onclick="openEmailModal()" style="background:var(--blue-dim);color:var(--blue);border-color:var(--blue)">&#9993; Po&#353;alji email</button>
+      <button class="btn btn-primary" onclick="saveLead()">Spremi</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATE MODAL -->
+<div class="modal-bg" id="modal-template">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title" id="tmpl-mtitle">Novi predlozak</div>
+    <div class="grid2">
+      <div class="field"><label>Naziv predloska</label><input id="tmpl-name" placeholder="npr. Cold outreach DE"></div>
+      <div class="field"><label>Jezik</label>
+        <select id="tmpl-lang"><option value="de">Njemacki (DE)</option><option value="en">Engleski (EN)</option><option value="hr">Hrvatski (HR)</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Subject</label><input id="tmpl-subject" placeholder="Subject emaila..."></div>
+    <div class="field"><label>Poruka</label><textarea id="tmpl-body" rows="10" style="font-family:var(--mono);font-size:12px;line-height:1.6" placeholder="Tekst emaila...&#10;&#10;Mozete koristiti [NAZIV_FIRME] za personalizaciju."></textarea></div>
+    <input type="hidden" id="tmpl-id">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-template')">Odustani</button>
+      <button class="btn btn-xs btn-danger" id="tmpl-del" style="display:none" onclick="deleteTemplate()">Obrisi</button>
+      <button class="btn btn-primary" onclick="saveTemplate()">Spremi</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL MODAL -->
+<div class="modal-bg" id="modal-email">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">Posalji email</div>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--text3)">
+      Od: <span style="color:var(--text2)">CAMOutput &lt;info@camoutput.com&gt;</span>
+    </div>
+    <div class="field"><label>Prima (email adresa)</label><input id="email-to" type="email" placeholder="office@firma.com"></div>
+    <div class="field"><label>Predlozak</label><select id="email-template-sel" onchange="applyTemplate()"><option value="">-- ili odaberi predlozak --</option></select></div>
+    <div style="margin-bottom:14px">
+      <button class="btn btn-primary" id="ai-gen-btn" onclick="generateAIEmail()" style="width:100%">&#10024; AI email - generiraj personalizirani email</button>
+    </div>
+    <input type="hidden" id="email-lang" value="de">
+    <div id="ai-status" style="display:none;font-size:12px;color:var(--accent);margin-bottom:10px;padding:8px 12px;background:var(--accent-dim);border-radius:6px"></div>
+    <div class="field"><label>Subject</label><input id="email-subject"></div>
+    <div class="field"><label>Poruka</label><textarea id="email-body" rows="9" style="font-family:var(--mono);font-size:12px;line-height:1.6"></textarea></div>
+    <div id="email-toast" class="toast"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-email')">Odustani</button>
+      <button class="btn btn-sm" onclick="generateEmailTemplate()">&#8635; Predlozak</button>
+      <button class="btn btn-primary" id="email-send-btn" onclick="sendEmail()">Posalji</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-preview" style="padding-top:20px;overflow-y:auto">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:680px;margin:0 auto 40px;overflow:hidden">
+    <div id="inv-preview-content"></div>
+    <div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:10px;background:#f9fafb">
+      <button onclick="closeModal('modal-preview')" style="padding:8px 16px;border-radius:8px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:13px">Zatvori</button>
+      <button onclick="generatePDF()" style="padding:8px 16px;border-radius:8px;border:none;background:#1D9E75;color:#fff;cursor:pointer;font-size:13px;font-weight:500">&#8595; PDF</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+
+</div>
+
+<script>
+function openApp(){
+  document.getElementById('landing-page').style.display='none';
+  document.getElementById('app-page').style.display='block';
+  document.title='ShopFlow — App';
+  window.scrollTo(0,0);
+  if(!window._appInit){window._appInit=true;initApp();}
+}
+function goToLanding(){
+  document.getElementById('app-page').style.display='none';
+  document.getElementById('landing-page').style.display='block';
+  document.title='ShopFlow';
+}
+
+/* LANDING */
+
+window.addEventListener('scroll',function(){
+  document.getElementById('main-nav').classList.toggle('scrolled',window.scrollY>40);
+});
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.fade-up').forEach(function(el){obs.observe(el);});
+
+
+/* APP */
+
+var jsPDF = window.jspdf ? window.jspdf.jsPDF : null;
+
+// ─── STATE
+var S = {
+  projects:[
+    {id:1,title:'Fanuc postprocesor',clientId:1,rate:75,status:1,note:'Sinumerik 840D'},
+    {id:2,title:'CAMOutput landing page',clientId:null,rate:0,status:1,note:''},
+    {id:3,title:'Speed & Feed kalkulator',clientId:null,rate:0,status:2,note:''}
+  ],
+  clients:[
+    {id:1,name:'Mustermann GmbH',contact:'Max Mustermann',email:'office@mustermann.de',phone:'+49 89 1234567',addr:'Musterstrasse 5, 80333 Munchen',country:'DE',rate:75,uid:'DE123456789',note:'Redovni klijent'},
+    {id:2,name:'Stirtec GmbH',contact:'',email:'',phone:'',addr:'Hauptstrasse 1, 8010 Graz',country:'AT',rate:0,uid:'',note:''}
+  ],
+  timeLogs:[],
+  expenses:[],
+  ganttTasks:[
+    {id:1,title:'Analiza zahtjeva',projectId:1,start:'2024-01-10',end:'2024-01-14',status:'done'},
+    {id:2,title:'Razvoj postprocesora',projectId:1,start:'2024-01-15',end:'2024-02-15',status:'active'},
+    {id:3,title:'Landing page dizajn',projectId:2,start:'2024-01-20',end:'2024-02-10',status:'active'}
+  ],
+  invoiceHistory:[],
+  leads:[],
+  invItems:[],invItemId:0,
+  timer:{running:false,start:null,interval:null},
+  nextId:20,
+  emailTemplates:[
+    {id:'t1',name:'Standard DE',lang:'de',subject:'CAM-Programmierung fur Ihre Fertigung',body:'Sehr geehrte Damen und Herren,\n\nmein Name ist [Name] von CAMOutput, einem spezialisierten CAM-Programmierdienst aus Graz, Osterreich.\n\nWir bieten:\n- CAM-Programmierung (Mastercam, Fusion360, Hypermill)\n- CNC-Postprozessor-Entwicklung\n- Optimierung von Zerspanungsparametern\n\nDarf ich Ihnen mehr Informationen zusenden?\n\nMit freundlichen Gru\u00dfen\nCAMOutput | info@camoutput.com'},
+    {id:'t2',name:'Standard EN',lang:'en',subject:'CAM Programming Services for Your Manufacturing',body:'Dear Sir or Madam,\n\nI am reaching out from CAMOutput, a specialized CAM programming service based in Graz, Austria.\n\nWe offer:\n- CAM programming (Mastercam, Fusion360, Hypermill)\n- CNC post-processor development\n- Cutting parameter optimization\n\nWould you be open to a brief call?\n\nBest regards,\nCAMOutput | info@camoutput.com'},
+    {id:'t3',name:'Standard HR',lang:'hr',subject:'CAM programiranje za vase potrebe',body:'Postovani,\n\nObra\u0107am vam se iz CAMOutput-a, specijaliziranog servisa za CAM programiranje iz Graza, Austrija.\n\nNudimo:\n- CAM programiranje (Mastercam, Fusion360, Hypermill)\n- Razvoj CNC postprocesora\n- Optimizacija parametara obrade\n\nSmijete li nam se javiti za kratki razgovor?\n\nS postovanjem,\nCAMOutput | info@camoutput.com'}
+  ],
+  settings:{appLang:'hr',appTheme:'dark',name:'CAMOutput e.U.',email:'info@camoutput.com',addr:'Hauptstrasse 1, 8010 Graz',uid:'',iban:'',bic:'',rate:75,vat:20,currency:'EUR',note:'Kleinunternehmer gem. Paragraph 6 Abs. 1 Z 27 UStG - keine Umsatzsteuer',claudeKey:''}
+};
+
+var KB_COLS = ['Upit','U izradi','Isporuceno','Fakturirano','Placeno'];
+var KB_CLR = ['#8b949e','#1D9E75','#388bfd','#d29922','#3fb950'];
+var WORKER_URL = 'https://shopflow-search.camodanko.workers.dev';
+var EMAIL_WORKER_URL = 'https://shopflow-email.camodanko.workers.dev';
+var FETCH_WORKER_URL = 'https://shopflow-fetch.camodanko.workers.dev';
+var LEAD_STATUSES = {novi:'Novi',kontaktiran:'Kontaktiran',zainteresiran:'Zainteresiran','nije-odgovorio':'Nije odgovorio',odbijenica:'Odbio'};
+var INV_STATUSES = {draft:'Nacrt',sent:'Poslano',paid:'Placeno',overdue:'Kasni'};
+var L10N = {
+  de:{invoice:'RECHNUNG',to:'RECHNUNGSEMPFANGER',num:'Rechnungs-Nr.',date:'Datum',due:'Falligkeitsdatum',desc:'Beschreibung',qty:'Std.',price:'Preis/Std.',vat:'MwSt.%',amount:'Betrag',sub:'Nettobetrag',vatl:'MwSt.',total:'Gesamtbetrag',iban:'IBAN',bic:'BIC',pay:'Zahlungsdetails'},
+  en:{invoice:'INVOICE',to:'BILL TO',num:'Invoice No.',date:'Date',due:'Due Date',desc:'Description',qty:'Qty (h)',price:'Rate/h',vat:'VAT%',amount:'Amount',sub:'Subtotal',vatl:'VAT',total:'Total',iban:'IBAN',bic:'BIC',pay:'Payment details'},
+  hr:{invoice:'RACUN',to:'PRIMATELJ',num:'Broj racuna',date:'Datum',due:'Rok placanja',desc:'Opis',qty:'Sati',price:'Cijena/h',vat:'PDV%',amount:'Iznos',sub:'Neto',vatl:'PDV',total:'Ukupno',iban:'IBAN',bic:'BIC',pay:'Podaci za placanje'}
+};
+
+var prosTab = 'results';
+var prosResults = [];
+var leadFilter = '';
+var currentHistoryInv = null;
+var JOB_PORTALS = [
+  'karriere.at','stepstone.at','stepstone.de','jobs.at','jooble.org','jooble.com',
+  'metajob.at','willhaben.at','hokify.at','indeed.com','indeed.at','indeed.de',
+  'linkedin.com','xing.com','monster.at','monster.de','jobboerse.arbeitsagentur.de',
+  'mach-mich-zum-experten.at','wlw.at','wlw.de','at.jooble.org','de.jooble.org',
+  'jobrapido.com','kimeta.de','yourfirm.de','jobanzeiger.de','stellenanzeigen.de',
+  'jobboerse.de','jobware.de','jobs.de','stellenonline.de','jobscout24.at'
+];
+
+function isJobPortal(url) {
+  if (!url) return false;
+  var domain = url.replace(/^https?:\/\//, '').split('/')[0].toLowerCase();
+  return JOB_PORTALS.some(function(p) { return domain === p || domain.endsWith('.' + p); });
+}
+
+
+
+// ─── I18N
+var APP_LANG = 'hr';
+var APP_THEME = 'dark';
+
+var TRANSLATIONS = {
+  hr: {
+    dashboard:'Dashboard', projects:'Projekti', tracker:'Time tracker',
+    expenses:'Troskovi', gantt:'Gantt', invoice:'Invoice',
+    invhistory:'Historija racuna', prospecting:'Prospecting',
+    templates:'Predlosci emaila', clients:'Klijenti', settings:'Postavke',
+    newProject:'+ Novi projekt', newTask:'+ Dodaj zadatak',
+    newExpense:'+ Novi trosak', newClient:'+ Novi klijent',
+    activeProjects:'Aktivni projekti', recentTracked:'Nedavno praceno',
+    revenueByProject:'Prihod po projektu', unpaidInvoices:'Neplaceni racuni',
+    startTimer:'Pokreni timer', manualEntry:'+ Rucni unos',
+    sendEmail:'Posalji email', aiEmail:'AI email',
+    searchFirms:'Pretrazi firme', keyword:'Djelatnost / kljucna rijec',
+    city:'Grad / regija', country:'Zemlja', searchType:'Tip pretrage',
+    numResults:'Broj rezultata', search:'Pretrazi',
+    results:'Rezultati', leads:'Leadi',
+    general:'Firme (opcenito)', contact:'Firme + kontakt email',
+    maps:'Google Maps (lokalne firme)', jobs:'Job oglasi',
+    linkedin:'LinkedIn profili',
+    saveSettings:'Spremi postavke', exportJson:'Export JSON',
+    importJson:'Import JSON', deleteAll:'Obrisi sve podatke',
+    myData:'Moji podaci', defaults:'Defaults', backup:'Backup podataka',
+    language:'Jezik / Language', theme:'Tema',
+    dark:'Tamna', light:'Svijetla',
+    followupToday:'Follow-up danas'
+  },
+  de: {
+    dashboard:'Dashboard', projects:'Projekte', tracker:'Zeiterfassung',
+    expenses:'Ausgaben', gantt:'Gantt', invoice:'Rechnung',
+    invhistory:'Rechnungsverlauf', prospecting:'Akquise',
+    templates:'E-Mail-Vorlagen', clients:'Kunden', settings:'Einstellungen',
+    newProject:'+ Neues Projekt', newTask:'+ Aufgabe hinzufugen',
+    newExpense:'+ Neue Ausgabe', newClient:'+ Neuer Kunde',
+    activeProjects:'Aktive Projekte', recentTracked:'Zuletzt erfasst',
+    revenueByProject:'Umsatz nach Projekt', unpaidInvoices:'Offene Rechnungen',
+    startTimer:'Timer starten', manualEntry:'+ Manuell',
+    sendEmail:'E-Mail senden', aiEmail:'KI-E-Mail',
+    searchFirms:'Unternehmen suchen', keyword:'Branche / Stichwort',
+    city:'Stadt / Region', country:'Land', searchType:'Suchtyp',
+    numResults:'Anzahl Ergebnisse', search:'Suchen',
+    results:'Ergebnisse', leads:'Leads',
+    general:'Unternehmen (allgemein)', contact:'Unternehmen + E-Mail',
+    maps:'Google Maps (lokale Firmen)', jobs:'Stellenanzeigen',
+    linkedin:'LinkedIn-Profile',
+    saveSettings:'Einstellungen speichern', exportJson:'JSON exportieren',
+    importJson:'JSON importieren', deleteAll:'Alle Daten loschen',
+    myData:'Meine Daten', defaults:'Standardwerte', backup:'Datensicherung',
+    language:'Sprache', theme:'Design',
+    dark:'Dunkel', light:'Hell',
+    followupToday:'Follow-up heute'
+  },
+  en: {
+    dashboard:'Dashboard', projects:'Projects', tracker:'Time tracker',
+    expenses:'Expenses', gantt:'Gantt', invoice:'Invoice',
+    invhistory:'Invoice history', prospecting:'Prospecting',
+    templates:'Email templates', clients:'Clients', settings:'Settings',
+    newProject:'+ New project', newTask:'+ Add task',
+    newExpense:'+ New expense', newClient:'+ New client',
+    activeProjects:'Active projects', recentTracked:'Recently tracked',
+    revenueByProject:'Revenue by project', unpaidInvoices:'Unpaid invoices',
+    startTimer:'Start timer', manualEntry:'+ Manual entry',
+    sendEmail:'Send email', aiEmail:'AI email',
+    searchFirms:'Search companies', keyword:'Industry / keyword',
+    city:'City / region', country:'Country', searchType:'Search type',
+    numResults:'Number of results', search:'Search',
+    results:'Results', leads:'Leads',
+    general:'Companies (general)', contact:'Companies + contact email',
+    maps:'Google Maps (local firms)', jobs:'Job listings',
+    linkedin:'LinkedIn profiles',
+    saveSettings:'Save settings', exportJson:'Export JSON',
+    importJson:'Import JSON', deleteAll:'Delete all data',
+    myData:'My data', defaults:'Defaults', backup:'Data backup',
+    language:'Language', theme:'Theme',
+    dark:'Dark', light:'Light',
+    followupToday:'Follow-up today'
+  }
+};
+
+function t(key){ return (TRANSLATIONS[APP_LANG]||TRANSLATIONS.hr)[key]||key; }
+
+function setAppLang(lang){
+  APP_LANG=lang;
+  S.settings.appLang=lang;
+  save();
+  applyTranslations();
+  updateLangButtons();
+  // Update email lang hidden input
+  var el_lang=el('email-lang');
+  if(el_lang)el_lang.value=lang;
+}
+
+function setTheme(theme){
+  APP_THEME=theme;
+  S.settings.appTheme=theme;
+  save();
+  applyTheme();
+  updateThemeButtons();
+}
+
+function applyTheme(){
+  if(APP_THEME==='light'){
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+}
+
+function updateLangButtons(){
+  ['hr','de','en'].forEach(function(l){
+    var btn=el('lang-'+l+'-btn');
+    if(!btn)return;
+    btn.style.background=APP_LANG===l?'var(--accent)':'';
+    btn.style.color=APP_LANG===l?'#fff':'';
+    btn.style.borderColor=APP_LANG===l?'var(--accent)':'';
+  });
+}
+
+function updateThemeButtons(){
+  var dark=el('theme-dark-btn');var light=el('theme-light-btn');
+  if(!dark||!light)return;
+  dark.style.background=APP_THEME==='dark'?'var(--accent)':'';
+  dark.style.color=APP_THEME==='dark'?'#fff':'';
+  dark.style.borderColor=APP_THEME==='dark'?'var(--accent)':'';
+  light.style.background=APP_THEME==='light'?'var(--accent)':'';
+  light.style.color=APP_THEME==='light'?'#fff':'';
+  light.style.borderColor=APP_THEME==='light'?'var(--accent)':'';
+}
+
+function applyTranslations(){
+  // Nav items
+  var navMap={
+    'nav-dashboard':'dashboard','nav-kanban':'projects','nav-tracker':'tracker',
+    'nav-expenses':'expenses','nav-gantt':'gantt','nav-invoice':'invoice',
+    'nav-invhistory':'invhistory','nav-prospecting':'prospecting',
+    'nav-templates':'templates','nav-clients':'clients','nav-settings':'settings'
+  };
+  Object.keys(navMap).forEach(function(id){
+    var navEl=el(id);
+    if(!navEl)return;
+    var svg=navEl.querySelector('svg');
+    navEl.textContent=t(navMap[id]);
+    if(svg)navEl.insertBefore(svg,navEl.firstChild);
+  });
+
+  // Page titles - update dynamically via data attributes
+  var titleMap={
+    'page-dashboard':'dashboard','page-kanban':'projects','page-tracker':'tracker',
+    'page-expenses':'expenses','page-gantt':'gantt','page-invoice':'invoice',
+    'page-invhistory':'invhistory','page-prospecting':'prospecting',
+    'page-templates':'templates','page-clients':'clients','page-settings':'settings'
+  };
+  Object.keys(titleMap).forEach(function(id){
+    var page=el(id);if(!page)return;
+    var title=page.querySelector('.page-title');
+    if(title)title.textContent=t(titleMap[id]).charAt(0).toUpperCase()+t(titleMap[id]).slice(1);
+  });
+
+  // Search form labels
+  var labelMap={
+    'label-keyword':'keyword','label-city':'city','label-country':'country',
+    'label-searchtype':'searchType','label-numresults':'numResults'
+  };
+  Object.keys(labelMap).forEach(function(id){
+    var lbl=el(id);if(lbl)lbl.textContent=t(labelMap[id]);
+  });
+
+  // Search type options
+  var typeSelect=el('pros-type');
+  if(typeSelect){
+    typeSelect.options[0].text=t('general');
+    typeSelect.options[1].text=t('contact');
+    typeSelect.options[2].text=t('maps');
+    typeSelect.options[3].text=t('jobs');
+    typeSelect.options[4].text=t('linkedin');
+  }
+
+  // Search button
+  var searchBtn=el('pros-btn');
+  if(searchBtn)searchBtn.textContent=t('search');
+
+  // Tabs
+  var tabR=el('tab-results');if(tabR)tabR.textContent=t('results');
+  var tabL=el('tab-leads');
+  if(tabL){
+    var cnt=el('leads-count');
+    var num=cnt?cnt.textContent:'0';
+    tabL.innerHTML=t('leads')+' <span id="leads-count" style="font-family:var(--mono);font-size:11px;background:var(--bg3);padding:1px 6px;border-radius:10px;margin-left:4px">'+num+'</span>';
+  }
+
+  // Theme/lang labels
+  var themeLabel=document.querySelector('[data-i18n="theme"]');
+  if(themeLabel)themeLabel.textContent=t('theme');
+  var langLabel=document.querySelector('[data-i18n="language"]');
+  if(langLabel)langLabel.textContent=t('language');
+
+  // Update email lang
+  var emailLang=el('email-lang');
+  if(emailLang)emailLang.value=APP_LANG;
+}
+
+// ─── UTILS
+function fmtD(s){var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return p2(h)+':'+p2(m)+':'+p2(sc);}
+function p2(n){return String(n).padStart(2,'0');}
+function flt(v){return parseFloat(v)||0;}
+function gv(id){var e=document.getElementById(id);return e?e.value:'';}
+function el(id){return document.getElementById(id);}
+function gp(id){return S.projects.find(function(p){return p.id==id;});}
+function gc(id){return S.clients.find(function(c){return c.id==id;});}
+function cur(){var c=gv('icur');return c==='EUR'?'EUR':c==='CHF'?'CHF':'USD';}
+function curSym(){var c=gv('icur');return c==='EUR'?'\u20AC':c==='CHF'?'Fr.':'$';}
+function tod(){return new Date().toISOString().split('T')[0];}
+function save(){try{localStorage.setItem('shopflow_v1',JSON.stringify(S));}catch(e){}}
+function load(){try{var d=localStorage.getItem('shopflow_v1');if(d){var p=JSON.parse(d);Object.keys(p).forEach(function(k){if(k in S)S[k]=p[k];});}}catch(e){}}
+function escH(str){var d=document.createElement('div');d.appendChild(document.createTextNode(String(str||'')));return d.innerHTML;}
+function showToast(id,msg,ok){var t=el(id);if(!t)return;t.className='toast '+(ok?'ok':'err');t.textContent=msg;setTimeout(function(){t.className='toast';},5000);}
+function dlCSV(rows,name){var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+
+// ─── NAV
+function showPage(p){
+  document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active');});
+  var page=el('page-'+p);var nav=el('nav-'+p);
+  if(page)page.classList.add('active');
+  if(nav)nav.classList.add('active');
+  var map={dashboard:renderDash,kanban:renderKanban,tracker:renderTracker,expenses:renderExpenses,gantt:renderGantt,
+    invoice:function(){applySettings();renderInvItems();renderInvTotals();refreshInvClientSel();},
+    invhistory:renderInvHistory,prospecting:renderProspecting,clients:renderClients,settings:loadSettings};
+  if(map[p])map[p]();
+}
+function openModal(id){el(id).classList.add('open');}
+function closeModal(id){el(id).classList.remove('open');}
+
+// ─── DASHBOARD
+function renderDash(){
+  var now=new Date();
+  el('dash-date').textContent=now.toLocaleDateString('de-AT',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var ap=S.projects.filter(function(p){return p.status<3;}).length;
+  var ts=S.timeLogs.reduce(function(a,l){return a+l.duration;},0);
+  var bil=S.timeLogs.reduce(function(a,l){var p=gp(l.projectId);return a+(p&&p.rate?p.rate*(l.duration/3600):0);},0);
+  var mon=new Date(now);mon.setDate(now.getDate()-now.getDay()+1);mon.setHours(0,0,0,0);
+  var ws=S.timeLogs.filter(function(l){return new Date(l.date)>=mon;}).reduce(function(a,l){return a+l.duration;},0);
+  var totalExp=S.expenses.reduce(function(a,e){return a+flt(e.amount);},0);
+  renderFollowups();
+  el('dash-stats').innerHTML=
+    '<div class="stat-card"><div class="stat-label">Aktivni projekti</div><div class="stat-val" style="color:var(--accent)">'+ap+'</div><div class="stat-sub">od '+S.projects.length+' ukupno</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Ukupno sati</div><div class="stat-val">'+(ts/3600).toFixed(1)+'h</div><div class="stat-sub">tjedan: '+(ws/3600).toFixed(1)+'h</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Fakturabilno</div><div class="stat-val" style="color:var(--yellow)">\u20AC'+Math.round(bil)+'</div><div class="stat-sub">prema hourly rate</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Tro\u0161kovi</div><div class="stat-val" style="color:var(--red)">\u20AC'+totalExp.toFixed(0)+'</div><div class="stat-sub">profit: \u20AC'+Math.round(bil-totalExp)+'</div></div>';
+  var active=S.projects.filter(function(p){return p.status<3;});
+  el('dash-projects').innerHTML=active.length?active.map(function(p){
+    var cl=gc(p.clientId);var h=S.timeLogs.filter(function(l){return l.projectId===p.id;}).reduce(function(a,l){return a+l.duration;},0)/3600;
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(p.title)+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+(cl?escH(cl.name):'Interno')+(h>0?' \u00b7 '+h.toFixed(1)+'h':'')+'</div></div><span class="badge" style="background:'+KB_CLR[p.status]+'20;color:'+KB_CLR[p.status]+'">'+KB_COLS[p.status]+'</span></div>';
+  }).join(''):'<div class="empty">Nema aktivnih projekata.</div>';
+  var rl=S.timeLogs.slice(-5).reverse();
+  el('dash-th').textContent=(ts/3600).toFixed(1)+'h';
+  el('dash-logs').innerHTML=rl.length?rl.map(function(l){var p=gp(l.projectId);return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:500">'+(p?escH(p.title):'&mdash;')+'</div><div style="font-size:11px;color:var(--text3)">'+(l.note||'&mdash;')+' \u00b7 '+l.date+'</div></div><span style="font-family:var(--mono);font-size:12px;color:var(--accent)">'+fmtD(l.duration)+'</span></div>';}).join(''):'<div class="empty">Pokreni timer.</div>';
+  var bp={};S.timeLogs.forEach(function(l){if(!l.projectId)return;bp[l.projectId]=(bp[l.projectId]||0)+l.duration;});
+  var rr=Object.keys(bp).map(function(pid){var p=gp(pid);var h=bp[pid]/3600;return{name:p?p.title:'&mdash;',h:h,v:p&&p.rate?p.rate*h:0};}).sort(function(a,b){return b.h-a.h;});
+  var maxH=rr.length?Math.max.apply(null,rr.map(function(r){return r.h;})):1;
+  el('dash-revenue').innerHTML=rr.length?rr.map(function(r){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+escH(r.name)+'</div><div style="margin-top:4px;height:3px;background:var(--bg3);border-radius:2px"><div style="height:100%;background:var(--accent);width:'+Math.round(r.h/maxH*100)+'%;border-radius:2px"></div></div></div><div style="text-align:right;margin-left:16px"><div style="font-family:var(--mono);font-size:13px;color:var(--yellow)">\u20AC'+Math.round(r.v)+'</div><div style="font-size:11px;color:var(--text3)">'+r.h.toFixed(1)+'h</div></div></div>';}).join(''):'<div class="empty">Nema podataka.</div>';
+  var unpaid=S.invoiceHistory.filter(function(i){return i.status!=='paid';});
+  var upTotal=unpaid.reduce(function(a,i){return a+flt(i.total);},0);
+  el('dash-unpaid-total').textContent=unpaid.length?unpaid.length+' ra\u010duna \u00b7 \u20AC'+upTotal.toFixed(0):'';
+  el('dash-invoices').innerHTML=unpaid.length?unpaid.slice(0,4).map(function(i){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(i.num)+'</div><div style="font-size:11px;color:var(--text3)">'+escH(i.client)+' \u00b7 '+i.date+'</div></div><div style="display:flex;align-items:center;gap:10px"><span style="font-family:var(--mono);font-size:13px">\u20AC'+flt(i.total).toFixed(0)+'</span><span class="inv-status '+i.status+'" onclick="cycleInvStatus(\''+i.id+'\')">'+INV_STATUSES[i.status]+'</span></div></div>';}).join(''):'<div class="empty">Nema neplacenih racuna.</div>';
+}
+
+// ─── KANBAN
+function refreshClSel(){var o='<option value="">— bez klijenta —</option>'+S.clients.map(function(c){return '<option value="'+c.id+'">'+escH(c.name)+'</option>';}).join('');el('kb-client').innerHTML=o;}
+function refreshProjSel(){var o='<option value="">— Odaberi —</option>'+S.projects.map(function(p){var cl=gc(p.clientId);return '<option value="'+p.id+'">'+escH(p.title)+(cl?' \u2014 '+escH(cl.name):'')+'</option>';}).join('');['timer-project','gt-proj','exp-project','manual-project'].forEach(function(id){var e=el(id);if(e)e.innerHTML=o;});}
+function renderKanban(){
+  refreshClSel();
+  var q=(el('kb-search').value||'').toLowerCase();
+  el('kanban-board').innerHTML=KB_COLS.map(function(col,ci){
+    var cards=S.projects.filter(function(p){return p.status===ci&&(!q||p.title.toLowerCase().includes(q)||(gc(p.clientId)?gc(p.clientId).name.toLowerCase().includes(q):false));});
+    return '<div class="kb-col"><div class="kb-col-header"><span class="kb-col-name" style="color:'+KB_CLR[ci]+'">'+col+'</span><span class="kb-col-count">'+cards.length+'</span></div><div class="kb-cards">'+
+      cards.map(function(p){var cl=gc(p.clientId);var h=S.timeLogs.filter(function(l){return l.projectId===p.id;}).reduce(function(a,l){return a+l.duration;},0)/3600;
+        return '<div class="kb-card" onclick="editProject('+p.id+')"><div class="kb-card-client">'+(cl?escH(cl.name):'Interno')+'</div><div class="kb-card-title">'+escH(p.title)+'</div><div class="kb-card-meta">'+(p.rate?'<span>\u20AC'+p.rate+'/h</span>':'')+(h>0?'<span>'+h.toFixed(1)+'h</span>':'')+(p.note?'<span>'+escH(p.note.substring(0,25))+'</span>':'')+'</div></div>';
+      }).join('')+
+      '<div class="kb-add" onclick="openKbModal('+ci+')">+ dodaj</div></div></div>';
+  }).join('');
+}
+function openKbModal(sp){el('kb-id').value='';el('kb-title').value='';el('kb-rate').value=S.settings.rate;el('kb-note').value='';el('kb-status').value=sp||0;el('kb-mtitle').textContent='Novi projekt';el('kb-del').style.display='none';refreshClSel();openModal('modal-kb');setTimeout(function(){el('kb-title').focus();},100);}
+function editProject(id){var p=gp(id);if(!p)return;el('kb-id').value=id;el('kb-title').value=p.title;el('kb-rate').value=p.rate;el('kb-note').value=p.note||'';el('kb-status').value=p.status;el('kb-mtitle').textContent='Uredi projekt';el('kb-del').style.display='inline-flex';refreshClSel();el('kb-client').value=p.clientId||'';openModal('modal-kb');}
+function saveProject(){var eid=el('kb-id').value;var d={title:el('kb-title').value||'Projekt',clientId:parseInt(el('kb-client').value)||null,rate:flt(el('kb-rate').value),status:parseInt(el('kb-status').value),note:el('kb-note').value};if(eid){Object.assign(gp(eid),d);}else{S.projects.push(Object.assign({id:S.nextId++},d));}save();closeModal('modal-kb');renderKanban();refreshProjSel();}
+function deleteProject(){if(!confirm('Obrisati projekt?'))return;S.projects=S.projects.filter(function(p){return p.id!=el('kb-id').value;});save();closeModal('modal-kb');renderKanban();refreshProjSel();}
+
+// ─── TRACKER
+function toggleTimer(){
+  var t=S.timer;
+  if(!t.running){
+    t.start=Date.now();t.running=true;el('timer-display').classList.add('running');el('timer-btn').className='btn btn-timer running';el('timer-btn').innerHTML='&#9632;';
+    t.interval=setInterval(function(){el('timer-display').textContent=fmtD(Math.floor((Date.now()-t.start)/1000));},1000);
+  }else{
+    var dur=Math.floor((Date.now()-t.start)/1000);clearInterval(t.interval);t.running=false;
+    el('timer-display').classList.remove('running');el('timer-btn').className='btn btn-timer stopped';el('timer-btn').innerHTML='&#9654;';el('timer-display').textContent='00:00:00';
+    if(dur>5){S.timeLogs.push({id:S.nextId++,projectId:parseInt(el('timer-project').value)||null,note:el('timer-note').value,duration:dur,date:tod(),manual:false});el('timer-note').value='';save();renderTracker();}
+  }
+}
+function openManualEntry(){el('manual-id').value='';el('manual-note').value='';el('manual-h').value=0;el('manual-m').value=0;el('manual-date').value=tod();el('manual-title').textContent='Rucni unos vremena';el('manual-del').style.display='none';refreshProjSel();updateManualPreview();openModal('modal-manual');setTimeout(function(){el('manual-note').focus();},100);}
+function editManualLog(id){var l=S.timeLogs.find(function(l){return l.id===id;});if(!l)return;el('manual-id').value=id;el('manual-note').value=l.note||'';el('manual-h').value=Math.floor(l.duration/3600);el('manual-m').value=Math.floor((l.duration%3600)/60);el('manual-date').value=l.date;el('manual-title').textContent='Uredi unos';el('manual-del').style.display='inline-flex';refreshProjSel();el('manual-project').value=l.projectId||'';updateManualPreview();openModal('modal-manual');}
+function updateManualPreview(){var s=flt(el('manual-h').value)*3600+flt(el('manual-m').value)*60;el('manual-preview').textContent=fmtD(s);}
+function saveManualEntry(){var dur=flt(el('manual-h').value)*3600+flt(el('manual-m').value)*60;if(dur<=0){alert('Unesi trajanje.');return;}var eid=el('manual-id').value;var d={projectId:parseInt(el('manual-project').value)||null,note:el('manual-note').value,duration:dur,date:el('manual-date').value||tod(),manual:true};if(eid){Object.assign(S.timeLogs.find(function(l){return l.id==eid;}),d);}else{S.timeLogs.push(Object.assign({id:S.nextId++},d));}save();closeModal('modal-manual');renderTracker();}
+function deleteManualLog(){S.timeLogs=S.timeLogs.filter(function(l){return l.id!=el('manual-id').value;});save();closeModal('modal-manual');renderTracker();}
+function deleteLog(id){S.timeLogs=S.timeLogs.filter(function(l){return l.id!==id;});save();renderTracker();}
+function clearLogs(){if(!confirm('Obrisati sve zapise?'))return;S.timeLogs=[];save();renderTracker();}
+function exportLogs(){var rows=[['Projekt','Klijent','Opis','Datum','Sati','Vrijednost (EUR)','Tip']];S.timeLogs.forEach(function(l){var p=gp(l.projectId);var cl=p?gc(p.clientId):null;var h=l.duration/3600;var v=p&&p.rate?p.rate*h:0;rows.push([p?p.title:'',cl?cl.name:'',l.note||'',l.date,h.toFixed(2),v.toFixed(2),l.manual?'rucno':'timer']);});dlCSV(rows,'time_logs.csv');}
+function renderTracker(){
+  refreshProjSel();
+  var tot=S.timeLogs.reduce(function(a,l){return a+l.duration;},0);
+  var val=S.timeLogs.reduce(function(a,l){var p=gp(l.projectId);return a+(p&&p.rate?p.rate*(l.duration/3600):0);},0);
+  el('tt-h').textContent=(tot/3600).toFixed(2)+'h';el('tt-eur').textContent='\u20AC'+Math.round(val);
+  var tb=el('log-body');
+  if(!S.timeLogs.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nema zapisa. Pokreni timer.</td></tr>';return;}
+  tb.innerHTML=S.timeLogs.slice().reverse().map(function(l){var p=gp(l.projectId);var v=p&&p.rate?p.rate*(l.duration/3600):0;
+    return '<tr onclick="editManualLog('+l.id+')" style="cursor:pointer"><td><div style="display:flex;align-items:center;gap:6px">'+(p?'<span class="badge" style="background:'+KB_CLR[p.status]+'15;color:'+KB_CLR[p.status]+'">'+escH(p.title)+'</span>':'<span style="color:var(--text3)">&mdash;</span>')+(l.manual?'<span style="font-size:10px;color:var(--text3);background:var(--bg3);padding:1px 5px;border-radius:4px">rucno</span>':'')+'</div></td><td style="color:var(--text3);font-size:12px">'+(l.note||'&mdash;')+'</td><td style="color:var(--text3);font-size:12px;font-family:var(--mono)">'+l.date+'</td><td style="font-family:var(--mono);font-weight:500;color:var(--text)">'+fmtD(l.duration)+'</td><td style="font-family:var(--mono);font-size:12px;color:'+(v>0?'var(--yellow)':'var(--text3)')+'">'+(v>0?'\u20AC'+v.toFixed(2):'&mdash;')+'</td><td onclick="event.stopPropagation()"><button class="btn btn-xs btn-danger" onclick="deleteLog('+l.id+')">x</button></td></tr>';
+  }).join('');
+}
+
+// ─── EXPENSES
+function openExpenseModal(id){
+  if(id){var e=S.expenses.find(function(e){return e.id===id;});if(!e)return;el('exp-id').value=id;el('exp-desc').value=e.desc;el('exp-amount').value=e.amount;el('exp-date').value=e.date;el('exp-note').value=e.note||'';el('exp-cat').value=e.cat;el('exp-mtitle').textContent='Uredi trosak';el('exp-del').style.display='inline-flex';refreshProjSel();el('exp-project').value=e.projectId||'';}
+  else{el('exp-id').value='';el('exp-desc').value='';el('exp-amount').value='';el('exp-date').value=tod();el('exp-note').value='';el('exp-cat').value='gorivo';el('exp-mtitle').textContent='Novi trosak';el('exp-del').style.display='none';refreshProjSel();}
+  openModal('modal-expense');setTimeout(function(){el('exp-desc').focus();},100);
+}
+function saveExpense(){var eid=el('exp-id').value;var d={desc:el('exp-desc').value||'Trosak',projectId:parseInt(el('exp-project').value)||null,cat:el('exp-cat').value,amount:flt(el('exp-amount').value),date:el('exp-date').value||tod(),note:el('exp-note').value};if(eid){Object.assign(S.expenses.find(function(e){return e.id==eid;}),d);}else{S.expenses.push(Object.assign({id:S.nextId++},d));}save();closeModal('modal-expense');renderExpenses();}
+function deleteExpense(){S.expenses=S.expenses.filter(function(e){return e.id!=el('exp-id').value;});save();closeModal('modal-expense');renderExpenses();}
+function exportExpenses(){var rows=[['Opis','Projekt','Kategorija','Datum','Iznos (EUR)']];S.expenses.forEach(function(e){var p=gp(e.projectId);rows.push([e.desc,p?p.title:'',e.cat,e.date,flt(e.amount).toFixed(2)]);});dlCSV(rows,'expenses.csv');}
+function renderExpenses(){
+  refreshProjSel();
+  var fp=el('exp-filter-proj').value;var fc=el('exp-filter-cat').value;
+  var pOpts='<option value="">Svi projekti</option>'+S.projects.map(function(p){return '<option value="'+p.id+'"'+(fp==p.id?' selected':'')+'>'+escH(p.title)+'</option>';}).join('');
+  el('exp-filter-proj').innerHTML=pOpts;
+  var filtered=S.expenses.filter(function(e){return(!fp||e.projectId==fp)&&(!fc||e.cat===fc);});
+  var byCat={};S.expenses.forEach(function(e){byCat[e.cat]=(byCat[e.cat]||0)+flt(e.amount);});
+  el('exp-stats').innerHTML=[
+    {l:'Ukupni tro\u0161kovi',v:'\u20AC'+S.expenses.reduce(function(a,e){return a+flt(e.amount);},0).toFixed(0),c:'var(--red)',s:S.expenses.length+' stavki'},
+    {l:'Gorivo',v:'\u20AC'+(byCat.gorivo||0).toFixed(0),c:'var(--yellow)',s:''},
+    {l:'Softver',v:'\u20AC'+(byCat.softver||0).toFixed(0),c:'var(--purple)',s:''},
+    {l:'Ostalo',v:'\u20AC'+((byCat.materijal||0)+(byCat.putovanje||0)+(byCat.ostalo||0)).toFixed(0),c:'var(--text2)',s:''}
+  ].map(function(s){return '<div class="stat-card"><div class="stat-label">'+s.l+'</div><div class="stat-val" style="color:'+s.c+'">'+s.v+'</div><div class="stat-sub">'+s.s+'</div></div>';}).join('');
+  var tb=el('exp-body');
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nema tro\u0161kova.</td></tr>';return;}
+  tb.innerHTML=filtered.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(e){var p=gp(e.projectId);
+    return '<tr onclick="openExpenseModal('+e.id+')" style="cursor:pointer"><td style="font-weight:500;color:var(--text)">'+escH(e.desc)+'</td><td style="font-size:12px;color:var(--text3)">'+(p?escH(p.title):'&mdash;')+'</td><td><span class="exp-cat '+e.cat+'">'+e.cat+'</span></td><td style="font-size:12px;color:var(--text3);font-family:var(--mono)">'+e.date+'</td><td style="font-family:var(--mono);font-weight:500;color:var(--red)">\u20AC'+flt(e.amount).toFixed(2)+'</td><td onclick="event.stopPropagation()"><button class="btn btn-xs btn-danger" onclick="S.expenses=S.expenses.filter(function(x){return x.id!=='+e.id+'});save();renderExpenses()">x</button></td></tr>';
+  }).join('');
+}
+
+// ─── GANTT
+function renderGantt(){
+  refreshProjSel();var tb=el('gantt-body');
+  if(!S.ganttTasks.length){tb.innerHTML='<tr><td colspan="7" class="empty">Nema zadataka.</td></tr>';return;}
+  var ad=S.ganttTasks.reduce(function(a,t){a.push(new Date(t.start));a.push(new Date(t.end));return a;},[]);
+  var minD=new Date(Math.min.apply(null,ad)),maxD=new Date(Math.max.apply(null,ad));
+  var now=new Date();if(now>minD&&now<maxD)maxD.setDate(maxD.getDate()+3);
+  var range=Math.max(1,(maxD-minD)/86400000);
+  var tp=Math.max(0,Math.min(100,((now-minD)/86400000/range)*100));
+  var SB={active:'var(--accent)',done:'var(--text3)',late:'var(--red)'};
+  var SBG={active:'var(--accent-dim)',done:'#8b949e20',late:'var(--red-dim)'};
+  var SL={active:'U tijeku',done:'Zavrseno',late:'Kasni'};
+  tb.innerHTML=S.ganttTasks.map(function(t){var p=gp(t.projectId);var s=new Date(t.start),e=new Date(t.end);var l=Math.max(0,((s-minD)/86400000/range)*100),w=Math.max(1,((e-s)/86400000/range)*100);
+    return '<tr><td style="font-size:13px;font-weight:500">'+escH(t.title)+'</td><td style="font-size:12px;color:var(--text3)">'+(p?escH(p.title):'&mdash;')+'</td><td style="font-size:11px;color:var(--text3);font-family:var(--mono)">'+t.start+'</td><td style="font-size:11px;color:var(--text3);font-family:var(--mono)">'+t.end+'</td><td><span class="badge" style="background:'+SBG[t.status]+';color:'+SB[t.status]+'">'+SL[t.status]+'</span></td><td class="gantt-bar-cell"><div class="gantt-bg"></div><div class="gantt-bar '+t.status+'" style="left:'+l.toFixed(1)+'%;width:'+w.toFixed(1)+'%"></div><div class="gantt-today" style="left:'+tp.toFixed(1)+'%"></div></td><td><button class="btn btn-xs btn-danger" onclick="delGantt('+t.id+')">x</button></td></tr>';
+  }).join('');
+}
+function openGanttModal(){el('gt-title').value='';el('gt-start').value=tod();el('gt-end').value='';el('gt-status').value='active';refreshProjSel();openModal('modal-gantt');setTimeout(function(){el('gt-title').focus();},100);}
+function saveGanttTask(){S.ganttTasks.push({id:S.nextId++,title:el('gt-title').value||'Zadatak',projectId:parseInt(el('gt-proj').value)||null,start:el('gt-start').value,end:el('gt-end').value||el('gt-start').value,status:el('gt-status').value});save();closeModal('modal-gantt');renderGantt();}
+function delGantt(id){S.ganttTasks=S.ganttTasks.filter(function(t){return t.id!==id;});save();renderGantt();}
+
+// ─── INVOICE
+function applySettings(){var ss=S.settings;el('ifn').value=ss.name||'';el('ifa').value=ss.addr||'';el('ife').value=ss.email||'';el('ifu').value=ss.uid||'';el('ifib').value=ss.iban||'';el('ifbic').value=ss.bic||'';if(!el('inote').value)el('inote').value=ss.note||'';}
+function refreshInvClientSel(){var o='<option value="">Popuni iz klijenta...</option>'+S.clients.map(function(c){return '<option value="'+c.id+'">'+escH(c.name)+'</option>';}).join('');el('inv-client-sel').innerHTML=o;}
+function fillClientFromSel(){var c=gc(el('inv-client-sel').value);if(!c)return;el('itn').value=c.name;el('ita').value=c.addr||'';el('ite').value=c.email||'';el('itu').value=c.uid||'';el('inv-client-sel').value='';}
+function addInvRow(desc,qty,price,vat){desc=desc||'';qty=qty||1;price=price!=null?price:(S.settings.rate||75);vat=vat!=null?vat:(S.settings.vat||20);S.invItems.push({id:S.invItemId++,desc:desc,qty:qty,price:price,vat:vat});renderInvItems();renderInvTotals();}
+function remInv(id){S.invItems=S.invItems.filter(function(i){return i.id!==id;});renderInvItems();renderInvTotals();}
+function updInv(id,f,v){var i=S.invItems.find(function(i){return i.id===id;});if(i){i[f]=v;renderInvTotals();}}
+function renderInvItems(){el('inv-body').innerHTML=S.invItems.map(function(i){return '<tr><td><input value="'+escH(i.desc)+'" placeholder="Opis rada" oninput="updInv('+i.id+',\'desc\',this.value)"></td><td><input type="number" value="'+i.qty+'" step="0.5" oninput="updInv('+i.id+',\'qty\',this.value)" style="text-align:center"></td><td><input type="number" value="'+i.price+'" step="0.5" oninput="updInv('+i.id+',\'price\',this.value)" style="text-align:right"></td><td><input type="number" value="'+i.vat+'" step="1" min="0" max="100" oninput="updInv('+i.id+',\'vat\',this.value)" style="text-align:center"></td><td style="text-align:right;font-family:var(--mono);font-size:13px;padding:6px 8px" id="ia'+i.id+'">0.00</td><td><button class="btn btn-xs btn-danger" onclick="remInv('+i.id+')">x</button></td></tr>';}).join('');}
+function renderInvTotals(){var c=curSym();var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;var e=el('ia'+i.id);if(e)e.textContent=(n+v).toFixed(2);});el('inv-totals').innerHTML='<div class="trow"><span class="tl">Neto:</span><span class="ta">'+c+' '+sub.toFixed(2)+'</span></div><div class="trow"><span class="tl">PDV:</span><span class="ta">'+c+' '+tv.toFixed(2)+'</span></div><div class="tdiv"></div><div class="trow grand"><span class="tl">Ukupno:</span><span class="ta" style="color:var(--accent)">'+c+' '+(sub+tv).toFixed(2)+'</span></div>';}
+function getInvTotals(){var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;});return{sub:sub,tv:tv,grand:sub+tv};}
+function importHours(){var bp={};S.timeLogs.forEach(function(l){if(!l.projectId)return;bp[l.projectId]=(bp[l.projectId]||0)+l.duration;});var e=Object.keys(bp);if(!e.length){showToast('inv-toast','Nema pracenih sati za uvoz.',false);return;}e.forEach(function(pid){var p=gp(pid);if(!p)return;var cl=gc(p.clientId);addInvRow(p.title+(cl?' - '+cl.name:''),parseFloat((bp[pid]/3600).toFixed(2)),p.rate||S.settings.rate||75,S.settings.vat||20);});showToast('inv-toast','Uvezeno '+e.length+' projekt(a).',true);}
+
+// ─── PAY OPTIONS
+document.addEventListener('DOMContentLoaded',function(){
+  el('pay-paypal').addEventListener('change',function(){el('pay-paypal-row').style.display=this.checked?'block':'none';updatePayEmpty();});
+  el('pay-revolut').addEventListener('change',function(){el('pay-revolut-row').style.display=this.checked?'block':'none';updatePayEmpty();});
+  el('pay-sepa').addEventListener('change',function(){updatePayEmpty();});
+});
+function updatePayEmpty(){var any=el('pay-sepa').checked||el('pay-paypal').checked||el('pay-revolut').checked;el('pay-empty').style.display=any?'none':'block';}
+function getPayOpts(){return{sepa:el('pay-sepa').checked&&!!gv('ifib'),paypal:el('pay-paypal').checked?gv('pay-paypal-val'):'',revolut:el('pay-revolut').checked?gv('pay-revolut-val'):''};}
+
+// ─── INVOICE PREVIEW
+function previewInvoice(){
+  var lang=gv('inv-lang');var L=L10N[lang]||L10N.en;var c=curSym();var t=getInvTotals();
+  var rows=S.invItems.map(function(i,idx){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;var bg=idx%2===0?'#fff':'#f7fbf9';
+    return '<tr style="background:'+bg+'"><td style="padding:12px 14px;font-size:13px;color:#111;border-bottom:1px solid #e8f0ed;font-weight:500">'+escH(i.desc||'&mdash;')+'</td><td style="padding:12px 8px;text-align:center;font-size:13px;color:#333;border-bottom:1px solid #e8f0ed">'+flt(i.qty)+'</td><td style="padding:12px 8px;text-align:right;font-size:13px;color:#333;border-bottom:1px solid #e8f0ed">'+c+' '+flt(i.price).toFixed(2)+'</td><td style="padding:12px 8px;text-align:center;font-size:13px;color:#555;border-bottom:1px solid #e8f0ed">'+flt(i.vat)+'%</td><td style="padding:12px 14px;text-align:right;font-size:13px;color:#111;border-bottom:1px solid #e8f0ed;font-weight:700">'+c+' '+(n+v).toFixed(2)+'</td></tr>';
+  }).join('');
+  var pay=getPayOpts();var payHtml='';
+  if(gv('ifib')||pay.paypal||pay.revolut){
+    payHtml='<div style="background:#f0faf5;border:1px solid #c6e9d8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:10px;font-weight:700;color:#0F6E56;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">'+L.pay+'</div>';
+    if(gv('ifib'))payHtml+='<div style="font-size:12px;color:#555;margin-bottom:3px;font-weight:600">'+L.iban+'</div><div style="font-size:13px;color:#111;font-weight:700;margin-bottom:8px">'+escH(gv('ifib'))+'</div>';
+    if(gv('ifbic'))payHtml+='<div style="font-size:12px;color:#555;margin-bottom:3px;font-weight:600">'+L.bic+'</div><div style="font-size:13px;color:#111;margin-bottom:8px">'+escH(gv('ifbic'))+'</div>';
+    if(pay.paypal)payHtml+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="background:#003087;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px">PayPal</div><div style="font-size:12px;color:#333">'+escH(pay.paypal)+'</div></div>';
+    if(pay.revolut)payHtml+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="background:#191c1f;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px">Revolut</div><div style="font-size:12px;color:#333">'+escH(pay.revolut)+'</div></div>';
+    payHtml+='</div>';
+  }
+  el('inv-preview-content').innerHTML='<div style="padding:40px 48px;font-family:Arial,sans-serif;background:#fff;color:#111"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px"><div><div style="font-size:38px;font-weight:900;color:#111;letter-spacing:-1.5px;margin-bottom:14px">'+L.invoice+'</div><div style="font-size:13px;color:#555;line-height:1.9">'+L.num+': <strong style="color:#111">'+escH(gv('inum'))+'</strong><br>'+L.date+': '+gv('idate')+(gv('idue')?'<br>'+L.due+': '+gv('idue'):'')+'</div></div><div style="text-align:right"><div style="font-size:17px;font-weight:700;color:#1D9E75;margin-bottom:6px">'+escH(gv('ifn'))+'</div><div style="font-size:12px;color:#666;line-height:1.9">'+escH(gv('ifa'))+'<br>'+escH(gv('ife'))+(gv('ifu')?'<br>UID: '+escH(gv('ifu')):'')+'</div></div></div><div style="background:#f8f9fa;border-left:4px solid #1D9E75;padding:18px 22px;margin-bottom:28px;border-radius:0 6px 6px 0"><div style="font-size:10px;font-weight:700;color:#aaa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">'+L.to+'</div><div style="font-size:17px;font-weight:700;color:#111;margin-bottom:5px">'+(gv('itn')||'&mdash;')+'</div><div style="font-size:13px;color:#444;line-height:1.8">'+escH(gv('ita'))+(gv('ite')?'<br>'+escH(gv('ite')):'')+(gv('itu')?'<br>UID: '+escH(gv('itu')):'')+'</div></div><table style="width:100%;border-collapse:collapse;border:1px solid #ddeedd;border-radius:6px;overflow:hidden"><thead><tr style="background:#1D9E75"><th style="padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase">'+L.desc+'</th><th style="padding:11px 8px;text-align:center;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;width:8%">'+L.qty+'</th><th style="padding:11px 8px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;width:14%">'+L.price+'</th><th style="padding:11px 8px;text-align:center;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;width:8%">'+L.vat+'</th><th style="padding:11px 14px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;width:14%">'+L.amount+'</th></tr>'+rows+'</table><div style="display:flex;justify-content:flex-end;margin:16px 0 24px"><div style="min-width:240px;background:#f8f9fa;border:1px solid #ddeedd;border-radius:6px;padding:14px 18px"><div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:#555"><span>'+L.sub+':</span><span>'+c+' '+t.sub.toFixed(2)+'</span></div><div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:#555"><span>'+L.vatl+':</span><span>'+c+' '+t.tv.toFixed(2)+'</span></div><div style="border-top:2px solid #1D9E75;margin:8px 0"></div><div style="display:flex;justify-content:space-between;padding:5px 0;font-size:17px;font-weight:700"><span>'+L.total+':</span><span style="color:#1D9E75">'+c+' '+t.grand.toFixed(2)+'</span></div></div></div>'+payHtml+(gv('inote')?'<div style="font-size:11px;color:#888;font-style:italic;padding-top:12px;border-top:1px solid #eee;margin-bottom:8px">'+escH(gv('inote'))+'</div>':'')+'<div style="text-align:center;font-size:10px;color:#ccc;margin-top:28px;padding-top:14px;border-top:1px solid #f0f0f0">'+escH(gv('ifn'))+' &middot; '+escH(gv('ifa'))+'</div></div>';
+  openModal('modal-preview');
+}
+
+// ─── PDF
+function generatePDF(){
+  if(!jsPDF){showToast('inv-toast','jsPDF nije ucitan.',false);return;}
+  var lang=gv('inv-lang');var L=L10N[lang]||L10N.en;var c=curSym();var t=getInvTotals();var pay=getPayOpts();
+  var doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+  var ML=20,MR=190,PW=170;var y=20;
+  doc.setFont('helvetica','bold');doc.setFontSize(28);doc.setTextColor(30,30,35);doc.text(L.invoice,ML,y);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(100,105,115);
+  doc.text(L.num+': '+gv('inum'),ML,y+9);doc.text(L.date+': '+gv('idate'),ML,y+14);
+  if(gv('idue'))doc.text(L.due+': '+gv('idue'),ML,y+19);
+  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(29,158,117);doc.text(gv('ifn'),MR,y,{align:'right'});
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(90,95,105);
+  var ry=y+7;[gv('ifa'),gv('ife'),gv('ifu')?'UID: '+gv('ifu'):''].filter(Boolean).forEach(function(l){doc.text(l,MR,ry,{align:'right'});ry+=5;});
+  y=46;doc.setDrawColor(220,225,230);doc.setLineWidth(.3);doc.line(ML,y,MR,y);
+  y=52;doc.setFillColor(248,249,250);doc.roundedRect(ML,y,PW*.57,34,2,2,'F');
+  doc.setDrawColor(29,158,117);doc.setLineWidth(2.5);doc.line(ML,y,ML,y+34);doc.setLineWidth(.3);doc.setDrawColor(220,225,230);
+  doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(150,155,165);doc.text(L.to,ML+6,y+7);
+  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(30,30,35);doc.text(gv('itn')||'',ML+6,y+15);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(80,85,95);
+  var by=y+21;[gv('ita'),gv('ite'),gv('itu')?'UID: '+gv('itu'):''].filter(Boolean).forEach(function(l){if(by<y+36){doc.text(l,ML+6,by);by+=5.5;}});
+  y=97;doc.setFillColor(29,158,117);doc.rect(ML,y,PW,9,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(255,255,255);
+  doc.text(L.desc,ML+4,y+6);doc.text(L.qty,ML+103,y+6,{align:'right'});doc.text(L.price,ML+127,y+6,{align:'right'});doc.text(L.vat,ML+144,y+6,{align:'right'});doc.text(L.amount,MR-4,y+6,{align:'right'});
+  y+=11;var rSub=0,rTv=0;
+  S.invItems.forEach(function(item,idx){
+    var net=flt(item.qty)*flt(item.price);var vat=net*flt(item.vat)/100;rSub+=net;rTv+=vat;
+    var lines=doc.splitTextToSize(item.desc||'',74);var rowH=Math.max(9,lines.length*5.5+4);
+    if(idx%2===0){doc.setFillColor(247,252,249);}else{doc.setFillColor(255,255,255);}
+    doc.rect(ML,y-3,PW,rowH,'F');
+    doc.setDrawColor(210,230,220);doc.setLineWidth(.3);doc.line(ML,y-3+rowH,MR,y-3+rowH);
+    doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(25,30,35);doc.text(lines,ML+4,y+.5);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(55,65,75);
+    doc.text(String(flt(item.qty)),ML+103,y+.5,{align:'right'});doc.text(c+' '+flt(item.price).toFixed(2),ML+127,y+.5,{align:'right'});doc.text(flt(item.vat)+'%',ML+144,y+.5,{align:'right'});
+    doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(15,80,55);doc.text(c+' '+(net+vat).toFixed(2),MR-4,y+.5,{align:'right'});
+    y+=rowH;
+  });
+  y+=5;doc.setDrawColor(180,210,195);doc.setLineWidth(.8);doc.line(MR-70,y,MR,y);y+=7;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(100,110,120);
+  doc.text(L.sub+':',MR-60,y);doc.text(c+' '+rSub.toFixed(2),MR-4,y,{align:'right'});y+=6;
+  doc.text(L.vatl+':',MR-60,y);doc.text(c+' '+rTv.toFixed(2),MR-4,y,{align:'right'});y+=4;
+  doc.setDrawColor(29,158,117);doc.setLineWidth(1.2);doc.line(MR-70,y,MR,y);doc.setLineWidth(.3);y+=8;
+  doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(29,158,117);
+  doc.text(L.total+':',MR-60,y);doc.text(c+' '+t.grand.toFixed(2),MR-4,y,{align:'right'});
+  if(gv('ifib')||pay.paypal||pay.revolut){
+    y+=14;var payH=pay.paypal||pay.revolut?22:14;
+    doc.setFillColor(240,250,245);doc.roundedRect(ML,y,PW,payH,2,2,'F');doc.setDrawColor(180,220,200);doc.setLineWidth(.5);doc.roundedRect(ML,y,PW,payH,2,2,'S');
+    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(15,110,86);doc.text(L.pay.toUpperCase(),ML+4,y+5);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,35,40);
+    if(gv('ifib')){doc.setFont('helvetica','bold');doc.text(L.iban+': ',ML+4,y+11,{continued:true});doc.setFont('helvetica','normal');doc.text(gv('ifib'),{});}
+    var py=y+18;
+    if(pay.paypal){doc.setFillColor(0,48,135);doc.roundedRect(ML+4,py-4,18,5,1,1,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(255,255,255);doc.text('PayPal',ML+5.5,py-.5);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(40,45,55);doc.text(pay.paypal,ML+25,py-.5);}
+    if(pay.revolut){doc.setFillColor(25,28,31);doc.roundedRect(ML+(pay.paypal?85:4),py-4,18,5,1,1,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(255,255,255);doc.text('Revolut',ML+(pay.paypal?86.5:5.5),py-.5);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(40,45,55);doc.text(pay.revolut,ML+(pay.paypal?106:25),py-.5);}
+    y+=payH+4;
+  }
+  if(gv('inote')){y+=5;doc.setFont('helvetica','italic');doc.setFontSize(8);doc.setTextColor(130,135,145);doc.text(doc.splitTextToSize(gv('inote'),PW),ML,y);}
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(180,185,195);doc.line(ML,285,MR,285);doc.text(gv('ifn')+' \u00b7 '+gv('ifa'),105,290,{align:'center'});
+  try{var blob=doc.output('blob');var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='invoice_'+(gv('inum')||'draft')+'.pdf';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},3000);closeModal('modal-preview');showToast('inv-toast','PDF downloadan!',true);}catch(e){showToast('inv-toast','Greska: '+e.message,false);}
+}
+
+// ─── INVOICE HISTORY
+function saveCurrentInvoice(){
+  if(!S.invItems.length){showToast('inv-toast','Nema stavki.',false);showPage('invoice');return;}
+  var t=getInvTotals();
+  S.invoiceHistory.push({id:'INV-'+S.nextId++,num:gv('inum'),client:gv('itn')||'',date:gv('idate'),due:gv('idue'),total:t.grand,lang:gv('inv-lang'),currency:gv('icur'),status:'draft',
+    from:{name:gv('ifn'),addr:gv('ifa'),email:gv('ife'),uid:gv('ifu'),iban:gv('ifib'),bic:gv('ifbic')},
+    to:{name:gv('itn'),addr:gv('ita'),email:gv('ite'),uid:gv('itu')},
+    items:JSON.parse(JSON.stringify(S.invItems)),note:gv('inote')});
+  save();showToast('inv-toast','Racun '+gv('inum')+' spremljen.',true);showPage('invhistory');
+}
+function cycleInvStatus(id){var inv=S.invoiceHistory.find(function(i){return i.id===id;});if(!inv)return;var cycle={draft:'sent',sent:'paid',paid:'overdue',overdue:'draft'};inv.status=cycle[inv.status]||'draft';save();renderInvHistory();renderDash();}
+function renderInvHistory(){
+  var filter=el('invh-filter').value;
+  var filtered=filter?S.invoiceHistory.filter(function(i){return i.status===filter;}):S.invoiceHistory;
+  var total=filtered.reduce(function(a,i){return a+flt(i.total);},0);
+  var paid=filtered.filter(function(i){return i.status==='paid';}).reduce(function(a,i){return a+flt(i.total);},0);
+  var pending=filtered.filter(function(i){return i.status==='sent';}).reduce(function(a,i){return a+flt(i.total);},0);
+  var overdue=filtered.filter(function(i){return i.status==='overdue';}).reduce(function(a,i){return a+flt(i.total);},0);
+  el('invh-stats').innerHTML=
+    '<div class="stat-card"><div class="stat-label">Ukupno racuna</div><div class="stat-val">'+filtered.length+'</div><div class="stat-sub">\u20AC'+total.toFixed(0)+' ukupno</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Placeno</div><div class="stat-val" style="color:var(--accent)">\u20AC'+paid.toFixed(0)+'</div><div class="stat-sub">'+filtered.filter(function(i){return i.status==='paid';}).length+' racuna</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Ceka uplatu</div><div class="stat-val" style="color:var(--yellow)">\u20AC'+pending.toFixed(0)+'</div><div class="stat-sub">'+filtered.filter(function(i){return i.status==='sent';}).length+' racuna</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Kasni</div><div class="stat-val" style="color:var(--red)">\u20AC'+overdue.toFixed(0)+'</div><div class="stat-sub">'+filtered.filter(function(i){return i.status==='overdue';}).length+' racuna</div></div>';
+  var tb=el('invh-body');
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="7" class="empty">Nema racuna.</td></tr>';return;}
+  tb.innerHTML=filtered.slice().reverse().map(function(i){
+    return '<tr style="cursor:pointer" onclick="openInvDetail(\''+i.id+'\')"><td style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)">'+escH(i.num)+'</td><td style="font-size:13px;color:var(--text)">'+escH(i.client)+'</td><td style="font-size:12px;color:var(--text3);font-family:var(--mono)">'+i.date+'</td><td style="font-size:12px;color:var(--text3);font-family:var(--mono)">'+(i.due||'&mdash;')+'</td><td style="font-family:var(--mono);font-weight:500;color:var(--text)">\u20AC'+flt(i.total).toFixed(2)+'</td><td onclick="event.stopPropagation()"><span class="inv-status '+i.status+'" onclick="cycleInvStatus(\''+i.id+'\')" title="Klikni za promjenu">'+INV_STATUSES[i.status]+'</span></td><td onclick="event.stopPropagation()"><button class="btn btn-xs btn-danger" onclick="S.invoiceHistory=S.invoiceHistory.filter(function(x){return x.id!==\''+i.id+'\';});save();renderInvHistory()">x</button></td></tr>';
+  }).join('');
+}
+function openInvDetail(id){var inv=S.invoiceHistory.find(function(i){return i.id===id;});if(!inv)return;currentHistoryInv=inv;
+  el('invh-detail').innerHTML='<div style="padding:4px 0 16px"><div style="display:flex;justify-content:space-between;margin-bottom:14px"><div><div style="font-size:18px;font-weight:600">'+escH(inv.num)+'</div><div style="font-size:12px;color:var(--text3);margin-top:3px">'+inv.date+' \u00b7 '+escH(inv.client)+'</div></div><span class="inv-status '+inv.status+'" onclick="cycleInvStatus(\''+inv.id+'\')">'+INV_STATUSES[inv.status]+'</span></div><table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:6px 0;color:var(--text3)">Opis</th><th style="text-align:right;padding:6px;color:var(--text3)">Sati</th><th style="text-align:right;padding:6px;color:var(--text3)">Cijena</th><th style="text-align:right;padding:6px 0;color:var(--text3)">Iznos</th></tr></thead><tbody>'+inv.items.map(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;return '<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text)">'+escH(i.desc)+'</td><td style="text-align:right;padding:8px 6px;font-family:var(--mono);color:var(--text2)">'+flt(i.qty)+'</td><td style="text-align:right;padding:8px 6px;font-family:var(--mono);color:var(--text2)">\u20AC'+flt(i.price).toFixed(2)+'</td><td style="text-align:right;padding:8px 0;font-family:var(--mono);font-weight:500;color:var(--text)">\u20AC'+(n+v).toFixed(2)+'</td></tr>';}).join('')+'</tbody></table><div style="text-align:right;font-size:14px;font-weight:600;color:var(--accent)">Ukupno: \u20AC'+flt(inv.total).toFixed(2)+'</div></div>';
+  openModal('modal-invh');
+}
+function recurringFromSaved(){if(!currentHistoryInv)return;var inv=currentHistoryInv;S.invItems=JSON.parse(JSON.stringify(inv.items));S.invItemId=inv.items.length;var parts=inv.num.split('-');var last=parseInt(parts[parts.length-1])||0;parts[parts.length-1]=String(last+1).padStart(parts[parts.length-1].length,'0');closeModal('modal-invh');showPage('invoice');setTimeout(function(){el('inum').value=parts.join('-');el('itn').value=inv.to&&inv.to.name?inv.to.name:'';el('ita').value=inv.to&&inv.to.addr?inv.to.addr:'';el('ite').value=inv.to&&inv.to.email?inv.to.email:'';el('itu').value=inv.to&&inv.to.uid?inv.to.uid:'';el('idate').value=tod();var d=new Date();d.setDate(d.getDate()+30);el('idue').value=d.toISOString().split('T')[0];el('icur').value=inv.currency||'EUR';el('inv-lang').value=inv.lang||'de';el('inote').value=inv.note||'';renderInvItems();renderInvTotals();showToast('inv-toast','Novi racun kreiran iz '+inv.num+'.',true);},100);}
+function regenPDF(){if(currentHistoryInv){var inv=currentHistoryInv;S.invItems=JSON.parse(JSON.stringify(inv.items));S.invItemId=inv.items.length;el('inum').value=inv.num;el('idate').value=inv.date;el('idue').value=inv.due||'';el('icur').value=inv.currency||'EUR';el('inv-lang').value=inv.lang||'de';el('ifn').value=inv.from&&inv.from.name?inv.from.name:'';el('ifa').value=inv.from&&inv.from.addr?inv.from.addr:'';el('ife').value=inv.from&&inv.from.email?inv.from.email:'';el('ifu').value=inv.from&&inv.from.uid?inv.from.uid:'';el('ifib').value=inv.from&&inv.from.iban?inv.from.iban:'';el('ifbic').value=inv.from&&inv.from.bic?inv.from.bic:'';el('itn').value=inv.to&&inv.to.name?inv.to.name:'';el('ita').value=inv.to&&inv.to.addr?inv.to.addr:'';el('ite').value=inv.to&&inv.to.email?inv.to.email:'';el('itu').value=inv.to&&inv.to.uid?inv.to.uid:'';el('inote').value=inv.note||'';closeModal('modal-invh');setTimeout(generatePDF,100);}}
+
+
+// ─── EMAIL TEMPLATES
+function renderTemplates(){
+  var grid=el('templates-grid');
+  if(!S.emailTemplates||!S.emailTemplates.length){
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nema predlozaka.</div>';return;
+  }
+  var langColor={'de':'var(--blue)','en':'var(--accent)','hr':'var(--yellow)'};
+  var langLabel={'de':'DE','en':'EN','hr':'HR'};
+  grid.innerHTML='';
+  S.emailTemplates.forEach(function(t){
+    var div=document.createElement('div');
+    div.className='card';div.style.cursor='pointer';
+    div.onclick=function(){editTemplate(t.id);};
+    div.innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+      +'<div style="font-size:14px;font-weight:600">'+escH(t.name)+'</div>'
+      +'<span class="badge" style="background:'+(langColor[t.lang]||'var(--text2)')+'20;color:'+(langColor[t.lang]||'var(--text2)')+'">'+( langLabel[t.lang]||t.lang)+'</span>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px">'+escH(t.subject)+'</div>'
+      +'<div style="font-size:12px;color:var(--text3);line-height:1.5;overflow:hidden;max-height:60px">'+escH(t.body.substring(0,120))+'...</div>'
+      +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'
+      +'<button class="btn btn-xs btn-primary">Koristi u emailu</button>'
+      +'</div>';
+    div.querySelector('.btn-primary').onclick=function(e){e.stopPropagation();currentEmailTemplate=t.id;showToast('settings-toast','Predlozak odabran: '+t.name+'. Otvori lead i posalji email.',true);};
+    grid.appendChild(div);
+  });
+}
+
+function openTemplateModal(){
+  el('tmpl-id').value='';el('tmpl-name').value='';el('tmpl-subject').value='';el('tmpl-body').value='';el('tmpl-lang').value='de';
+  el('tmpl-mtitle').textContent='Novi predlozak';el('tmpl-del').style.display='none';
+  openModal('modal-template');setTimeout(function(){el('tmpl-name').focus();},100);
+}
+
+function editTemplate(id){
+  var t=(S.emailTemplates||[]).find(function(t){return t.id===id;});if(!t)return;
+  el('tmpl-id').value=id;el('tmpl-name').value=t.name;el('tmpl-subject').value=t.subject;el('tmpl-body').value=t.body;el('tmpl-lang').value=t.lang||'de';
+  el('tmpl-mtitle').textContent='Uredi predlozak';el('tmpl-del').style.display='inline-flex';
+  openModal('modal-template');
+}
+
+function saveTemplate(){
+  if(!S.emailTemplates)S.emailTemplates=[];
+  var eid=el('tmpl-id').value;
+  var d={name:el('tmpl-name').value||'Predlozak',lang:el('tmpl-lang').value,subject:el('tmpl-subject').value,body:el('tmpl-body').value};
+  if(eid){Object.assign(S.emailTemplates.find(function(t){return t.id===eid;}),d);}
+  else{S.emailTemplates.push(Object.assign({id:'t'+S.nextId++},d));}
+  save();closeModal('modal-template');renderTemplates();refreshTemplateSelect();
+}
+
+function deleteTemplate(){
+  var id=el('tmpl-id').value;if(!confirm('Obrisati predlozak?'))return;
+  S.emailTemplates=S.emailTemplates.filter(function(t){return t.id!==id;});
+  save();closeModal('modal-template');renderTemplates();refreshTemplateSelect();
+}
+
+function refreshTemplateSelect(){
+  var sel=el('email-template-sel');if(!sel)return;
+  sel.innerHTML='<option value="">-- ili odaberi predlozak --</option>'+
+    (S.emailTemplates||[]).map(function(t){return'<option value="'+t.id+'">'+escH(t.name)+' ('+t.lang.toUpperCase()+')</option>';}).join('');
+}
+
+function applyTemplate(){
+  var id=el('email-template-sel').value;if(!id)return;
+  var t=(S.emailTemplates||[]).find(function(t){return t.id===id;});if(!t)return;
+  var lead=S.leads.find(function(l){return l.id===currentEmailLeadId;});
+  var body=t.body;
+  if(lead)body=body.replace(/\[NAZIV_FIRME\]/g,lead.name);
+  el('email-subject').value=t.subject;
+  el('email-body').value=body;
+}
+
+function useTemplate(id){
+  showPage('prospecting');
+  setTimeout(function(){
+    var lead=S.leads[0];
+    if(lead)openLeadModal(lead.id);
+    setTimeout(function(){
+      el('email-template-sel').value=id;
+      applyTemplate();
+    },200);
+  },100);
+}
+
+// ─── FOLLOW-UP
+function renderFollowups(){
+  var today=tod();
+  var due=S.leads.filter(function(l){return l.followup&&l.followup<=today&&l.status!=='odbijenica';});
+  var card=el('dash-followups-card');
+  if(!due.length){if(card)card.style.display='none';return;}
+  if(card)card.style.display='block';
+  var html='';
+  due.forEach(function(l){
+    var overdue=l.followup<today;
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
+      +'<div><div style="font-size:13px;font-weight:500">'+escH(l.name)+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'
+      +(overdue?'<span style="color:var(--red)">Kasni! </span>':'')
+      +'Follow-up: '+l.followup+'</div></div>'
+      +'<button class="btn btn-xs" data-lid="'+l.id+'">Otvori</button>'
+      +'</div>';
+  });
+  el('dash-followups').innerHTML=html;
+  el('dash-followups').querySelectorAll('button[data-lid]').forEach(function(btn){
+    btn.onclick=function(){quickOpenLead(btn.dataset.lid);};
+  });
+}
+
+function quickOpenLead(id){
+  showPage('prospecting');
+  setTimeout(function(){switchTab('leads');setTimeout(function(){openLeadModal(id);},100);},100);
+}
+
+// ─── PROSPECTING
+function renderProspecting(){el('leads-count').textContent=S.leads.length;}
+function switchTab(tab){prosTab=tab;var isR=tab==='results';el('tab-content-results').style.display=isR?'block':'none';el('tab-content-leads').style.display=isR?'none':'block';el('tab-results').className='pros-tab'+(isR?' active':'');el('tab-leads').className='pros-tab'+(isR?'':' active');if(!isR)renderLeads();}
+function setLeadFilter(f){leadFilter=f;renderLeads();}
+async function runSearch(){
+  var query=el('pros-query').value.trim();
+  var location=el('pros-location').value.trim();
+  var country=el('pros-country').value;
+  var type=el('pros-type').value;
+  var num=parseInt(el('pros-num').value)||10;
+  if(!query){el('pros-status').textContent='Upisi kljucnu rijec.';return;}
+  var q=query;
+  if(location)q+=' '+location;
+  if(type==='contact')q+=' email kontakt';
+  if(type==='linkedin')q+=' site:linkedin.com/company';
+  if(type==='jobs')q+=' Stellenangebote CAM Programmierer';
+  el('pros-btn').disabled=true;el('pros-btn').textContent='Pretrazujem...';el('pros-status').textContent='';
+  el('pros-results-grid').innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:40px;justify-content:center;color:var(--text3);font-size:13px"><div class="pros-spinner"></div> Pretrazujem...</div>';
+  switchTab('results');
+  try{
+    var searchType = type === 'maps' ? 'maps' : 'search';
+    var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:country,num:num,lang:country==='hr'||country==='ba'?'hr':'de',type:searchType})});
+    if(!res.ok)throw new Error('Worker greska: '+res.status);
+    var data=await res.json();
+    var rawResults = [];
+    if(searchType === 'maps') {
+      rawResults = (data.places||[]).map(function(r,i){
+        return{
+          id:'r'+Date.now()+i,
+          name:r.title||r.name||'',
+          url:r.website||r.link||'',
+          desc:[r.address||'',r.category||'',r.phone||'',r.rating?'Rating: '+r.rating:''].filter(Boolean).join(' | '),
+          phone:r.phone||'',
+          address:r.address||'',
+          rating:r.rating||'',
+          query:q,
+          isMaps:true
+        };
+      });
+    } else {
+      rawResults = (data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||'',query:q};});
+    }
+    prosResults = rawResults;
+    el('pros-status').textContent=prosResults.length+' rezultata';
+    renderSearchResults();
+  }catch(err){
+    el('pros-results-grid').innerHTML='<div class="empty" style="grid-column:1/-1;color:var(--red)">Greska: '+escH(err.message)+'</div>';
+    el('pros-status').textContent='Greska.';
+  }finally{el('pros-btn').disabled=false;el('pros-btn').textContent='Pretrazi';}
+}
+function renderSearchResults(){
+  var savedUrls={};
+  S.leads.forEach(function(l){savedUrls[l.url]=true;});
+  var grid=el('pros-results-grid');
+  if(!prosResults.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nema rezultata.</div>';return;}
+  grid.innerHTML=prosResults.map(function(r,idx){
+    var isSaved=!!savedUrls[r.url];
+    var displayUrl=r.url?r.url.replace(/^https?:\/\//,'').split('/')[0]:'';
+    var portal=r.url&&isJobPortal(r.url);
+    var btns='';
+    if(r.url)btns+='<a href="'+r.url+'" target="_blank" class="btn btn-xs" onclick="event.stopPropagation()">Otvori &#8599;</a> ';
+    if(portal)btns+='<button class="btn btn-xs" style="background:var(--blue-dim);color:var(--blue);border-color:var(--blue)" onclick="findCompanyFromPortal('+idx+')">&#128269; Pronadi firmu</button> ';
+    if(isSaved)btns+='<span style="font-size:11px;color:var(--text3)">Spremljeno</span>';
+    else btns+='<button class="btn btn-xs btn-primary" onclick="saveAsLead('+idx+')">+ Spremi</button>';
+    var mapsBadge=r.isMaps?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--blue-dim);color:var(--blue);margin-left:4px">Maps</span>':'';
+    var portalBadge=portal?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow);margin-left:4px">Job portal</span>':'';
+    var extraInfo='';
+    if(r.isMaps){
+      if(r.phone)extraInfo+='<span style="font-size:11px;color:var(--text2)">&#9742; '+escH(r.phone)+'</span> ';
+      if(r.address)extraInfo+='<span style="font-size:11px;color:var(--text3)">'+escH(r.address)+'</span>';
+      if(r.rating)extraInfo+=' <span style="font-size:11px;color:var(--yellow)">&#9733; '+r.rating+'</span>';
+      if(extraInfo)extraInfo='<div style="margin-bottom:6px">'+extraInfo+'</div>';
+    }
+    return '<div class="pros-card">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
+      +'<div class="pros-card-name">'+escH(r.name)+mapsBadge+portalBadge+'</div>'
+      +(isSaved?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--accent-dim);color:var(--accent)">Sprem.</span>':'')
+      +'</div>'
+      +(displayUrl?'<div class="pros-card-url">'+escH(displayUrl)+'</div>':'')
+      +extraInfo
+      +'<div class="pros-card-desc">'+escH(r.desc)+'</div>'
+      +'<div class="pros-card-footer" style="gap:6px">'+btns+'</div>'
+      +'</div>';
+  }).join('')||'<div class="empty" style="grid-column:1/-1">Nema rezultata.</div>';
+}
+
+async function findCompanyFromPortal(idx){
+  var r=prosResults[idx];if(!r)return;
+  el('pros-status').textContent='Citam oglas...';
+  el('pros-btn').disabled=true;
+  try{
+    var pageText=r.desc;
+    var fetchRes=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:r.url})});
+    var fd=await fetchRes.json();
+    if(fd.ok&&fd.text)pageText=fd.text;
+    // Store email if found for later use
+    if(fd.primaryEmail)r._foundEmail=fd.primaryEmail;
+    var apiKey=S.settings.claudeKey||'';
+    if(!apiKey){
+      var cn=r.name.replace(/Jobs?[^a-zA-Z].*$/i,'').replace(/Stellen.*$/i,'').trim();
+      searchForCompany(cn);return;
+    }
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,messages:[{role:'user',content:
+        'From this job listing, extract ALL hiring company names (not the job portal).\nJob title: '+r.name+'\nContent:\n'+pageText.substring(0,2000)+'\n\nReturn ONLY comma-separated company names. Example: Mustermann GmbH, Schmidt AG'
+      }]})
+    });
+    var data=await res.json();
+    var companies=data.content&&data.content[0]?data.content[0].text.trim():'';
+    if(companies){
+      var first=companies.split(',')[0].trim();
+      el('pros-status').textContent='Nasao: '+companies+' | Pretrazujem: '+first;
+      searchForCompany(first);
+    }else{
+      el('pros-status').textContent='Nisu pronadene firme u oglasu.';
+      el('pros-btn').disabled=false;
+    }
+  }catch(err){
+    el('pros-status').textContent='Greska: '+err.message;
+    el('pros-btn').disabled=false;
+  }
+}
+
+function searchForCompany(name){
+  if(!name)return;
+  el('pros-query').value=name;
+  el('pros-location').value='';
+  el('pros-type').value='general';
+  runSearch();
+}
+
+function saveAsLead(idx){
+  var r=prosResults[idx];
+  if(!r)return;
+  if(S.leads.find(function(l){return l.url===r.url;})){return;}
+
+  if(isJobPortal(r.url)){
+    if(!confirm('Ova stranica izgleda kao job portal (' + r.url.replace(/^https?:\/\//, '').split('/')[0] + ').\n\nJob portali nisu tvoji klijenti — iz oglasa ces izvuci pravu firmu.\n\nSvejedno spremi?')) return;
+  }
+
+  S.leads.push({
+    id:'lead'+S.nextId++,
+    name:r.name,url:r.url,desc:r.desc,
+    status:'novi',note:'',email:'',emails:[],followup:'',
+    savedAt:tod(),query:r.query||''
+  });
+  save();
+  el('leads-count').textContent=S.leads.length;
+  renderSearchResults();
+}
+function renderLeads(){
+  el('leads-count').textContent=S.leads.length;
+  var filtered=leadFilter?S.leads.filter(function(l){return l.status===leadFilter;}):S.leads;
+  if(!filtered.length){el('pros-leads-grid').innerHTML='<div class="empty" style="grid-column:1/-1">'+(S.leads.length?'Nema leadova s ovim statusom.':'Nema spremljenih leadova.')+'</div>';return;}
+  el('pros-leads-grid').innerHTML=filtered.slice().reverse().map(function(l){var displayUrl=l.url.replace(/^https?:\/\//,'').split('/')[0];
+    return '<div class="pros-card" onclick="openLeadModal(\''+l.id+'\')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="pros-card-name">'+escH(l.name)+'</div><span class="pros-lead-status '+l.status+'" onclick="event.stopPropagation();cycleLead(\''+l.id+'\')">'+LEAD_STATUSES[l.status]+'</span></div><div class="pros-card-url">'+escH(displayUrl)+'</div><div class="pros-card-desc">'+escH(l.desc)+'</div>'+(l.note?'<div style="font-size:11px;color:var(--text3);font-style:italic;margin-bottom:6px">"'+escH(l.note)+'"</div>':'')+'<div class="pros-card-footer"><span style="font-size:11px;color:var(--text3)">'+l.savedAt+'</span><a href="'+l.url+'" target="_blank" class="btn btn-xs" onclick="event.stopPropagation()">Otvori &#8599;</a></div></div>';
+  }).join('');
+}
+function cycleLead(id){var l=S.leads.find(function(l){return l.id===id;});if(!l)return;var cycle={novi:'kontaktiran',kontaktiran:'zainteresiran',zainteresiran:'nije-odgovorio','nije-odgovorio':'odbijenica',odbijenica:'novi'};l.status=cycle[l.status]||'novi';save();renderLeads();}
+function openLeadModal(id){
+  var l=S.leads.find(function(l){return l.id===id;});if(!l)return;
+  el('lead-id').value=id;el('lead-note').value=l.note||'';el('lead-status').value=l.status||'novi';el('lead-followup').value=l.followup||'';el('lead-mtitle').textContent=l.name;
+  var displayUrl=l.url.replace(/^https?:\/\//,'').split('/')[0];
+  var emailHint = l.email ? '<div style="margin-bottom:14px"><div style="font-size:12px;color:var(--text3);margin-bottom:4px">Email</div><div style="font-size:13px;color:var(--accent)">'+escH(l.email)+'</div></div>' : '';
+  el('lead-detail').innerHTML='<div style="margin-bottom:14px"><div style="font-size:12px;color:var(--text3);margin-bottom:4px">Website</div><a href="'+l.url+'" target="_blank" style="color:var(--accent);font-size:13px;text-decoration:none">'+escH(displayUrl)+' &#8599;</a></div>'+emailHint+'<div style="margin-bottom:14px"><div style="font-size:12px;color:var(--text3);margin-bottom:4px">Opis</div><div style="font-size:13px;color:var(--text2);line-height:1.5">'+escH(l.desc)+'</div></div>';
+  // Show email history
+  var emails = l.emails || [];
+  var histEl = el('lead-email-history');
+  var histList = el('lead-email-history-list');
+  if(emails.length) {
+    histEl.style.display='block';
+    histList.innerHTML = emails.map(function(e){
+      return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><div style="color:var(--text2)">'+escH(e.subject)+'<br><span style="color:var(--text3);font-size:11px">'+escH(e.to)+'</span></div><span style="color:var(--text3);font-family:var(--mono);font-size:11px;white-space:nowrap">'+e.sentAt+'</span></div>';
+    }).join('');
+  } else {
+    histEl.style.display='none';
+  }
+  openModal('modal-lead');setTimeout(function(){el('lead-note').focus();},100);
+}
+function saveLead(){var id=el('lead-id').value;var l=S.leads.find(function(l){return l.id===id;});if(!l)return;l.note=el('lead-note').value;l.status=el('lead-status').value;l.followup=el('lead-followup').value;save();closeModal('modal-lead');renderLeads();}
+function deleteLead(){var id=el('lead-id').value;if(!confirm('Obrisati lead?'))return;S.leads=S.leads.filter(function(l){return l.id!==id;});save();closeModal('modal-lead');renderLeads();}
+function clearAllLeads(){if(!confirm('Obrisati sve leadove?'))return;S.leads=[];save();renderProspecting();}
+
+// ─── CLIENTS
+function renderClients(){
+  var grid=el('clients-grid');
+  if(!S.clients.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nema klijenata.</div>';return;}
+  grid.innerHTML=S.clients.map(function(c){
+    var pc=S.projects.filter(function(p){return p.clientId===c.id;}).length;
+    var h=S.timeLogs.filter(function(l){var p=gp(l.projectId);return p&&p.clientId===c.id;}).reduce(function(a,l){return a+l.duration;},0)/3600;
+    var rev=S.timeLogs.filter(function(l){var p=gp(l.projectId);return p&&p.clientId===c.id;}).reduce(function(a,l){var p=gp(l.projectId);return a+(p&&p.rate?p.rate*(l.duration/3600):0);},0);
+    return '<div class="card" style="cursor:pointer" onclick="editClient('+c.id+')">'+'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div><div style="font-size:14px;font-weight:600">'+escH(c.name)+'</div>'+(c.contact?'<div style="font-size:12px;color:var(--text3);margin-top:2px">'+escH(c.contact)+'</div>':'')+'</div><span class="badge" style="background:var(--bg3);color:var(--text2)">'+c.country+'</span></div>'+(c.email?'<div style="font-size:12px;color:var(--accent);margin-bottom:3px">'+escH(c.email)+'</div>':'')+(c.phone?'<div style="font-size:12px;color:var(--text3);margin-bottom:8px">'+escH(c.phone)+'</div>':'')+'<div style="display:flex;gap:12px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)"><span>'+pc+' projekt(a)</span>'+(h>0?'<span style="color:var(--text2)">'+h.toFixed(1)+'h</span>':'')+(rev>0?'<span style="color:var(--yellow)">\u20AC'+Math.round(rev)+'</span>':'')+(c.rate?'<span>\u20AC'+c.rate+'/h</span>':'')+'</div><div style="margin-top:10px"><button class="btn btn-xs" onclick="event.stopPropagation();fillInvFromClient('+c.id+')">Invoice \u2192</button></div></div>';
+  }).join('');
+}
+function fillInvFromClient(id){var c=gc(id);if(!c)return;showPage('invoice');setTimeout(function(){el('itn').value=c.name;el('ita').value=c.addr||'';el('ite').value=c.email||'';el('itu').value=c.uid||'';showToast('inv-toast','Popunjeno iz klijenta: '+c.name,true);},100);}
+function openClientModal(){['cl-name','cl-contact','cl-email','cl-phone','cl-addr','cl-note','cl-uid'].forEach(function(id){el(id).value='';});el('cl-rate').value=S.settings.rate||75;el('cl-country').value='DE';el('cl-id').value='';el('cl-mtitle').textContent='Novi klijent';el('cl-del').style.display='none';openModal('modal-client');setTimeout(function(){el('cl-name').focus();},100);}
+function editClient(id){var c=gc(id);if(!c)return;el('cl-id').value=id;el('cl-name').value=c.name;el('cl-contact').value=c.contact||'';el('cl-email').value=c.email||'';el('cl-phone').value=c.phone||'';el('cl-addr').value=c.addr||'';el('cl-country').value=c.country||'DE';el('cl-rate').value=c.rate||0;el('cl-uid').value=c.uid||'';el('cl-note').value=c.note||'';el('cl-mtitle').textContent='Uredi klijenta';el('cl-del').style.display='inline-flex';openModal('modal-client');}
+function saveClient(){var eid=el('cl-id').value;var d={name:el('cl-name').value||'Klijent',contact:el('cl-contact').value,email:el('cl-email').value,phone:el('cl-phone').value,addr:el('cl-addr').value,country:el('cl-country').value,rate:flt(el('cl-rate').value),uid:el('cl-uid').value,note:el('cl-note').value};if(eid){Object.assign(gc(eid),d);}else{S.clients.push(Object.assign({id:S.nextId++},d));}save();closeModal('modal-client');renderClients();refreshClSel();}
+function deleteClient(){if(!confirm('Obrisati klijenta?'))return;S.clients=S.clients.filter(function(c){return c.id!=el('cl-id').value;});save();closeModal('modal-client');renderClients();}
+
+// ─── SETTINGS
+function loadSettings(){var ss=S.settings;APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';el('s-note').value=ss.note||'';if(el('s-claude-key'))el('s-claude-key').value=ss.claudeKey||'';}
+function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),note:gv('s-note'),claudeKey:gv('s-claude-key')};save();showToast('settings-toast','Postavke spremljene.',true);}
+function exportData(){var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='shopflow_backup_'+tod()+'.json';a.click();URL.revokeObjectURL(url);}
+function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var d=JSON.parse(ev.target.result);Object.keys(d).forEach(function(k){if(k in S)S[k]=d[k];});save();renderDash();showToast('settings-toast','Backup uvezen!',true);}catch(err){showToast('settings-toast','Greska: '+err.message,false);}};r.readAsText(f);e.target.value='';}
+function resetAll(){if(!confirm('Obrisati SVE podatke?'))return;localStorage.removeItem('shopflow_v1');location.reload();}
+
+// ─── KEYBOARD
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(function(m){m.classList.remove('open');});});
+
+
+// ─── EMAIL OUTREACH
+var currentEmailLeadId = null;
+
+var EMAIL_TEMPLATES = {
+  de: {
+    subject: function(name) { return 'CAM-Programmierung und CNC-Optimierung fuer ' + name; },
+    body: function(name, url) {
+      return 'Sehr geehrte Damen und Herren,\n\nmein Name ist [Ihr Name] und ich bin freiberuflicher CAM-Programmierer mit Spezialisierung auf Praezisionsfertigung und CNC-Optimierung.\n\nIch habe ' + name + ' (' + url + ') entdeckt und glaube, dass meine Dienstleistungen fuer Ihr Unternehmen von Nutzen sein koennten. Ich biete an:\n\n- CAM-Programmierung (Mastercam, Fusion 360, Hypermill)\n- CNC-Postprozessor-Entwicklung\n- Optimierung von Zerspanungsparametern\n- Technische Beratung\n\nMeine Kunden in der DACH-Region berichten von deutlichen Effizienzsteigerungen und Kosteneinsparungen durch meine Arbeit.\n\nDarf ich Ihnen weitere Informationen zusenden oder einen kurzen Termin vorschlagen?\n\nMit freundlichen Gruessen\n[Ihr Name]\nCAMOutput e.U.\ninfo@camoutput.com\nwww.camoutput.com';
+    }
+  },
+  en: {
+    subject: function(name) { return 'CAM Programming and CNC Optimization for ' + name; },
+    body: function(name, url) {
+      return 'Dear Sir or Madam,\n\nMy name is [Your Name] and I am a freelance CAM programmer specializing in precision manufacturing and CNC optimization.\n\nI came across ' + name + ' (' + url + ') and believe my services could benefit your operations. I offer:\n\n- CAM programming (Mastercam, Fusion 360, Hypermill)\n- CNC post-processor development\n- Cutting parameter optimization\n- Technical consulting\n\nMy clients across the DACH region report significant efficiency gains and cost savings.\n\nMay I send you more information or suggest a brief call?\n\nBest regards,\n[Your Name]\nCAMOutput e.U.\ninfo@camoutput.com\nwww.camoutput.com';
+    }
+  },
+  hr: {
+    subject: function(name) { return 'CAM programiranje i CNC optimizacija za ' + name; },
+    body: function(name, url) {
+      return 'Postovani,\n\nMoje ime je [Vase ime] i slobodni sam CAM programer specijaliziran za preciznu obradu i CNC optimizaciju.\n\nNaisao sam na ' + name + ' (' + url + ') i vjerujem da bi moje usluge mogle biti korisne vasoj tvrtki. Nudim:\n\n- CAM programiranje (Mastercam, Fusion 360, Hypermill)\n- Razvoj CNC postprocesora\n- Optimizaciju parametara obrade\n- Tehnicko savjetovanje\n\nMoji klijenti u regiji AT/DE/CH/HR prijavljuju znacajno poboljsanje efikasnosti i ustedane troskove.\n\nSmijete li vam poslati vise informacija ili predloziti kratki razgovor?\n\nS postovanjem,\n[Vase ime]\nCAMOutput e.U.\ninfo@camoutput.com\nwww.camoutput.com';
+    }
+  }
+};
+
+function openEmailModal() {
+  var id = el('lead-id').value;
+  var lead = S.leads.find(function(l) { return l.id === id; });
+  if (!lead) return;
+  currentEmailLeadId = id;
+  el('email-to').value = lead.email || '';
+  el('email-lang').value = 'de';
+  generateEmailTemplate();
+  refreshTemplateSelect();
+  closeModal('modal-lead');
+  openModal('modal-email');
+  setTimeout(function() { el('email-to').focus(); }, 100);
+}
+
+function generateEmailTemplate() {
+  var id = currentEmailLeadId;
+  var lead = S.leads.find(function(l) { return l.id === id; });
+  if (!lead) return;
+  var lang = el('email-lang').value;
+  var tmpl = EMAIL_TEMPLATES[lang] || EMAIL_TEMPLATES.de;
+  var displayUrl = lead.url.replace(/^https?:\/\//, '').split('/')[0];
+  el('email-subject').value = tmpl.subject(lead.name);
+  el('email-body').value = tmpl.body(lead.name, displayUrl);
+}
+
+async function sendEmail() {
+  var to = el('email-to').value.trim();
+  var subject = el('email-subject').value.trim();
+  var body = el('email-body').value.trim();
+
+  if (!to) { showToast('email-toast', 'Unesi email adresu primatelja.', false); return; }
+  if (!to.includes('@')) { showToast('email-toast', 'Email adresa nije ispravna.', false); return; }
+  if (!subject) { showToast('email-toast', 'Unesi subject.', false); return; }
+  if (!body) { showToast('email-toast', 'Unesi poruku.', false); return; }
+
+  var btn = el('email-send-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saljem...';
+  showToast('email-toast', '', false);
+
+  try {
+    var res = await fetch(EMAIL_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: to, subject: subject, body: body })
+    });
+
+    var data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || 'Greska pri slanju');
+    }
+
+    // Save email to lead history
+    var lead = S.leads.find(function(l) { return l.id === currentEmailLeadId; });
+    if (lead) {
+      if (!lead.emails) lead.emails = [];
+      lead.emails.push({ to: to, subject: subject, sentAt: new Date().toISOString().replace('T', ' ').substring(0, 16) });
+      if (!lead.email) lead.email = to;
+      lead.status = 'kontaktiran';
+      save();
+    }
+
+    showToast('email-toast', 'Email uspjesno poslan na ' + to, true);
+    setTimeout(function() { closeModal('modal-email'); renderLeads(); }, 2000);
+
+  } catch(err) {
+    showToast('email-toast', 'Greska: ' + err.message, false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Posalji';
+  }
+}
+
+
+// --- AI EMAIL GENERATION
+async function generateAIEmail() {
+  var id = currentEmailLeadId;
+  var lead = S.leads.find(function(l) { return l.id === id; });
+  if (!lead) return;
+
+  var apiKey = S.settings.claudeKey || '';
+  if (!apiKey) {
+    el('ai-status').style.display = 'block';
+    el('ai-status').textContent = 'Nema Claude API key-a. Dodaj ga u Postavke.';
+    el('ai-status').style.color = 'var(--red)';
+    el('ai-status').style.background = 'var(--red-dim)';
+    return;
+  }
+
+  var lang = APP_LANG || el('email-lang').value || 'hr';
+  var langName = lang === 'de' ? 'German' : lang === 'hr' ? 'Croatian' : 'English';
+  var displayUrl = lead.url.replace(/^https?:\/\//, '').split('/')[0];
+  var isPortal = isJobPortal(lead.url);
+
+  el('ai-gen-btn').disabled = true;
+  el('ai-gen-btn').textContent = 'Generiram...';
+  el('ai-status').style.display = 'block';
+  el('ai-status').style.color = 'var(--accent)';
+  el('ai-status').style.background = 'var(--accent-dim)';
+  el('ai-status').textContent = 'Korak 1/2: Citam stranicu firme...';
+
+  var pageContent = '';
+  var fetchData = {};
+  try {
+    var fetchRes = await fetch(FETCH_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: lead.url })
+    });
+    fetchData = await fetchRes.json();
+    if (fetchData.ok && fetchData.text) {
+      pageContent = fetchData.text;
+      // Auto-fill email if found by Worker
+      if (fetchData.primaryEmail && !el('email-to').value) {
+        el('email-to').value = fetchData.primaryEmail;
+        el('ai-status').textContent = 'Email pronadjen: ' + fetchData.primaryEmail + ' | Korak 2/2: AI pise email...';
+      } else {
+        el('ai-status').textContent = 'Korak 2/2: AI pise personalizirani email...';
+      }
+    } else {
+      el('ai-status').textContent = 'Korak 2/2: AI pise email (koristim opis iz pretrage)...';
+    }
+  } catch(e) {
+    el('ai-status').textContent = 'Korak 2/2: AI pise email (koristim opis iz pretrage)...';
+  }
+
+  var contextInfo = pageContent
+    ? 'Full page content from ' + lead.url + ':\n' + pageContent
+    : 'Google search snippet:\n' + lead.desc;
+
+  var prompt;
+  if (isPortal) {
+    prompt = 'A freelance CAM programmer (CAMOutput, Graz, Austria) found a job listing on a job portal.\n\n'
+      + 'Job listing title: ' + lead.name + '\n'
+      + 'Portal: ' + displayUrl + '\n\n'
+      + 'Page content:\n' + contextInfo + '\n\n'
+      + 'TASK:\n'
+      + '1. Find the actual hiring company name from the page content above\n'
+      + '2. Find any contact email address on the page\n'
+      + '3. Write a short personalized email in ' + langName + ' to that company\n\n'
+      + 'The email should:\n'
+      + '- Start with: Hallo [ActualCompanyName]-Team, (personalized greeting with real company name)\n'
+      + '- Second sentence: introduce Danko from CAMOutput as remote CAM programmer with 10+ years experience\n'
+      + '- Mention you saw they are looking for CAM programmers - freelance remote is faster and cheaper than hiring\n'
+      + '- CTA: Weitere Infos auf www.camoutput.com - NO phone calls\n'
+      + '- Offer freelance CAM services (Mastercam/Fusion360/Hypermill, post-processors, optimization)\n'
+      + '- Be max 100 words, direct and human\n'
+      + '- No placeholder like [Your Name] - sign: CAMOutput | info@camoutput.com\n\n'
+      + 'Format your response EXACTLY as:\n'
+      + 'COMPANY:[company name you found]\n'
+      + 'EMAIL:[email if found, else none]\n'
+      + 'SUBJECT:[max 8 word subject]\n'
+      + '[email body only, nothing else]';
+  } else {
+    prompt = 'A freelance CAM programmer (CAMOutput, Graz, Austria) wants to cold email this company.\n\n'
+      + 'Company: ' + lead.name + '\n'
+      + 'Website: ' + displayUrl + '\n\n'
+      + contextInfo + '\n\n'
+      + 'TASK: Write a short cold email in ' + langName + '.\n\n'
+      + 'Rules:\n'
+      + '1. Greeting: Hallo [CompanyName]-Team, (use actual company name)\n'
+      + '2. One sentence referencing something SPECIFIC about this company\n'
+      + '3. Introduce sender: Ich bin Danko von CAMOutput - ich biete remote CAM-Programmierservices mit uber 10 Jahren Erfahrung an.\n'
+      + '4. One sentence about relevant services (Mastercam/Fusion360/Hypermill, post-processors, optimization)\n'
+      + '5. CTA: Weitere Infos und Terminbuchung auf www.camoutput.com - NO phone calls, NO brief call suggestion\n'
+      + '6. Max 120 words total\n'
+      + '7. Human and direct, not corporate\n'
+      + '8. Sign as: CAMOutput | info@camoutput.com | www.camoutput.com\n\n'
+      + 'Format EXACTLY as:\n'
+      + 'EMAIL:[email if found on page, else none]\n'
+      + 'SUBJECT:[max 8 word subject]\n'
+      + '[email body only]';
+  }
+
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error ? data.error.message : 'API greska');
+
+    var text = data.content && data.content[0] ? data.content[0].text : '';
+    var lines = text.split('\n');
+
+    // Extract company
+    var companyLine = lines.find(function(l) { return l.startsWith('COMPANY:'); });
+    var extractedCompany = companyLine ? companyLine.replace('COMPANY:', '').trim() : '';
+
+    // Extract email - prefer Worker-found email over Claude's extraction
+    var emailLine = lines.find(function(l) { return l.startsWith('EMAIL:'); });
+    var foundEmail = emailLine ? emailLine.replace('EMAIL:', '').trim() : '';
+    // Use Worker primaryEmail if Claude didn't find one
+    if ((!foundEmail || foundEmail === 'none') && fetchData && fetchData.primaryEmail) {
+      foundEmail = fetchData.primaryEmail;
+    }
+    if (foundEmail && foundEmail !== 'none' && foundEmail.includes('@')) {
+      if (!el('email-to').value) el('email-to').value = foundEmail;
+      // Save email to lead for future reference
+      var leadToUpdate = S.leads.find(function(l) { return l.id === currentEmailLeadId; });
+      if (leadToUpdate && !leadToUpdate.email) { leadToUpdate.email = foundEmail; save(); }
+    }
+
+    // Extract subject
+    var subjectLine = lines.find(function(l) { return l.startsWith('SUBJECT:'); });
+    if (subjectLine) el('email-subject').value = subjectLine.replace('SUBJECT:', '').trim();
+
+    // Extract body
+    var headerPrefixes = ['COMPANY:', 'EMAIL:', 'SUBJECT:'];
+    var bodyLines = [];
+    var pastHeaders = false;
+    for (var i = 0; i < lines.length; i++) {
+      var isHeader = headerPrefixes.some(function(p) { return lines[i].startsWith(p); });
+      if (!isHeader) pastHeaders = true;
+      if (pastHeaders && !isHeader) bodyLines.push(lines[i]);
+    }
+    var body = bodyLines.join('\n').trim();
+    if (body) el('email-body').value = body;
+
+    // Status
+    var statusParts = [];
+    if (extractedCompany) statusParts.push('Firma: ' + extractedCompany);
+    if (foundEmail && foundEmail !== 'none' && foundEmail.includes('@')) statusParts.push('Email: ' + foundEmail);
+    statusParts.push('Gotovo!');
+    el('ai-status').textContent = statusParts.join(' | ');
+
+  } catch(err) {
+    el('ai-status').textContent = 'Greska: ' + err.message;
+    el('ai-status').style.color = 'var(--red)';
+    el('ai-status').style.background = 'var(--red-dim)';
+  } finally {
+    el('ai-gen-btn').disabled = false;
+    el('ai-gen-btn').textContent = '\u2728 AI email';
+  }
+}
+
+
+// ─── INIT
+load();
+var now=new Date();var due=new Date(now);due.setDate(due.getDate()+30);
+el('idate').value=now.toISOString().split('T')[0];
+el('idue').value=due.toISOString().split('T')[0];
+/* init in initApp() */
+
+
+function initApp(){
+  load();
+  var now=new Date(),due=new Date(now);due.setDate(due.getDate()+30);
+  el('idate').value=now.toISOString().split('T')[0];
+  el('idue').value=due.toISOString().split('T')[0];
+  APP_LANG=S.settings.appLang||'hr';
+  APP_THEME=S.settings.appTheme||'dark';
+  applyTheme();updateLangButtons();updateThemeButtons();applyTranslations();
+  refreshProjSel();refreshClSel();refreshTemplateSelect();renderDash();
+}
+</script>
+</body>
+</html>

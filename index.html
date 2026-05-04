@@ -388,6 +388,41 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
 .nav-logo:hover .nav-logo-sub{color:var(--accent);transition:color .2s}
 #app-page{display:none}
 #app-page .app{height:100vh;overflow:hidden}
+
+/* LANDING NAV CONTROLS — premium minimal */
+#landing-page .lp-ctrl-group{display:flex;align-items:center}
+#landing-page .lp-ctrl-btn{background:none;border:none;font-family:'JetBrains Mono',var(--mono),monospace;font-size:11px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:rgba(245,245,240,.28);padding:5px 8px;cursor:pointer;transition:color .2s;line-height:1}
+#landing-page .lp-ctrl-btn:hover{color:rgba(245,245,240,.7)}
+#landing-page .lp-ctrl-sep{width:1px;height:10px;background:rgba(245,245,240,.1);flex-shrink:0}
+
+/* LANDING LIGHT MODE */
+body.light #landing-page .lp-ctrl-btn{color:rgba(0,0,0,.25)}
+body.light #landing-page .lp-ctrl-btn:hover{color:rgba(0,0,0,.65)}
+body.light #landing-page .lp-ctrl-sep{background:rgba(0,0,0,.12)}
+body.light #landing-page .line-white{color:#0d0d0d}
+body.light #landing-page .line-dim{color:#333}
+body.light #landing-page .line-yellow{color:#7a5c00}
+body.light #landing-page .hero-eyebrow{color:#7a5c00}
+body.light #landing-page .hero-eyebrow::before{background:#7a5c00}
+body.light #landing-page .stat-num{color:#7a5c00}
+body.light #landing-page .section-tag.yellow{color:#7a5c00}
+body.light #landing-page .section-tag.yellow::before{background:#7a5c00}
+body.light #landing-page .replacing-title{color:#0d0d0d}
+body.light #landing-page .shopflow-pill{border-color:#7a5c00;color:#7a5c00}
+body.light #landing-page .feat-name{color:#0d0d0d}
+body.light #landing-page .features-title{color:#0d0d0d}
+body.light #landing-page .comp-h.hl{color:#7a5c00}
+body.light #landing-page .comp-price-good{color:#7a5c00}
+body.light #landing-page .saving-badge strong{color:#7a5c00}
+body.light #landing-page .y{color:#7a5c00}
+body.light #landing-page .final-title{color:#0d0d0d}
+body.light #landing-page .footer-logo{color:#0d0d0d}
+body.light #landing-page .hero-bg-grid{background-image:linear-gradient(rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.025) 1px,transparent 1px)}
+body.light #landing-page .nav-cta{background:#7a5c00;color:#fff}
+body.light #landing-page .nav-cta:hover{background:#5c4500}
+body.light #landing-page .btn-yellow{background:#7a5c00}
+body.light #landing-page .btn-yellow:hover{background:#5c4500}
+body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 </style>
 </head>
 <body>
@@ -412,11 +447,18 @@ footer{padding:48px;border-top:1px solid var(--border);display:flex;justify-cont
     <a href="#features" data-lp="nav-features">Features</a>
     <a href="#compare" data-lp="nav-compare">Compare</a>
     <a href="#pricing" data-lp="nav-pricing">Pricing</a>
-    <button id="lang-hr-btn" onclick="setAppLang('hr')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 10px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s">HR</button>
-    <button id="lang-de-btn" onclick="setAppLang('de')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 10px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s">DE</button>
-    <button id="lang-en-btn" onclick="setAppLang('en')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 10px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s">EN</button>
-    <button id="theme-dark-btn" onclick="setTheme('dark')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 9px;border-radius:5px;font-size:14px;cursor:pointer;transition:all .2s" title="Dark">🌙</button>
-    <button id="theme-light-btn" onclick="setTheme('light')" style="background:none;border:1px solid #333;color:var(--text2);padding:5px 9px;border-radius:5px;font-size:14px;cursor:pointer;transition:all .2s" title="Light">☀️</button>
+    <div class="lp-ctrl-group">
+      <button id="lang-hr-btn" class="lp-ctrl-btn" onclick="setAppLang('hr')">HR</button>
+      <span class="lp-ctrl-sep"></span>
+      <button id="lang-de-btn" class="lp-ctrl-btn" onclick="setAppLang('de')">DE</button>
+      <span class="lp-ctrl-sep"></span>
+      <button id="lang-en-btn" class="lp-ctrl-btn" onclick="setAppLang('en')">EN</button>
+    </div>
+    <div class="lp-ctrl-group">
+      <button id="theme-dark-btn" class="lp-ctrl-btn" onclick="setTheme('dark')">Dark</button>
+      <span class="lp-ctrl-sep"></span>
+      <button id="theme-light-btn" class="lp-ctrl-btn" onclick="setTheme('light')">Light</button>
+    </div>
     <a href="#" class="nav-cta" data-lp="nav-cta" onclick="openApp();return false;">Start free →</a>
   </div>
 </nav>
@@ -1564,21 +1606,22 @@ function updateLangButtons(){
   ['hr','de','en'].forEach(function(l){
     var btn=el('lang-'+l+'-btn');
     if(!btn)return;
-    btn.style.background=APP_LANG===l?'var(--accent)':'';
-    btn.style.color=APP_LANG===l?'#fff':'';
-    btn.style.borderColor=APP_LANG===l?'var(--accent)':'';
+    var a=APP_LANG===l;
+    btn.style.color=a?'var(--yellow)':'';
+    btn.style.fontWeight=a?'700':'';
+    btn.style.background='';btn.style.borderColor='';
   });
 }
 
 function updateThemeButtons(){
   var dark=el('theme-dark-btn');var light=el('theme-light-btn');
   if(!dark||!light)return;
-  dark.style.background=APP_THEME==='dark'?'var(--accent)':'';
-  dark.style.color=APP_THEME==='dark'?'#fff':'';
-  dark.style.borderColor=APP_THEME==='dark'?'var(--accent)':'';
-  light.style.background=APP_THEME==='light'?'var(--accent)':'';
-  light.style.color=APP_THEME==='light'?'#fff':'';
-  light.style.borderColor=APP_THEME==='light'?'var(--accent)':'';
+  dark.style.color=APP_THEME==='dark'?'var(--yellow)':'';
+  dark.style.fontWeight=APP_THEME==='dark'?'700':'';
+  light.style.color=APP_THEME==='light'?'var(--yellow)':'';
+  light.style.fontWeight=APP_THEME==='light'?'700':'';
+  dark.style.background='';dark.style.borderColor='';
+  light.style.background='';light.style.borderColor='';
 }
 
 function applyTranslations(){

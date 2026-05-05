@@ -1987,6 +1987,7 @@ function applyLandingTranslations(){
 function setAppLang(lang){
   APP_LANG=lang;
   window._userPickedLang=lang;
+  sessionStorage.setItem('compallo_lang',lang);
   S.settings.appLang=lang;
   save();
   applyTranslations();
@@ -2000,6 +2001,7 @@ function setAppLang(lang){
 function setTheme(theme){
   APP_THEME=theme;
   window._userPickedTheme=theme;
+  sessionStorage.setItem('compallo_theme',theme);
   S.settings.appTheme=theme;
   save();
   applyTheme();
@@ -3068,8 +3070,11 @@ function initApp(){
   S.settings={appLang:'hr',appTheme:'dark',name:'',email:'',addr:'',uid:'',iban:'',bic:'',rate:75,vat:20,currency:'EUR',note:'',calUsername:''};
   load();
   // If user explicitly picked lang/theme before login, that takes priority over saved profile
-  if(window._userPickedLang){ S.settings.appLang=window._userPickedLang; window._userPickedLang=null; }
-  if(window._userPickedTheme){ S.settings.appTheme=window._userPickedTheme; window._userPickedTheme=null; }
+  // sessionStorage survives OAuth redirects; window flag covers same-session email login
+  var pickedLang = window._userPickedLang || sessionStorage.getItem('compallo_lang');
+  var pickedTheme = window._userPickedTheme || sessionStorage.getItem('compallo_theme');
+  if(pickedLang){ S.settings.appLang=pickedLang; sessionStorage.removeItem('compallo_lang'); window._userPickedLang=null; }
+  if(pickedTheme){ S.settings.appTheme=pickedTheme; sessionStorage.removeItem('compallo_theme'); window._userPickedTheme=null; }
   var now=new Date(),due=new Date(now);due.setDate(due.getDate()+30);
   el('idate').value=now.toISOString().split('T')[0];
   el('idue').value=due.toISOString().split('T')[0];

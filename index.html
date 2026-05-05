@@ -3063,7 +3063,7 @@ function initApp(){
   S.projects=[];S.clients=[];S.timeLogs=[];S.expenses=[];S.ganttTasks=[];
   S.invoiceHistory=[];S.leads=[];S.invItems=[];S.invItemId=0;S.nextId=1;
   S.emailTemplates=[];S.timer={running:false,start:null,interval:null};
-  S.settings={appLang:'hr',appTheme:'dark',name:'',email:'',addr:'',uid:'',iban:'',bic:'',rate:75,vat:20,currency:'EUR',note:'',calUsername:''};
+  S.settings={appLang:APP_LANG||'hr',appTheme:APP_THEME||'dark',name:'',email:'',addr:'',uid:'',iban:'',bic:'',rate:75,vat:20,currency:'EUR',note:'',calUsername:''};
   load();
   var now=new Date(),due=new Date(now);due.setDate(due.getDate()+30);
   el('idate').value=now.toISOString().split('T')[0];

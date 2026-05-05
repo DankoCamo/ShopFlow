@@ -843,10 +843,10 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- KANBAN -->
 <div class="page" id="page-kanban">
   <div class="page-header">
-    <div class="page-title">Projekti</div>
+    <div class="page-title" data-i18n="projects"></div>
     <div class="page-actions">
-      <input id="kb-search" placeholder="Pretraži..." oninput="renderKanban()" style="font-size:13px;padding:6px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);outline:none;width:160px">
-      <button class="btn btn-sm btn-primary" onclick="openKbModal()">+ Novi projekt</button>
+      <input id="kb-search" data-i18n-ph="kanbanSearchPh" oninput="renderKanban()" style="font-size:13px;padding:6px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);outline:none;width:160px">
+      <button class="btn btn-sm btn-primary" onclick="openKbModal()" data-i18n="newProject"></button>
     </div>
   </div>
   <div class="kanban" id="kanban-board"></div>
@@ -855,33 +855,33 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- TRACKER -->
 <div class="page" id="page-tracker">
   <div class="page-header">
-    <div class="page-title">Time tracker</div>
+    <div class="page-title" data-i18n="tracker"></div>
     <div class="page-actions">
       <button class="btn btn-sm" onclick="exportLogs()">&#8595; CSV</button>
-      <button class="btn btn-sm btn-danger" onclick="clearLogs()">Obri&#353;i sve</button>
+      <button class="btn btn-sm btn-danger" onclick="clearLogs()" data-i18n="clearAll"></button>
     </div>
   </div>
   <div class="timer-hero">
     <div class="timer-display" id="timer-display">00:00:00</div>
     <div class="timer-right">
       <select id="timer-project"></select>
-      <input id="timer-note" placeholder="Opis rada...">
+      <input id="timer-note" data-i18n-ph="timerNotePh">
       <button class="btn btn-timer stopped" id="timer-btn" onclick="toggleTimer()">&#9654;</button>
     </div>
   </div>
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-      Evidencija rada
+      <span data-i18n="trackerLogs"></span>
       <div style="display:flex;gap:12px;align-items:center">
-        <button class="btn btn-sm" onclick="openManualEntry()" style="font-size:11px">+ Ru&#269;ni unos</button>
+        <button class="btn btn-sm" onclick="openManualEntry()" style="font-size:11px" data-i18n="manualEntry"></button>
         <span style="font-family:var(--mono);font-size:12px;color:var(--text3)">
-          Sati: <span id="tt-h" style="color:var(--accent)">0.00</span> &nbsp;&middot;&nbsp;
-          Vrijednost: <span id="tt-eur" style="color:var(--yellow)">&#8364;0</span>
+          <span data-i18n="hours"></span>: <span id="tt-h" style="color:var(--accent)">0.00</span> &nbsp;&middot;&nbsp;
+          <span data-i18n="thValue"></span>: <span id="tt-eur" style="color:var(--yellow)">&#8364;0</span>
         </span>
       </div>
     </div>
     <table class="data-table">
-      <thead><tr><th>Projekt</th><th>Opis</th><th>Datum</th><th>Trajanje</th><th>Vrijednost</th><th></th></tr></thead>
+      <thead><tr><th data-i18n="thProject"></th><th data-i18n="thDesc"></th><th data-i18n="thDate"></th><th data-i18n="thDuration"></th><th data-i18n="thValue"></th><th></th></tr></thead>
       <tbody id="log-body"></tbody>
     </table>
   </div>
@@ -890,30 +890,30 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- EXPENSES -->
 <div class="page" id="page-expenses">
   <div class="page-header">
-    <div class="page-title">Tro&#353;kovi</div>
+    <div class="page-title" data-i18n="expenses"></div>
     <div class="page-actions">
       <button class="btn btn-sm" onclick="exportExpenses()">&#8595; CSV</button>
-      <button class="btn btn-sm btn-primary" onclick="openExpenseModal()">+ Novi tro&#353;ak</button>
+      <button class="btn btn-sm btn-primary" onclick="openExpenseModal()" data-i18n="newExpense"></button>
     </div>
   </div>
   <div class="summary-grid" id="exp-stats"></div>
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-      Svi tro&#353;kovi
+      <span data-i18n="allExpenses"></span>
       <div style="display:flex;gap:8px">
-        <select id="exp-filter-proj" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="renderExpenses()"><option value="">Svi projekti</option></select>
+        <select id="exp-filter-proj" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="renderExpenses()"><option value="" data-i18n="allProjects"></option></select>
         <select id="exp-filter-cat" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="renderExpenses()">
-          <option value="">Sve kategorije</option>
-          <option value="gorivo">Gorivo</option>
-          <option value="materijal">Materijal</option>
-          <option value="softver">Softver</option>
-          <option value="putovanje">Putovanje</option>
-          <option value="ostalo">Ostalo</option>
+          <option value="" data-i18n="allCats"></option>
+          <option value="gorivo" data-i18n="catFuel"></option>
+          <option value="materijal" data-i18n="catMaterial"></option>
+          <option value="softver" data-i18n="catSoftware"></option>
+          <option value="putovanje" data-i18n="catTravel"></option>
+          <option value="ostalo" data-i18n="catOther"></option>
         </select>
       </div>
     </div>
     <table class="data-table">
-      <thead><tr><th>Opis</th><th>Projekt</th><th>Kategorija</th><th>Datum</th><th>Iznos</th><th></th></tr></thead>
+      <thead><tr><th data-i18n="thDesc"></th><th data-i18n="thProject"></th><th data-i18n="thStatus"></th><th data-i18n="thDate"></th><th data-i18n="thAmount"></th><th></th></tr></thead>
       <tbody id="exp-body"></tbody>
     </table>
   </div>
@@ -923,11 +923,11 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <div class="page" id="page-gantt">
   <div class="page-header">
     <div class="page-title">Gantt</div>
-    <button class="btn btn-sm btn-primary" onclick="openGanttModal()">+ Dodaj zadatak</button>
+    <button class="btn btn-sm btn-primary" onclick="openGanttModal()" data-i18n="newTask"></button>
   </div>
   <div class="card" style="overflow-x:auto">
     <table class="data-table" style="min-width:700px">
-      <thead><tr><th style="width:20%">Zadatak</th><th style="width:16%">Projekt</th><th style="width:9%">Po&#269;etak</th><th style="width:9%">Kraj</th><th style="width:9%">Status</th><th>Timeline</th><th style="width:4%"></th></tr></thead>
+      <thead><tr><th style="width:20%" data-i18n="thTask"></th><th style="width:16%" data-i18n="thProject"></th><th style="width:9%" data-i18n="thStart"></th><th style="width:9%" data-i18n="thEnd"></th><th style="width:9%" data-i18n="thStatus"></th><th data-i18n="thTimeline"></th><th style="width:4%"></th></tr></thead>
       <tbody id="gantt-body"></tbody>
     </table>
   </div>
@@ -939,58 +939,58 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
     <div class="page-title">Invoice</div>
     <div class="page-actions">
       <select id="inv-lang" class="btn btn-sm" style="cursor:pointer"><option value="de">DE</option><option value="en">EN</option><option value="hr">HR</option></select>
-      <button class="btn btn-sm" onclick="importHours()">&#8635; Uvezi sate</button>
-      <button class="btn btn-sm" onclick="previewInvoice()">Pregled</button>
+      <button class="btn btn-sm" onclick="importHours()" data-i18n="importHours"></button>
+      <button class="btn btn-sm" onclick="previewInvoice()" data-i18n="preview"></button>
       <button class="btn btn-sm btn-primary" onclick="generatePDF()">&#8595; PDF</button>
     </div>
   </div>
   <div class="inv-hdr">
     <div class="card">
-      <div class="card-title">Izdava&#269;</div>
-      <div class="field"><label>Naziv</label><input id="ifn"></div>
-      <div class="field"><label>Adresa</label><input id="ifa"></div>
-      <div class="field"><label>Email</label><input id="ife"></div>
-      <div class="field"><label>UID / Steuernummer</label><input id="ifu" placeholder="ATU12345678"></div>
+      <div class="card-title" data-i18n="issuer"></div>
+      <div class="field"><label data-i18n="fieldName"></label><input id="ifn"></div>
+      <div class="field"><label data-i18n="fieldAddr"></label><input id="ifa"></div>
+      <div class="field"><label data-i18n="fieldEmail"></label><input id="ife"></div>
+      <div class="field"><label data-i18n="taxId"></label><input id="ifu" placeholder="ATU12345678"></div>
       <div class="field"><label>IBAN</label><input id="ifib" placeholder="AT12 3456 7890 1234 5678"></div>
       <div class="field"><label>BIC / SWIFT</label><input id="ifbic" placeholder="RLNWATWW"></div>
     </div>
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-        Klijent
-        <select id="inv-client-sel" class="btn btn-sm" style="font-size:11px;cursor:pointer" onchange="fillClientFromSel()"><option value="">Popuni iz klijenta...</option></select>
+        <span data-i18n="clients"></span>
+        <select id="inv-client-sel" class="btn btn-sm" style="font-size:11px;cursor:pointer" onchange="fillClientFromSel()"><option value="" data-i18n="clientFrom"></option></select>
       </div>
-      <div class="field"><label>Naziv</label><input id="itn" placeholder="Mustermann GmbH"></div>
-      <div class="field"><label>Adresa</label><input id="ita"></div>
-      <div class="field"><label>Email</label><input id="ite"></div>
-      <div class="field"><label>UID klijenta</label><input id="itu"></div>
+      <div class="field"><label data-i18n="fieldName"></label><input id="itn" placeholder="Mustermann GmbH"></div>
+      <div class="field"><label data-i18n="fieldAddr"></label><input id="ita"></div>
+      <div class="field"><label data-i18n="fieldEmail"></label><input id="ite"></div>
+      <div class="field"><label data-i18n="clientUid"></label><input id="itu"></div>
       <div class="grid2">
-        <div class="field"><label>Br. ra&#269;una</label><input id="inum" value="2024-001"></div>
-        <div class="field"><label>Valuta</label>
+        <div class="field"><label data-i18n="thInvNum"></label><input id="inum" value="2024-001"></div>
+        <div class="field"><label data-i18n="currency"></label>
           <select id="icur" onchange="renderInvTotals()">
             <option value="EUR">EUR &#8364;</option><option value="CHF">CHF Fr.</option><option value="USD">USD $</option>
           </select>
         </div>
       </div>
       <div class="grid2">
-        <div class="field"><label>Datum</label><input id="idate" type="date"></div>
-        <div class="field"><label>Rok pla&#263;anja</label><input id="idue" type="date"></div>
+        <div class="field"><label data-i18n="thDate"></label><input id="idate" type="date"></div>
+        <div class="field"><label data-i18n="paymentDue"></label><input id="idue" type="date"></div>
       </div>
     </div>
   </div>
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-      Stavke
-      <button class="btn btn-sm" onclick="addInvRow()">+ Dodaj</button>
+      <span data-i18n="lineItems"></span>
+      <button class="btn btn-sm" onclick="addInvRow()" data-i18n="add"></button>
     </div>
     <table class="inv-table">
-      <thead><tr><th style="width:38%">Opis</th><th style="width:10%">Sati</th><th style="width:17%">Cijena/h</th><th style="width:10%">PDV%</th><th style="width:17%">Iznos</th><th style="width:8%"></th></tr></thead>
+      <thead><tr><th style="width:38%" data-i18n="thDesc"></th><th style="width:10%" data-i18n="hours"></th><th style="width:17%">€/h</th><th style="width:10%">PDV%</th><th style="width:17%" data-i18n="thAmount"></th><th style="width:8%"></th></tr></thead>
       <tbody id="inv-body"></tbody>
     </table>
     <div class="totals-wrap" id="inv-totals"></div>
   </div>
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-      Opcije pla&#263;anja
+      <span data-i18n="paymentOpts"></span>
       <div style="display:flex;gap:10px">
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0"><input type="checkbox" id="pay-sepa" style="accent-color:var(--accent)"> SEPA QR</label>
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0"><input type="checkbox" id="pay-paypal" style="accent-color:var(--accent)"> PayPal</label>
@@ -999,32 +999,32 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
     </div>
     <div id="pay-paypal-row" style="display:none" class="field"><label>PayPal link / email</label><input id="pay-paypal-val" placeholder="https://paypal.me/..."></div>
     <div id="pay-revolut-row" style="display:none" class="field"><label>Revolut link</label><input id="pay-revolut-val" placeholder="https://revolut.me/..."></div>
-    <div id="pay-empty" style="font-size:12px;color:var(--text3)">Odaberi opcije pla&#263;anja.</div>
+    <div id="pay-empty" style="font-size:12px;color:var(--text3)" data-i18n="invNoPayment"></div>
   </div>
-  <div class="card"><div class="card-title">Napomena</div><div class="field" style="margin:0"><textarea id="inote" rows="2" placeholder="Kleinunternehmer gem. &#167; 6 Abs. 1 Z 27 UStG &#8211; keine Umsatzsteuer"></textarea></div></div>
+  <div class="card"><div class="card-title" data-i18n="invNote"></div><div class="field" style="margin:0"><textarea id="inote" rows="2" placeholder="Kleinunternehmer gem. &#167; 6 Abs. 1 Z 27 UStG &#8211; keine Umsatzsteuer"></textarea></div></div>
   <div id="inv-toast" class="toast"></div>
 </div>
 
 <!-- INVOICE HISTORY -->
 <div class="page" id="page-invhistory">
   <div class="page-header">
-    <div class="page-title">Historija ra&#269;una</div>
-    <button class="btn btn-sm btn-primary" onclick="saveCurrentInvoice()">+ Spremi trenutni ra&#269;un</button>
+    <div class="page-title" data-i18n="invhistory"></div>
+    <button class="btn btn-sm btn-primary" onclick="saveCurrentInvoice()" data-i18n="saveCurrentInv"></button>
   </div>
   <div class="summary-grid" id="invh-stats"></div>
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-      Svi ra&#269;uni
+      <span data-i18n="allInvoices"></span>
       <select id="invh-filter" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="renderInvHistory()">
-        <option value="">Svi statusi</option>
-        <option value="draft">Nacrt</option>
-        <option value="sent">Poslano</option>
-        <option value="paid">Pla&#263;eno</option>
-        <option value="overdue">Kasni</option>
+        <option value="" data-i18n="allStatuses"></option>
+        <option value="draft" data-i18n="invFilterDraft"></option>
+        <option value="sent" data-i18n="invFilterSent"></option>
+        <option value="paid" data-i18n="invFilterPaid"></option>
+        <option value="overdue" data-i18n="invFilterOverdue"></option>
       </select>
     </div>
     <table class="data-table">
-      <thead><tr><th>Br. ra&#269;una</th><th>Klijent</th><th>Datum</th><th>Rok</th><th>Iznos</th><th>Status</th><th></th></tr></thead>
+      <thead><tr><th data-i18n="thInvNum"></th><th data-i18n="thClient"></th><th data-i18n="thDate"></th><th data-i18n="thDue"></th><th data-i18n="thAmount"></th><th data-i18n="thStatus"></th><th></th></tr></thead>
       <tbody id="invh-body"></tbody>
     </table>
   </div>
@@ -1033,8 +1033,8 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- TEMPLATES -->
 <div class="page" id="page-templates">
   <div class="page-header">
-    <div class="page-title">Predlosci emaila</div>
-    <button class="btn btn-sm btn-primary" onclick="openTemplateModal()">+ Novi predlozak</button>
+    <div class="page-title" data-i18n="templates"></div>
+    <button class="btn btn-sm btn-primary" onclick="openTemplateModal()" data-i18n="newTemplateTitle"></button>
   </div>
   <div id="templates-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
 </div>
@@ -1044,11 +1044,11 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
   <div class="page-header">
     <div class="page-title">Prospecting</div>
     <div class="page-actions">
-      <button class="btn btn-sm btn-danger" onclick="clearAllLeads()">Obri&#353;i sve leadove</button>
+      <button class="btn btn-sm btn-danger" onclick="clearAllLeads()" data-i18n="confirmDeleteLeads"></button>
     </div>
   </div>
   <div class="card">
-    <div style="font-size:13px;font-weight:500;margin-bottom:14px">Pretra&#382;i firme</div>
+    <div style="font-size:13px;font-weight:500;margin-bottom:14px" data-i18n="searchFirms"></div>
     <div class="grid3" style="margin-bottom:12px">
       <div class="field" style="margin:0"><label id="label-keyword">Djelatnost / klju&#269;na rije&#269;</label><input id="pros-query" placeholder="CNC Fr&#228;sen, Maschinenbau..."></div>
       <div class="field" style="margin:0"><label id="label-city">Grad / regija</label><input id="pros-location" placeholder="Graz, Bayern, &#214;sterreich..."></div>
@@ -1088,18 +1088,18 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 
   <div id="tab-content-results">
     <div id="pros-results-grid" class="pros-grid">
-      <div class="empty" style="grid-column:1/-1">Upi&#353;i djelatnost i grad pa klikni Pretra&#382;i.</div>
+      <div class="empty" style="grid-column:1/-1" data-i18n="emptySearch"></div>
     </div>
   </div>
 
   <div id="tab-content-leads" style="display:none">
     <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap" id="lead-filters">
-      <button class="btn btn-sm" onclick="setLeadFilter('')">Svi</button>
-      <button class="btn btn-sm" onclick="setLeadFilter('novi')">Novi</button>
-      <button class="btn btn-sm" onclick="setLeadFilter('kontaktiran')">Kontaktirani</button>
-      <button class="btn btn-sm" onclick="setLeadFilter('zainteresiran')">Zainteresirani</button>
-      <button class="btn btn-sm" onclick="setLeadFilter('nije-odgovorio')">Nije odgovorio</button>
-      <button class="btn btn-sm" onclick="setLeadFilter('odbijenica')">Odbio</button>
+      <button class="btn btn-sm" onclick="setLeadFilter('')" data-i18n="filterAll"></button>
+      <button class="btn btn-sm" onclick="setLeadFilter('novi')" data-i18n="leadNew"></button>
+      <button class="btn btn-sm" onclick="setLeadFilter('kontaktiran')" data-i18n="leadContacted"></button>
+      <button class="btn btn-sm" onclick="setLeadFilter('zainteresiran')" data-i18n="leadInterested"></button>
+      <button class="btn btn-sm" onclick="setLeadFilter('nije-odgovorio')" data-i18n="leadNotContacted"></button>
+      <button class="btn btn-sm" onclick="setLeadFilter('odbijenica')" data-i18n="leadRejected"></button>
     </div>
     <div id="pros-leads-grid" class="pros-grid"></div>
   </div>
@@ -1130,39 +1130,39 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- CLIENTS -->
 <div class="page" id="page-clients">
   <div class="page-header">
-    <div class="page-title">Klijenti</div>
-    <button class="btn btn-sm btn-primary" onclick="openClientModal()">+ Novi klijent</button>
+    <div class="page-title" data-i18n="clients"></div>
+    <button class="btn btn-sm btn-primary" onclick="openClientModal()" data-i18n="newClient"></button>
   </div>
   <div id="clients-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
 </div>
 
 <!-- SETTINGS -->
 <div class="page" id="page-settings">
-  <div class="page-header"><div class="page-title">Postavke</div></div>
+  <div class="page-header"><div class="page-title" data-i18n="settings"></div></div>
   <div class="settings-section">
-    <h3>Moji podaci</h3>
+    <h3 data-i18n="myData"></h3>
     <div class="grid2">
-      <div class="field"><label>Naziv tvrtke</label><input id="s-name"></div>
-      <div class="field"><label>Email</label><input id="s-email"></div>
-      <div class="field"><label>Adresa</label><input id="s-addr"></div>
-      <div class="field"><label>UID / Steuernummer</label><input id="s-uid"></div>
+      <div class="field"><label data-i18n="companyName"></label><input id="s-name"></div>
+      <div class="field"><label data-i18n="fieldEmail"></label><input id="s-email"></div>
+      <div class="field"><label data-i18n="fieldAddr"></label><input id="s-addr"></div>
+      <div class="field"><label data-i18n="taxId"></label><input id="s-uid"></div>
       <div class="field"><label>IBAN</label><input id="s-iban"></div>
       <div class="field"><label>BIC / SWIFT</label><input id="s-bic"></div>
     </div>
   </div>
   <div class="settings-section">
-    <h3>Defaults</h3>
+    <h3 data-i18n="defaults"></h3>
     <div class="grid3">
-      <div class="field"><label>Default hourly rate (&#8364;/h)</label><input id="s-rate" type="number" value="75" min="0"></div>
-      <div class="field"><label>Default PDV %</label><input id="s-vat" type="number" value="20" min="0"></div>
-      <div class="field"><label>Default valuta</label>
+      <div class="field"><label data-i18n="hourlyRateDef"></label><input id="s-rate" type="number" value="75" min="0"></div>
+      <div class="field"><label data-i18n="vatDefault"></label><input id="s-vat" type="number" value="20" min="0"></div>
+      <div class="field"><label data-i18n="currencyDefault"></label>
         <select id="s-currency"><option value="EUR">EUR &#8364;</option><option value="CHF">CHF Fr.</option><option value="USD">USD $</option></select>
       </div>
     </div>
-    <div class="field"><label>Default napomena na invoiceu</label><textarea id="s-note" rows="2"></textarea></div>
+    <div class="field"><label data-i18n="invNoteDefault"></label><textarea id="s-note" rows="2"></textarea></div>
   </div>
   <div style="display:flex;justify-content:flex-end;margin-top:4px">
-    <button class="btn btn-primary" onclick="saveSettings()">Spremi postavke</button>
+    <button class="btn btn-primary" onclick="saveSettings()" data-i18n="saveSettings"></button>
   </div>
   <div id="settings-toast" class="toast" style="max-width:400px;margin-left:auto"></div>
 </div>
@@ -1172,135 +1172,135 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- MODALS -->
 <div class="modal-bg" id="modal-kb">
   <div class="modal">
-    <div class="modal-title" id="kb-mtitle">Novi projekt</div>
-    <div class="field"><label>Naziv projekta</label><input id="kb-title"></div>
+    <div class="modal-title" id="kb-mtitle" data-i18n="newProjectTitle"></div>
+    <div class="field"><label data-i18n="fieldName"></label><input id="kb-title"></div>
     <div class="grid2">
-      <div class="field"><label>Klijent</label><select id="kb-client"></select></div>
-      <div class="field"><label>Hourly rate (&#8364;/h)</label><input id="kb-rate" type="number" min="0"></div>
+      <div class="field"><label data-i18n="thClient"></label><select id="kb-client"></select></div>
+      <div class="field"><label data-i18n="fieldHourlyRate"></label><input id="kb-rate" type="number" min="0"></div>
     </div>
-    <div class="field"><label>Status</label>
+    <div class="field"><label data-i18n="thStatus"></label>
       <select id="kb-status">
-        <option value="0">Upit</option><option value="1">U izradi</option>
-        <option value="2">Isporu&#269;eno</option><option value="3">Fakturirano</option><option value="4">Pla&#263;eno</option>
+        <option value="0" data-i18n="statusInquiry"></option><option value="1" data-i18n="statusInWork"></option>
+        <option value="2" data-i18n="statusDelivered"></option><option value="3" data-i18n="statusBilled"></option><option value="4" data-i18n="statusPaidProj"></option>
       </select>
     </div>
-    <div class="field"><label>Napomena</label><textarea id="kb-note" rows="2"></textarea></div>
+    <div class="field"><label data-i18n="fieldNotes"></label><textarea id="kb-note" rows="2"></textarea></div>
     <input type="hidden" id="kb-id">
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-kb')">Odustani</button>
-      <button class="btn btn-xs btn-danger" id="kb-del" style="display:none" onclick="deleteProject()">Obri&#353;i</button>
-      <button class="btn btn-primary" onclick="saveProject()">Spremi</button>
+      <button class="btn" onclick="closeModal('modal-kb')" data-i18n="cancel"></button>
+      <button class="btn btn-xs btn-danger" id="kb-del" style="display:none" onclick="deleteProject()" data-i18n="delete"></button>
+      <button class="btn btn-primary" onclick="saveProject()" data-i18n="save"></button>
     </div>
   </div>
 </div>
 
 <div class="modal-bg" id="modal-gantt">
   <div class="modal">
-    <div class="modal-title">Novi zadatak</div>
-    <div class="field"><label>Naziv</label><input id="gt-title"></div>
-    <div class="field"><label>Projekt</label><select id="gt-proj"></select></div>
+    <div class="modal-title" data-i18n="newTaskTitle"></div>
+    <div class="field"><label data-i18n="fieldName"></label><input id="gt-title"></div>
+    <div class="field"><label data-i18n="thProject"></label><select id="gt-proj"></select></div>
     <div class="grid2">
-      <div class="field"><label>Po&#269;etak</label><input id="gt-start" type="date"></div>
-      <div class="field"><label>Kraj</label><input id="gt-end" type="date"></div>
+      <div class="field"><label data-i18n="thStart"></label><input id="gt-start" type="date"></div>
+      <div class="field"><label data-i18n="thEnd"></label><input id="gt-end" type="date"></div>
     </div>
-    <div class="field"><label>Status</label>
-      <select id="gt-status"><option value="active">U tijeku</option><option value="done">Zavr&#353;eno</option><option value="late">Kasni</option></select>
+    <div class="field"><label data-i18n="thStatus"></label>
+      <select id="gt-status"><option value="active" data-i18n="statusActive"></option><option value="done" data-i18n="statusDone2"></option><option value="late" data-i18n="statusLate"></option></select>
     </div>
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-gantt')">Odustani</button>
-      <button class="btn btn-primary" onclick="saveGanttTask()">Spremi</button>
+      <button class="btn" onclick="closeModal('modal-gantt')" data-i18n="cancel"></button>
+      <button class="btn btn-primary" onclick="saveGanttTask()" data-i18n="save"></button>
     </div>
   </div>
 </div>
 
 <div class="modal-bg" id="modal-client">
   <div class="modal">
-    <div class="modal-title" id="cl-mtitle">Novi klijent</div>
+    <div class="modal-title" id="cl-mtitle" data-i18n="newClientTitle"></div>
     <div class="grid2">
-      <div class="field"><label>Naziv tvrtke</label><input id="cl-name"></div>
-      <div class="field"><label>Kontakt osoba</label><input id="cl-contact"></div>
+      <div class="field"><label data-i18n="companyName"></label><input id="cl-name"></div>
+      <div class="field"><label data-i18n="contactPerson"></label><input id="cl-contact"></div>
     </div>
     <div class="grid2">
-      <div class="field"><label>Email</label><input id="cl-email" type="email"></div>
-      <div class="field"><label>Telefon</label><input id="cl-phone"></div>
+      <div class="field"><label data-i18n="fieldEmail"></label><input id="cl-email" type="email"></div>
+      <div class="field"><label data-i18n="fieldPhone"></label><input id="cl-phone"></div>
     </div>
-    <div class="field"><label>Adresa</label><input id="cl-addr"></div>
+    <div class="field"><label data-i18n="fieldAddr"></label><input id="cl-addr"></div>
     <div class="grid2">
-      <div class="field"><label>Zemlja</label>
+      <div class="field"><label data-i18n="country"></label>
         <select id="cl-country">
-          <option value="AT">Austrija</option><option value="DE">Njema&#269;ka</option>
-          <option value="CH">&#352;vicarska</option><option value="HR">Hrvatska</option><option value="BA">BiH</option>
+          <option value="AT" data-i18n="cntAT"></option><option value="DE" data-i18n="cntDE"></option>
+          <option value="CH" data-i18n="cntCH"></option><option value="HR" data-i18n="cntHR"></option><option value="BA">BiH</option>
         </select>
       </div>
-      <div class="field"><label>Default rate (&#8364;/h)</label><input id="cl-rate" type="number" min="0"></div>
+      <div class="field"><label data-i18n="defaultRate"></label><input id="cl-rate" type="number" min="0"></div>
     </div>
-    <div class="field"><label>UID / Steuernummer</label><input id="cl-uid"></div>
-    <div class="field"><label>Napomena</label><textarea id="cl-note" rows="2"></textarea></div>
+    <div class="field"><label data-i18n="taxId"></label><input id="cl-uid"></div>
+    <div class="field"><label data-i18n="fieldNotes"></label><textarea id="cl-note" rows="2"></textarea></div>
     <input type="hidden" id="cl-id">
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-client')">Odustani</button>
-      <button class="btn btn-xs btn-danger" id="cl-del" style="display:none" onclick="deleteClient()">Obri&#353;i</button>
-      <button class="btn btn-primary" onclick="saveClient()">Spremi</button>
+      <button class="btn" onclick="closeModal('modal-client')" data-i18n="cancel"></button>
+      <button class="btn btn-xs btn-danger" id="cl-del" style="display:none" onclick="deleteClient()" data-i18n="delete"></button>
+      <button class="btn btn-primary" onclick="saveClient()" data-i18n="save"></button>
     </div>
   </div>
 </div>
 
 <div class="modal-bg" id="modal-manual">
   <div class="modal">
-    <div class="modal-title" id="manual-title">Ru&#269;ni unos vremena</div>
-    <div class="field"><label>Projekt</label><select id="manual-project"></select></div>
-    <div class="field"><label>Opis rada</label><input id="manual-note" placeholder="Opis..."></div>
+    <div class="modal-title" id="manual-title" data-i18n="manualTimeTitle"></div>
+    <div class="field"><label data-i18n="thProject"></label><select id="manual-project"></select></div>
+    <div class="field"><label data-i18n="workDesc"></label><input id="manual-note" data-i18n-ph="descPh"></div>
     <div class="grid3">
-      <div class="field"><label>Sati</label><input id="manual-h" type="number" value="0" min="0" max="24" oninput="updateManualPreview()"></div>
-      <div class="field"><label>Minute</label><input id="manual-m" type="number" value="0" min="0" max="59" oninput="updateManualPreview()"></div>
-      <div class="field"><label>Datum</label><input id="manual-date" type="date"></div>
+      <div class="field"><label data-i18n="hours"></label><input id="manual-h" type="number" value="0" min="0" max="24" oninput="updateManualPreview()"></div>
+      <div class="field"><label data-i18n="minutes"></label><input id="manual-m" type="number" value="0" min="0" max="59" oninput="updateManualPreview()"></div>
+      <div class="field"><label data-i18n="thDate"></label><input id="manual-date" type="date"></div>
     </div>
     <div style="padding:10px 12px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--text3);margin-top:4px">
-      Trajanje: <span id="manual-preview" style="color:var(--accent);font-family:var(--mono)">00:00:00</span>
+      <span data-i18n="thDuration"></span>: <span id="manual-preview" style="color:var(--accent);font-family:var(--mono)">00:00:00</span>
     </div>
     <input type="hidden" id="manual-id">
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-manual')">Odustani</button>
-      <button class="btn btn-xs btn-danger" id="manual-del" style="display:none" onclick="deleteManualLog()">Obri&#353;i</button>
-      <button class="btn btn-primary" onclick="saveManualEntry()">Spremi</button>
+      <button class="btn" onclick="closeModal('modal-manual')" data-i18n="cancel"></button>
+      <button class="btn btn-xs btn-danger" id="manual-del" style="display:none" onclick="deleteManualLog()" data-i18n="delete"></button>
+      <button class="btn btn-primary" onclick="saveManualEntry()" data-i18n="save"></button>
     </div>
   </div>
 </div>
 
 <div class="modal-bg" id="modal-expense">
   <div class="modal">
-    <div class="modal-title" id="exp-mtitle">Novi tro&#353;ak</div>
-    <div class="field"><label>Opis</label><input id="exp-desc" placeholder="Npr. Gorivo za odlazak klijentu"></div>
+    <div class="modal-title" id="exp-mtitle" data-i18n="newExpenseTitle"></div>
+    <div class="field"><label data-i18n="fieldDesc"></label><input id="exp-desc"></div>
     <div class="grid2">
-      <div class="field"><label>Projekt</label><select id="exp-project"></select></div>
-      <div class="field"><label>Kategorija</label>
+      <div class="field"><label data-i18n="thProject"></label><select id="exp-project"></select></div>
+      <div class="field"><label data-i18n="thStatus"></label>
         <select id="exp-cat">
-          <option value="gorivo">Gorivo</option><option value="materijal">Materijal</option>
-          <option value="softver">Softver</option><option value="putovanje">Putovanje</option><option value="ostalo">Ostalo</option>
+          <option value="gorivo" data-i18n="catFuel"></option><option value="materijal" data-i18n="catMaterial"></option>
+          <option value="softver" data-i18n="catSoftware"></option><option value="putovanje" data-i18n="catTravel"></option><option value="ostalo" data-i18n="catOther"></option>
         </select>
       </div>
     </div>
     <div class="grid2">
-      <div class="field"><label>Iznos (&#8364;)</label><input id="exp-amount" type="number" min="0" step="0.01"></div>
-      <div class="field"><label>Datum</label><input id="exp-date" type="date"></div>
+      <div class="field"><label data-i18n="thAmount"></label><input id="exp-amount" type="number" min="0" step="0.01"></div>
+      <div class="field"><label data-i18n="thDate"></label><input id="exp-date" type="date"></div>
     </div>
-    <div class="field"><label>Napomena</label><textarea id="exp-note" rows="2"></textarea></div>
+    <div class="field"><label data-i18n="fieldNotes"></label><textarea id="exp-note" rows="2"></textarea></div>
     <input type="hidden" id="exp-id">
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-expense')">Odustani</button>
-      <button class="btn btn-xs btn-danger" id="exp-del" style="display:none" onclick="deleteExpense()">Obri&#353;i</button>
-      <button class="btn btn-primary" onclick="saveExpense()">Spremi</button>
+      <button class="btn" onclick="closeModal('modal-expense')" data-i18n="cancel"></button>
+      <button class="btn btn-xs btn-danger" id="exp-del" style="display:none" onclick="deleteExpense()" data-i18n="delete"></button>
+      <button class="btn btn-primary" onclick="saveExpense()" data-i18n="save"></button>
     </div>
   </div>
 </div>
 
 <div class="modal-bg" id="modal-invh">
   <div class="modal" style="max-width:560px">
-    <div class="modal-title">Detalji ra&#269;una</div>
+    <div class="modal-title" data-i18n="invDetails"></div>
     <div id="invh-detail"></div>
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-invh')">Zatvori</button>
-      <button class="btn btn-sm" onclick="recurringFromSaved()">&#8635; Novi iz ovoga</button>
+      <button class="btn" onclick="closeModal('modal-invh')" data-i18n="close"></button>
+      <button class="btn btn-sm" onclick="recurringFromSaved()" data-i18n="newFromThis"></button>
       <button class="btn btn-sm btn-primary" onclick="regenPDF()">&#8595; PDF</button>
     </div>
   </div>
@@ -1308,31 +1308,31 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 
 <div class="modal-bg" id="modal-lead">
   <div class="modal">
-    <div class="modal-title" id="lead-mtitle">Detalji leada</div>
+    <div class="modal-title" id="lead-mtitle" data-i18n="leadDetails"></div>
     <div id="lead-detail"></div>
-    <div class="field"><label>Napomena</label><textarea id="lead-note" rows="2" placeholder="Bilješka o firmi..."></textarea></div>
-    <div class="field"><label>Follow-up datum</label>
+    <div class="field"><label data-i18n="fieldNotes"></label><textarea id="lead-note" rows="2" data-i18n-ph="notesPh"></textarea></div>
+    <div class="field"><label data-i18n="followUpDate"></label>
       <input id="lead-followup" type="date" style="font-size:13px;padding:8px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);outline:none;width:100%">
     </div>
-    <div class="field"><label>Status</label>
+    <div class="field"><label data-i18n="thStatus"></label>
       <select id="lead-status">
-        <option value="novi">Novi</option>
-        <option value="kontaktiran">Kontaktiran</option>
-        <option value="zainteresiran">Zainteresiran</option>
-        <option value="nije-odgovorio">Nije odgovorio</option>
-        <option value="odbijenica">Odbio</option>
+        <option value="novi" data-i18n="leadNew"></option>
+        <option value="kontaktiran" data-i18n="leadContacted"></option>
+        <option value="zainteresiran" data-i18n="leadInterested"></option>
+        <option value="nije-odgovorio" data-i18n="leadNotContacted"></option>
+        <option value="odbijenica" data-i18n="leadRejected"></option>
       </select>
     </div>
     <div id="lead-email-history" style="display:none">
-      <div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Poslani emailovi</div>
+      <div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px" data-i18n="emailHistory"></div>
       <div id="lead-email-history-list"></div>
     </div>
     <input type="hidden" id="lead-id">
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-lead')">Zatvori</button>
-      <button class="btn btn-xs btn-danger" onclick="deleteLead()">Obri&#353;i</button>
-      <button class="btn btn-sm" onclick="openEmailModal()" style="background:var(--blue-dim);color:var(--blue);border-color:var(--blue)">&#9993; Po&#353;alji email</button>
-      <button class="btn btn-primary" onclick="saveLead()">Spremi</button>
+      <button class="btn" onclick="closeModal('modal-lead')" data-i18n="close"></button>
+      <button class="btn btn-xs btn-danger" onclick="deleteLead()" data-i18n="delete"></button>
+      <button class="btn btn-sm" onclick="openEmailModal()" style="background:var(--blue-dim);color:var(--blue);border-color:var(--blue)" data-i18n="sendEmail"></button>
+      <button class="btn btn-primary" onclick="saveLead()" data-i18n="save"></button>
     </div>
   </div>
 </div>
@@ -1340,20 +1340,20 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- TEMPLATE MODAL -->
 <div class="modal-bg" id="modal-template">
   <div class="modal" style="max-width:560px">
-    <div class="modal-title" id="tmpl-mtitle">Novi predlozak</div>
+    <div class="modal-title" id="tmpl-mtitle" data-i18n="newTemplateTitle"></div>
     <div class="grid2">
-      <div class="field"><label>Naziv predloska</label><input id="tmpl-name" placeholder="npr. Cold outreach DE"></div>
-      <div class="field"><label>Jezik</label>
-        <select id="tmpl-lang"><option value="de">Njemacki (DE)</option><option value="en">Engleski (EN)</option><option value="hr">Hrvatski (HR)</option></select>
+      <div class="field"><label data-i18n="templateName"></label><input id="tmpl-name" placeholder="Cold outreach DE"></div>
+      <div class="field"><label data-i18n="templateLang"></label>
+        <select id="tmpl-lang"><option value="de">DE</option><option value="en">EN</option><option value="hr">HR</option></select>
       </div>
     </div>
-    <div class="field"><label>Subject</label><input id="tmpl-subject" placeholder="Subject emaila..."></div>
-    <div class="field"><label>Poruka</label><textarea id="tmpl-body" rows="10" style="font-family:var(--mono);font-size:12px;line-height:1.6" placeholder="Tekst emaila...&#10;&#10;Mozete koristiti [NAZIV_FIRME] za personalizaciju."></textarea></div>
+    <div class="field"><label data-i18n="templateSubject"></label><input id="tmpl-subject"></div>
+    <div class="field"><label data-i18n="templateMsg"></label><textarea id="tmpl-body" rows="10" style="font-family:var(--mono);font-size:12px;line-height:1.6"></textarea></div>
     <input type="hidden" id="tmpl-id">
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-template')">Odustani</button>
-      <button class="btn btn-xs btn-danger" id="tmpl-del" style="display:none" onclick="deleteTemplate()">Obrisi</button>
-      <button class="btn btn-primary" onclick="saveTemplate()">Spremi</button>
+      <button class="btn" onclick="closeModal('modal-template')" data-i18n="cancel"></button>
+      <button class="btn btn-xs btn-danger" id="tmpl-del" style="display:none" onclick="deleteTemplate()" data-i18n="delete"></button>
+      <button class="btn btn-primary" onclick="saveTemplate()" data-i18n="save"></button>
     </div>
   </div>
 </div>
@@ -1361,24 +1361,24 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- EMAIL MODAL -->
 <div class="modal-bg" id="modal-email">
   <div class="modal" style="max-width:560px">
-    <div class="modal-title">Posalji email</div>
+    <div class="modal-title" data-i18n="sendEmail"></div>
     <div style="background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--text3)">
-      Od: <span style="color:var(--text2)">CAMOutput &lt;info@camoutput.com&gt;</span>
+      <span data-i18n="emailFrom"></span>: <span style="color:var(--text2)">CAMOutput &lt;info@camoutput.com&gt;</span>
     </div>
-    <div class="field"><label>Prima (email adresa)</label><input id="email-to" type="email" placeholder="office@firma.com"></div>
-    <div class="field"><label>Predlozak</label><select id="email-template-sel" onchange="applyTemplate()"><option value="">-- ili odaberi predlozak --</option></select></div>
+    <div class="field"><label data-i18n="emailTo"></label><input id="email-to" type="email" placeholder="office@firma.com"></div>
+    <div class="field"><label data-i18n="templateSubject"></label><select id="email-template-sel" onchange="applyTemplate()"><option value="" data-i18n="selectTpl"></option></select></div>
     <div style="margin-bottom:14px">
-      <button class="btn btn-primary" id="ai-gen-btn" onclick="generateAIEmail()" style="width:100%">&#10024; AI email - generiraj personalizirani email</button>
+      <button class="btn btn-primary" id="ai-gen-btn" onclick="generateAIEmail()" style="width:100%" data-i18n="aiGenBtn"></button>
     </div>
     <input type="hidden" id="email-lang" value="de">
     <div id="ai-status" style="display:none;font-size:12px;color:var(--accent);margin-bottom:10px;padding:8px 12px;background:var(--accent-dim);border-radius:6px"></div>
-    <div class="field"><label>Subject</label><input id="email-subject"></div>
-    <div class="field"><label>Poruka</label><textarea id="email-body" rows="9" style="font-family:var(--mono);font-size:12px;line-height:1.6"></textarea></div>
+    <div class="field"><label data-i18n="templateSubject"></label><input id="email-subject"></div>
+    <div class="field"><label data-i18n="templateMsg"></label><textarea id="email-body" rows="9" style="font-family:var(--mono);font-size:12px;line-height:1.6"></textarea></div>
     <div id="email-toast" class="toast"></div>
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-email')">Odustani</button>
-      <button class="btn btn-sm" onclick="generateEmailTemplate()">&#8635; Predlozak</button>
-      <button class="btn btn-primary" id="email-send-btn" onclick="sendEmail()">Posalji</button>
+      <button class="btn" onclick="closeModal('modal-email')" data-i18n="cancel"></button>
+      <button class="btn btn-sm" onclick="generateEmailTemplate()">&#8635; <span data-i18n="templates"></span></button>
+      <button class="btn btn-primary" id="email-send-btn" onclick="sendEmail()" data-i18n="send"></button>
     </div>
   </div>
 </div>
@@ -1387,7 +1387,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
   <div style="background:#fff;border-radius:12px;width:100%;max-width:680px;margin:0 auto 40px;overflow:hidden">
     <div id="inv-preview-content"></div>
     <div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:10px;background:#f9fafb">
-      <button onclick="closeModal('modal-preview')" style="padding:8px 16px;border-radius:8px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:13px">Zatvori</button>
+      <button onclick="closeModal('modal-preview')" style="padding:8px 16px;border-radius:8px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:13px" data-i18n="close"></button>
       <button onclick="generatePDF()" style="padding:8px 16px;border-radius:8px;border:none;background:#1D9E75;color:#fff;cursor:pointer;font-size:13px;font-weight:500">&#8595; PDF</button>
     </div>
   </div>
@@ -1666,12 +1666,14 @@ var S = {
   settings:{appLang:'hr',appTheme:'dark',name:'CAMOutput e.U.',email:'info@camoutput.com',addr:'Hauptstrasse 1, 8010 Graz',uid:'',iban:'',bic:'',rate:75,vat:20,currency:'EUR',note:'Kleinunternehmer gem. Paragraph 6 Abs. 1 Z 27 UStG - keine Umsatzsteuer',calUsername:''}
 };
 
-var KB_COLS = ['Upit','U izradi','Isporuceno','Fakturirano','Placeno'];
+function getKbCols(){return [t('statusInquiry'),t('statusInWork'),t('statusDelivered'),t('statusBilled'),t('statusPaidProj')];}
 var KB_CLR = ['#8b949e','#1D9E75','#388bfd','#d29922','#3fb950'];
 var WORKER_URL = 'https://shopflow-search.camodanko.workers.dev';
 var EMAIL_WORKER_URL = 'https://shopflow-email.camodanko.workers.dev';
 var FETCH_WORKER_URL = 'https://shopflow-fetch.camodanko.workers.dev';
+function getLeadStatuses(){return {novi:t('leadNew'),kontaktiran:t('leadContacted'),zainteresiran:t('leadInterested'),'nije-odgovorio':t('leadNotContacted'),odbijenica:t('leadRejected')};}
 var LEAD_STATUSES = {novi:'Novi',kontaktiran:'Kontaktiran',zainteresiran:'Zainteresiran','nije-odgovorio':'Nije odgovorio',odbijenica:'Odbio'};
+function getInvStatuses(){return {draft:t('invFilterDraft'),sent:t('invFilterSent'),paid:t('invFilterPaid'),overdue:t('invFilterOverdue')};}
 var INV_STATUSES = {draft:'Nacrt',sent:'Poslano',paid:'Placeno',overdue:'Kasni'};
 var L10N = {
   de:{invoice:'RECHNUNG',to:'RECHNUNGSEMPFANGER',num:'Rechnungs-Nr.',date:'Datum',due:'Falligkeitsdatum',desc:'Beschreibung',qty:'Std.',price:'Preis/Std.',vat:'MwSt.%',amount:'Betrag',sub:'Nettobetrag',vatl:'MwSt.',total:'Gesamtbetrag',iban:'IBAN',bic:'BIC',pay:'Zahlungsdetails'},
@@ -1712,13 +1714,109 @@ var TRANSLATIONS = {
     templates:'Predlošci e-maila', clients:'Klijenti', settings:'Postavke',
     newProject:'+ Novi projekt', newTask:'+ Dodaj zadatak',
     newExpense:'+ Novi trošak', newClient:'+ Novi klijent',
+    // Common actions
+    cancel:'Odustani', save:'Spremi', delete:'Obriši', close:'Zatvori', send:'Pošalji',
+    edit:'Uredi', add:'Dodaj', search:'Pretraži', preview:'Pregled', export:'Izvezi',
+    // Field labels
+    fieldName:'Naziv', fieldAddr:'Adresa', fieldEmail:'Email', fieldPhone:'Telefon',
+    fieldDate:'Datum', fieldStatus:'Status', fieldNote:'Napomena', fieldProject:'Projekt',
+    fieldClient:'Klijent', fieldHours:'Sati', fieldMinutes:'Minute', fieldAmount:'Iznos (€)',
+    fieldCategory:'Kategorija', fieldDesc:'Opis', fieldRate:'Hourly rate (€/h)',
+    fieldDue:'Rok plaćanja', fieldStart:'Početak', fieldEnd:'Kraj',
+    fieldCurrency:'Valuta', fieldVat:'PDV %', fieldContact:'Kontakt osoba',
+    fieldUID:'UID / Steuernummer', fieldSubject:'Subject', fieldMessage:'Poruka',
+    fieldLang:'Jezik', fieldTemplateName:'Naziv predloška', fieldFollowup:'Follow-up datum',
+    fieldReceiver:'Prima (email adresa)', fieldInvNum:'Br. računa',
+    // Page subtitles / card titles
+    issuer:'Izdavač', invoiceItems:'Stavke', paymentOptions:'Opcije plaćanja',
+    allInvoices:'Svi računi', allExpenses:'Svi troškovi', allStatuses:'Svi statusi',
+    allProjects:'Svi projekti', allCategories:'Sve kategorije',
+    emailSent:'Poslani e-mailovi', invoiceDetails:'Detalji računa',
+    leadDetails:'Detalji leada', newFromThis:'↺ Novi iz ovoga',
+    // Modal titles
+    newProjectTitle:'Novi projekt', editProjectTitle:'Uredi projekt',
+    newClientTitle:'Novi klijent', editClientTitle:'Uredi klijenta',
+    newExpenseTitle:'Novi trošak', editExpenseTitle:'Uredi trošak',
+    newTaskTitle:'Novi zadatak', manualEntryTitle:'Ručni unos vremena', editEntryTitle:'Uredi unos',
+    newTemplateTitle:'Novi predložak', editTemplateTitle:'Uredi predložak',
+    sendEmailTitle:'Pošalji e-mail',
+    // Kanban status
+    kbUpit:'Upit', kbUizradi:'U izradi', kbIsporuceno:'Isporučeno',
+    kbFakturirano:'Fakturirano', kbPlaceno:'Plaćeno',
+    // Gantt status
+    ganttActive:'U tijeku', ganttDone:'Završeno', ganttLate:'Kasni',
+    // Invoice
+    importHours:'Uvezi sate', downloadPDF:'↓ PDF',
+    clientFrom:'Popuni iz klijenta...', noPayOption:'Odaberi opcije plaćanja.',
+    addRow:'+ Dodaj',
+    // Expense categories
+    catFuel:'Gorivo', catMaterial:'Materijal', catSoftware:'Softver',
+    catTravel:'Putovanje', catOther:'Ostalo',
+    // Countries
+    countryAT:'Austrija', countryDE:'Njemačka', countryCH:'Švicarska',
+    countryHR:'Hrvatska', countryBA:'BiH',
+    // Lead statuses
+    leadNew:'Novi', leadContacted:'Kontaktiran', leadInterested:'Zainteresiran',
+    leadNoReply:'Nije odgovorio', leadRejected:'Odbio',
+    leadFilterAll:'Svi', leadFilterNew:'Novi', leadFilterContacted:'Kontaktirani',
+    leadFilterInterested:'Zainteresirani', leadFilterNoReply:'Nije odgovorio', leadFilterRejected:'Odbio',
+    // Invoice statuses
+    invDraft:'Nacrt', invSent:'Poslano', invPaid:'Plaćeno', invOverdue:'Kasni',
+    // Tracker
+    trackerHours:'Sati:', trackerValue:'Vrijednost:', trackerDuration:'Trajanje:',
+    exportCSV:'↓ CSV', clearAll:'Obriši sve', saveInvoice:'+ Spremi trenutni račun',
+    // Template languages
+    langDE:'Njemački (DE)', langEN:'Engleski (EN)', langHR:'Hrvatski (HR)',
+    // Prospecting
+    deleteLeads:'Obriši sve leadove', searchSection:'Pretraži firme',
+    useTemplate:'↺ Predložak', aiEmailBtn:'✨ AI e-mail — generiraj personalizirani e-mail',
+    // Empty states
+    emptyTracker:'Nema zapisa. Pokreni timer.', emptyExpenses:'Nema troškova.',
+    emptyGantt:'Nema zadataka.', emptyInvHistory:'Nema računa.', emptyTemplates:'Nema predložaka.',
+    emptyResults:'Nema rezultata.', emptyClients:'Nema klijenata.', emptyLeads:'Nema leadova.',
+    searching:'Pretražujem...', emptySearch:'Upiši djelatnost i grad pa klikni Pretraži.',
+    emptyLeadStatus:'Nema leadova s ovim statusom.',
+    // Confirm dialogs
+    confirmDeleteProject:'Obrisati projekt?', confirmDeleteEntry:'Obrisati unos?',
+    confirmDeleteExpense:'Obrisati trošak?', confirmDeleteClient:'Obrisati klijenta?',
+    confirmDeleteLead:'Obrisati lead?', confirmDeleteLeads:'Obrisati sve leadove?',
+    confirmClearTracker:'Obrisati sve zapise?', confirmDeleteTemplate:'Obrisati predložak?',
+    // Table headers
+    thProject:'Projekt', thDesc:'Opis', thDate:'Datum', thDuration:'Trajanje',
+    thValue:'Vrijednost', thClient:'Klijent', thDue:'Rok', thAmount:'Iznos',
+    thStatus:'Status', thTask:'Zadatak', thStart:'Početak', thEnd:'Kraj', thTimeline:'Timeline',
+    thInvNum:'Br. računa',
+    trackerLogs:'Evidencija rada', hours:'Sati', minutes:'Minute',
+    allCats:'Sve kategorije', lineItems:'Stavke',
+    paymentOpts:'Opcije plaćanja', invNote:'Napomena',
+    saveCurrentInv:'+ Spremi trenutni račun',
+    invDetails:'Detalji računa',
+    followUpDate:'Follow-up datum', emailHistory:'Poslani emailovi',
+    manualTimeTitle:'Ručni unos vremena', workDesc:'Opis rada',
+    templateName:'Naziv predloška', templateLang:'Jezik', templateSubject:'Subject',
+    templateMsg:'Poruka', emailFrom:'Od', emailTo:'Prima (email adresa)',
+    selectTpl:'-- odaberi predložak --', companyName:'Naziv tvrtke',
+    contactPerson:'Kontakt osoba', taxId:'UID / Steuernummer', paymentDue:'Rok plaćanja',
+    hourlyRateDef:'Default hourly rate (€/h)', vatDefault:'Default PDV %',
+    currency:'Valuta', currencyDefault:'Default valuta', invNoteDefault:'Default napomena na invoiceu',
+    clientUid:'UID klijenta', defaultRate:'Default rate (€/h)',
+    aiGenBtn:'✨ AI email — personalizirani email',
+    filterAll:'Svi', timerNotePh:'Opis rada...', descPh:'Opis...',
+    kanbanSearchPh:'Pretraži...', notesPh:'Bilješka o firmi...',
+    invNoPayment:'Odaberi opcije plaćanja.',
+    statusInquiry:'Upit', statusInWork:'U izradi', statusDelivered:'Isporučeno',
+    statusBilled:'Fakturirano', statusPaidProj:'Plaćeno',
+    statusActive:'U tijeku', statusDone2:'Završeno', statusLate:'Kasni',
+    leadNotContacted:'Nije odgovorio',
+    invFilterDraft:'Nacrt', invFilterSent:'Poslano', invFilterPaid:'Plaćeno',
+    invFilterOverdue:'Kasni',
     activeProjects:'Aktivni projekti', recentTracked:'Nedavno praćeno',
     revenueByProject:'Prihod po projektu', unpaidInvoices:'Neplaćeni računi',
     startTimer:'Pokreni timer', manualEntry:'+ Ručni unos',
     sendEmail:'Pošalji e-mail', aiEmail:'AI e-mail',
     searchFirms:'Pretraži firme', keyword:'Djelatnost / ključna riječ',
     city:'Grad / regija', country:'Zemlja', searchType:'Tip pretrage',
-    numResults:'Broj rezultata', search:'Pretraži',
+    numResults:'Broj rezultata',
     results:'Rezultati', leads:'Leadovi',
     general:'Firme (općenito)', contact:'Firme + kontakt e-mail',
     maps:'Google Maps (lokalne firme)', jobs:'Oglasi za posao',
@@ -1821,7 +1919,69 @@ var TRANSLATIONS = {
     errAlreadyReg:'E-Mail bereits registriert. Bitte anmelden.',
     errPassLength:'Passwort muss mindestens 6 Zeichen haben.',
     errRateLimit:'Zu viele Versuche. Bitte eine Minute warten.',
-    errNetwork:'Keine Internetverbindung.'
+    errNetwork:'Keine Internetverbindung.',
+    cancel:'Abbrechen', save:'Speichern', delete:'Löschen', close:'Schließen', send:'Senden',
+    edit:'Bearbeiten', add:'Hinzufügen', preview:'Vorschau', export:'Exportieren',
+    fieldName:'Name', fieldAddr:'Adresse', fieldEmail:'E-Mail', fieldPhone:'Telefon',
+    fieldNotes:'Notizen', fieldHourlyRate:'Stundensatz', fieldBudget:'Budget',
+    fieldDesc:'Beschreibung', fieldClient:'Kunde', fieldStatus:'Status', fieldDate:'Datum',
+    newProjectTitle:'Neues Projekt', editProjectTitle:'Projekt bearbeiten',
+    newClientTitle:'Neuer Kunde', editClientTitle:'Kunde bearbeiten',
+    newExpenseTitle:'Neue Ausgabe', editExpenseTitle:'Ausgabe bearbeiten',
+    newTaskTitle:'Neue Aufgabe', editTaskTitle:'Aufgabe bearbeiten',
+    newTemplateTitle:'Neue Vorlage', editTemplateTitle:'Vorlage bearbeiten',
+    statusTodo:'Zu erledigen', statusInProgress:'In Bearbeitung', statusReview:'In Prüfung',
+    statusDone:'Fertig', statusBlocked:'Blockiert',
+    catFuel:'Kraftstoff', catMaterial:'Material', catSoftware:'Software', catTravel:'Reise',
+    catEquipment:'Ausrüstung', catMarketing:'Marketing', catOther:'Sonstiges',
+    cntHR:'Kroatien', cntDE:'Deutschland', cntAT:'Österreich', cntCH:'Schweiz',
+    cntUS:'USA', cntGB:'Großbritannien',
+    leadNew:'Neu', leadContacted:'Kontaktiert', leadProposal:'Angebot',
+    leadWon:'Gewonnen', leadLost:'Verloren',
+    invDraft:'Entwurf', invSent:'Gesendet', invPaid:'Bezahlt',
+    invOverdue:'Überfällig', invCancelled:'Storniert',
+    emptyTracker:'Keine Einträge. Timer starten.',
+    emptyExpenses:'Keine Ausgaben.',
+    emptyGantt:'Keine Aufgaben im Gantt.',
+    emptyInvHistory:'Keine Rechnungen.',
+    emptyTemplates:'Keine Vorlagen.',
+    searching:'Suche läuft...', emptySearch:'Branche und Stadt eingeben, dann Suchen klicken.',
+    emptyLeads:'Keine Leads.', emptyLeadStatus:'Keine Leads mit diesem Status.',
+    emptyClients:'Keine Kunden.',
+    emptyKanban:'Keine Aufgaben in dieser Spalte.',
+    confirmDeleteProject:'Projekt löschen?', confirmDeleteTask:'Aufgabe löschen?',
+    confirmDeleteExpense:'Ausgabe löschen?', confirmDeleteClient:'Kunden löschen?',
+    confirmDeleteLead:'Lead löschen?', confirmDeleteLeads:'Alle Leads löschen?',
+    confirmClearTracker:'Alle Einträge löschen?', confirmDeleteTemplate:'Vorlage löschen?',
+    thProject:'Projekt', thDesc:'Beschreibung', thDate:'Datum', thDuration:'Dauer',
+    thValue:'Wert', thClient:'Kunde', thDue:'Fälligkeit', thAmount:'Betrag',
+    thStatus:'Status', thTask:'Aufgabe', thStart:'Start', thEnd:'Ende',
+    thTimeline:'Timeline', thInvNum:'Rech.-Nr.',
+    clearAll:'Alle löschen', trackerLogs:'Arbeitsprotokoll', hours:'Stunden', minutes:'Minuten',
+    allProjects:'Alle Projekte', allCats:'Alle Kategorien', allExpenses:'Alle Ausgaben',
+    importHours:'Stunden importieren', issuer:'Aussteller', lineItems:'Positionen',
+    paymentOpts:'Zahlungsoptionen', invNote:'Anmerkung', allInvoices:'Alle Rechnungen',
+    allStatuses:'Alle Status', saveCurrentInv:'+ Aktuelle Rechnung speichern', clientFrom:'Aus Kunde befüllen...',
+    newFromThis:'↺ Neu aus diesem', leadDetails:'Lead-Details', invDetails:'Rechnungsdetails',
+    followUpDate:'Follow-up Datum', emailHistory:'Gesendete E-Mails',
+    manualTimeTitle:'Manuelle Zeiteingabe', workDesc:'Arbeitsbeschreibung',
+    templateName:'Vorlagenname', templateLang:'Sprache', templateSubject:'Betreff',
+    templateMsg:'Nachricht', emailFrom:'Von', emailTo:'Empfänger (E-Mail-Adresse)',
+    selectTpl:'-- Vorlage auswählen --', companyName:'Firmenname',
+    contactPerson:'Ansprechpartner', taxId:'UID / Steuernummer', paymentDue:'Zahlungsziel',
+    hourlyRateDef:'Standard-Stundensatz (€/h)', vatDefault:'Standard-MwSt. %',
+    currency:'Währung', currencyDefault:'Standard-Währung', invNoteDefault:'Standard-Rechnungsanmerkung',
+    clientUid:'UID des Kunden', defaultRate:'Standard-Stundensatz (€/h)',
+    aiGenBtn:'✨ KI-E-Mail — personalisierten E-Mail generieren',
+    filterAll:'Alle', timerNotePh:'Arbeitsbeschreibung...', descPh:'Beschreibung...',
+    kanbanSearchPh:'Suchen...', notesPh:'Notiz zum Unternehmen...',
+    invNoPayment:'Zahlungsoptionen auswählen.',
+    statusInquiry:'Anfrage', statusInWork:'In Bearbeitung', statusDelivered:'Geliefert',
+    statusBilled:'Fakturiert', statusPaidProj:'Bezahlt',
+    statusActive:'Aktiv', statusDone2:'Abgeschlossen', statusLate:'Verspätet',
+    leadNotContacted:'Keine Antwort', leadRejected:'Abgelehnt', leadInterested:'Interessiert',
+    invFilterDraft:'Entwurf', invFilterSent:'Gesendet', invFilterPaid:'Bezahlt',
+    invFilterOverdue:'Überfällig',
   },
   en: {
     dashboard:'Dashboard', projects:'Projects', tracker:'Time tracker',
@@ -1880,7 +2040,69 @@ var TRANSLATIONS = {
     errAlreadyReg:'Email already registered. Please sign in.',
     errPassLength:'Password must be at least 6 characters.',
     errRateLimit:'Too many attempts. Please wait a minute.',
-    errNetwork:'No internet connection.'
+    errNetwork:'No internet connection.',
+    cancel:'Cancel', save:'Save', delete:'Delete', close:'Close', send:'Send',
+    edit:'Edit', add:'Add', preview:'Preview', export:'Export',
+    fieldName:'Name', fieldAddr:'Address', fieldEmail:'Email', fieldPhone:'Phone',
+    fieldNotes:'Notes', fieldHourlyRate:'Hourly rate', fieldBudget:'Budget',
+    fieldDesc:'Description', fieldClient:'Client', fieldStatus:'Status', fieldDate:'Date',
+    newProjectTitle:'New project', editProjectTitle:'Edit project',
+    newClientTitle:'New client', editClientTitle:'Edit client',
+    newExpenseTitle:'New expense', editExpenseTitle:'Edit expense',
+    newTaskTitle:'New task', editTaskTitle:'Edit task',
+    newTemplateTitle:'New template', editTemplateTitle:'Edit template',
+    statusTodo:'To do', statusInProgress:'In progress', statusReview:'In review',
+    statusDone:'Done', statusBlocked:'Blocked',
+    catFuel:'Fuel', catMaterial:'Material', catSoftware:'Software', catTravel:'Travel',
+    catEquipment:'Equipment', catMarketing:'Marketing', catOther:'Other',
+    cntHR:'Croatia', cntDE:'Germany', cntAT:'Austria', cntCH:'Switzerland',
+    cntUS:'USA', cntGB:'United Kingdom',
+    leadNew:'New', leadContacted:'Contacted', leadProposal:'Proposal',
+    leadWon:'Won', leadLost:'Lost',
+    invDraft:'Draft', invSent:'Sent', invPaid:'Paid',
+    invOverdue:'Overdue', invCancelled:'Cancelled',
+    emptyTracker:'No entries. Start the timer.',
+    emptyExpenses:'No expenses.',
+    emptyGantt:'No tasks in Gantt.',
+    emptyInvHistory:'No invoices.',
+    emptyTemplates:'No templates.',
+    searching:'Searching...', emptySearch:'Enter industry and city, then click Search.',
+    emptyLeads:'No leads.', emptyLeadStatus:'No leads with this status.',
+    emptyClients:'No clients.',
+    emptyKanban:'No tasks in this column.',
+    confirmDeleteProject:'Delete project?', confirmDeleteTask:'Delete task?',
+    confirmDeleteExpense:'Delete expense?', confirmDeleteClient:'Delete client?',
+    confirmDeleteLead:'Delete lead?', confirmDeleteLeads:'Delete all leads?',
+    confirmClearTracker:'Delete all entries?', confirmDeleteTemplate:'Delete template?',
+    thProject:'Project', thDesc:'Description', thDate:'Date', thDuration:'Duration',
+    thValue:'Value', thClient:'Client', thDue:'Due', thAmount:'Amount',
+    thStatus:'Status', thTask:'Task', thStart:'Start', thEnd:'End',
+    thTimeline:'Timeline', thInvNum:'Inv. No.',
+    clearAll:'Clear all', trackerLogs:'Work log', hours:'Hours', minutes:'Minutes',
+    allProjects:'All projects', allCats:'All categories', allExpenses:'All expenses',
+    importHours:'Import hours', issuer:'Issuer', lineItems:'Line items',
+    paymentOpts:'Payment options', invNote:'Note', allInvoices:'All invoices',
+    allStatuses:'All statuses', saveCurrentInv:'+ Save current invoice', clientFrom:'Fill from client...',
+    newFromThis:'↺ New from this', leadDetails:'Lead details', invDetails:'Invoice details',
+    followUpDate:'Follow-up date', emailHistory:'Sent emails',
+    manualTimeTitle:'Manual time entry', workDesc:'Work description',
+    templateName:'Template name', templateLang:'Language', templateSubject:'Subject',
+    templateMsg:'Message', emailFrom:'From', emailTo:'Recipient (email address)',
+    selectTpl:'-- select template --', companyName:'Company name',
+    contactPerson:'Contact person', taxId:'VAT ID / Tax number', paymentDue:'Payment due',
+    hourlyRateDef:'Default hourly rate (€/h)', vatDefault:'Default VAT %',
+    currency:'Currency', currencyDefault:'Default currency', invNoteDefault:'Default invoice note',
+    clientUid:'Client VAT ID', defaultRate:'Default rate (€/h)',
+    aiGenBtn:'✨ AI email — generate personalised email',
+    filterAll:'All', timerNotePh:'Work description...', descPh:'Description...',
+    kanbanSearchPh:'Search...', notesPh:'Note about the company...',
+    invNoPayment:'Select payment options.',
+    statusInquiry:'Inquiry', statusInWork:'In progress', statusDelivered:'Delivered',
+    statusBilled:'Invoiced', statusPaidProj:'Paid',
+    statusActive:'Active', statusDone2:'Completed', statusLate:'Late',
+    leadNotContacted:'No reply', leadRejected:'Rejected', leadInterested:'Interested',
+    invFilterDraft:'Draft', invFilterSent:'Sent', invFilterPaid:'Paid',
+    invFilterOverdue:'Overdue',
   }
 };
 
@@ -2144,6 +2366,19 @@ function applyTranslations(){
   if(el('meetings-username'))el('meetings-username').placeholder=t('calPlaceholder');
   if(el('meetings-no-account'))el('meetings-no-account').textContent=t('calNoAccount');
   if(el('meetings-placeholder'))el('meetings-placeholder').textContent=t('calEmpty');
+  // Auto-scan: all elements with data-i18n or data-i18n-ph
+  document.querySelectorAll('[data-i18n]').forEach(function(e){
+    var key=e.getAttribute('data-i18n');
+    if(key)e.textContent=t(key);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(e){
+    var key=e.getAttribute('data-i18n-ph');
+    if(key)e.placeholder=t(key);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(function(e){
+    var key=e.getAttribute('data-i18n-title');
+    if(key)e.title=t(key);
+  });
 }
 
 // ─── UTILS
@@ -2224,7 +2459,7 @@ function renderDash(){
   var active=S.projects.filter(function(p){return p.status<3;});
   el('dash-projects').innerHTML=active.length?active.map(function(p){
     var cl=gc(p.clientId);var h=S.timeLogs.filter(function(l){return l.projectId===p.id;}).reduce(function(a,l){return a+l.duration;},0)/3600;
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(p.title)+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+(cl?escH(cl.name):t('dashInternal'))+(h>0?' \u00b7 '+h.toFixed(1)+'h':'')+'</div></div><span class="badge" style="background:'+KB_CLR[p.status]+'20;color:'+KB_CLR[p.status]+'">'+KB_COLS[p.status]+'</span></div>';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(p.title)+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+(cl?escH(cl.name):t('dashInternal'))+(h>0?' \u00b7 '+h.toFixed(1)+'h':'')+'</div></div><span class="badge" style="background:'+KB_CLR[p.status]+'20;color:'+KB_CLR[p.status]+'">'+getKbCols()[p.status]+'</span></div>';
   }).join(''):'<div class="empty">'+t('dashNoActiveProj')+'</div>';
   var rl=S.timeLogs.slice(-5).reverse();
   el('dash-th').textContent=(ts/3600).toFixed(1)+'h';
@@ -2236,7 +2471,7 @@ function renderDash(){
   var unpaid=S.invoiceHistory.filter(function(i){return i.status!=='paid';});
   var upTotal=unpaid.reduce(function(a,i){return a+flt(i.total);},0);
   el('dash-unpaid-total').textContent=unpaid.length?t('dashInvoicesCount').replace('{n}',unpaid.length)+' \u00b7 \u20AC'+upTotal.toFixed(0):'';
-  el('dash-invoices').innerHTML=unpaid.length?unpaid.slice(0,4).map(function(i){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(i.num)+'</div><div style="font-size:11px;color:var(--text3)">'+escH(i.client)+' \u00b7 '+i.date+'</div></div><div style="display:flex;align-items:center;gap:10px"><span style="font-family:var(--mono);font-size:13px">\u20AC'+flt(i.total).toFixed(0)+'</span><span class="inv-status '+i.status+'" onclick="cycleInvStatus(\''+i.id+'\')">'+INV_STATUSES[i.status]+'</span></div></div>';}).join(''):'<div class="empty">'+t('dashNoUnpaid')+'</div>';
+  el('dash-invoices').innerHTML=unpaid.length?unpaid.slice(0,4).map(function(i){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(i.num)+'</div><div style="font-size:11px;color:var(--text3)">'+escH(i.client)+' \u00b7 '+i.date+'</div></div><div style="display:flex;align-items:center;gap:10px"><span style="font-family:var(--mono);font-size:13px">\u20AC'+flt(i.total).toFixed(0)+'</span><span class="inv-status '+i.status+'" onclick="cycleInvStatus(\''+i.id+'\')">'+getInvStatuses()[i.status]+'</span></div></div>';}).join(''):'<div class="empty">'+t('dashNoUnpaid')+'</div>';
 }
 
 // ─── KANBAN
@@ -2245,7 +2480,7 @@ function refreshProjSel(){var o='<option value="">— Odaberi —</option>'+S.pr
 function renderKanban(){
   refreshClSel();
   var q=(el('kb-search').value||'').toLowerCase();
-  el('kanban-board').innerHTML=KB_COLS.map(function(col,ci){
+  el('kanban-board').innerHTML=getKbCols().map(function(col,ci){
     var cards=S.projects.filter(function(p){return p.status===ci&&(!q||p.title.toLowerCase().includes(q)||(gc(p.clientId)?gc(p.clientId).name.toLowerCase().includes(q):false));});
     return '<div class="kb-col"><div class="kb-col-header"><span class="kb-col-name" style="color:'+KB_CLR[ci]+'">'+col+'</span><span class="kb-col-count">'+cards.length+'</span></div><div class="kb-cards">'+
       cards.map(function(p){var cl=gc(p.clientId);var h=S.timeLogs.filter(function(l){return l.projectId===p.id;}).reduce(function(a,l){return a+l.duration;},0)/3600;
@@ -2254,10 +2489,10 @@ function renderKanban(){
       '<div class="kb-add" onclick="openKbModal('+ci+')">+ dodaj</div></div></div>';
   }).join('');
 }
-function openKbModal(sp){el('kb-id').value='';el('kb-title').value='';el('kb-rate').value=S.settings.rate;el('kb-note').value='';el('kb-status').value=sp||0;el('kb-mtitle').textContent='Novi projekt';el('kb-del').style.display='none';refreshClSel();openModal('modal-kb');setTimeout(function(){el('kb-title').focus();},100);}
-function editProject(id){var p=gp(id);if(!p)return;el('kb-id').value=id;el('kb-title').value=p.title;el('kb-rate').value=p.rate;el('kb-note').value=p.note||'';el('kb-status').value=p.status;el('kb-mtitle').textContent='Uredi projekt';el('kb-del').style.display='inline-flex';refreshClSel();el('kb-client').value=p.clientId||'';openModal('modal-kb');}
+function openKbModal(sp){el('kb-id').value='';el('kb-title').value='';el('kb-rate').value=S.settings.rate;el('kb-note').value='';el('kb-status').value=sp||0;el('kb-mtitle').textContent=t('newProjectTitle');el('kb-del').style.display='none';refreshClSel();openModal('modal-kb');setTimeout(function(){el('kb-title').focus();},100);}
+function editProject(id){var p=gp(id);if(!p)return;el('kb-id').value=id;el('kb-title').value=p.title;el('kb-rate').value=p.rate;el('kb-note').value=p.note||'';el('kb-status').value=p.status;el('kb-mtitle').textContent=t('editProjectTitle');el('kb-del').style.display='inline-flex';refreshClSel();el('kb-client').value=p.clientId||'';openModal('modal-kb');}
 function saveProject(){var eid=el('kb-id').value;var d={title:el('kb-title').value||'Projekt',clientId:parseInt(el('kb-client').value)||null,rate:flt(el('kb-rate').value),status:parseInt(el('kb-status').value),note:el('kb-note').value};if(eid){Object.assign(gp(eid),d);}else{S.projects.push(Object.assign({id:S.nextId++},d));}save();closeModal('modal-kb');renderKanban();refreshProjSel();}
-function deleteProject(){if(!confirm('Obrisati projekt?'))return;S.projects=S.projects.filter(function(p){return p.id!=el('kb-id').value;});save();closeModal('modal-kb');renderKanban();refreshProjSel();}
+function deleteProject(){if(!confirm(t('confirmDeleteProject')))return;S.projects=S.projects.filter(function(p){return p.id!=el('kb-id').value;});save();closeModal('modal-kb');renderKanban();refreshProjSel();}
 
 // ─── TRACKER
 function toggleTimer(){
@@ -2271,13 +2506,13 @@ function toggleTimer(){
     if(dur>5){S.timeLogs.push({id:S.nextId++,projectId:parseInt(el('timer-project').value)||null,note:el('timer-note').value,duration:dur,date:tod(),manual:false});el('timer-note').value='';save();renderTracker();}
   }
 }
-function openManualEntry(){el('manual-id').value='';el('manual-note').value='';el('manual-h').value=0;el('manual-m').value=0;el('manual-date').value=tod();el('manual-title').textContent='Rucni unos vremena';el('manual-del').style.display='none';refreshProjSel();updateManualPreview();openModal('modal-manual');setTimeout(function(){el('manual-note').focus();},100);}
-function editManualLog(id){var l=S.timeLogs.find(function(l){return l.id===id;});if(!l)return;el('manual-id').value=id;el('manual-note').value=l.note||'';el('manual-h').value=Math.floor(l.duration/3600);el('manual-m').value=Math.floor((l.duration%3600)/60);el('manual-date').value=l.date;el('manual-title').textContent='Uredi unos';el('manual-del').style.display='inline-flex';refreshProjSel();el('manual-project').value=l.projectId||'';updateManualPreview();openModal('modal-manual');}
+function openManualEntry(){el('manual-id').value='';el('manual-note').value='';el('manual-h').value=0;el('manual-m').value=0;el('manual-date').value=tod();el('manual-title').textContent=t('manualTimeTitle');el('manual-del').style.display='none';refreshProjSel();updateManualPreview();openModal('modal-manual');setTimeout(function(){el('manual-note').focus();},100);}
+function editManualLog(id){var l=S.timeLogs.find(function(l){return l.id===id;});if(!l)return;el('manual-id').value=id;el('manual-note').value=l.note||'';el('manual-h').value=Math.floor(l.duration/3600);el('manual-m').value=Math.floor((l.duration%3600)/60);el('manual-date').value=l.date;el('manual-title').textContent=t('editTaskTitle');el('manual-del').style.display='inline-flex';refreshProjSel();el('manual-project').value=l.projectId||'';updateManualPreview();openModal('modal-manual');}
 function updateManualPreview(){var s=flt(el('manual-h').value)*3600+flt(el('manual-m').value)*60;el('manual-preview').textContent=fmtD(s);}
 function saveManualEntry(){var dur=flt(el('manual-h').value)*3600+flt(el('manual-m').value)*60;if(dur<=0){alert('Unesi trajanje.');return;}var eid=el('manual-id').value;var d={projectId:parseInt(el('manual-project').value)||null,note:el('manual-note').value,duration:dur,date:el('manual-date').value||tod(),manual:true};if(eid){Object.assign(S.timeLogs.find(function(l){return l.id==eid;}),d);}else{S.timeLogs.push(Object.assign({id:S.nextId++},d));}save();closeModal('modal-manual');renderTracker();}
 function deleteManualLog(){S.timeLogs=S.timeLogs.filter(function(l){return l.id!=el('manual-id').value;});save();closeModal('modal-manual');renderTracker();}
 function deleteLog(id){S.timeLogs=S.timeLogs.filter(function(l){return l.id!==id;});save();renderTracker();}
-function clearLogs(){if(!confirm('Obrisati sve zapise?'))return;S.timeLogs=[];save();renderTracker();}
+function clearLogs(){if(!confirm(t('confirmClearTracker')))return;S.timeLogs=[];save();renderTracker();}
 function exportLogs(){var rows=[['Projekt','Klijent','Opis','Datum','Sati','Vrijednost (EUR)','Tip']];S.timeLogs.forEach(function(l){var p=gp(l.projectId);var cl=p?gc(p.clientId):null;var h=l.duration/3600;var v=p&&p.rate?p.rate*h:0;rows.push([p?p.title:'',cl?cl.name:'',l.note||'',l.date,h.toFixed(2),v.toFixed(2),l.manual?'rucno':'timer']);});dlCSV(rows,'time_logs.csv');}
 function renderTracker(){
   refreshProjSel();
@@ -2285,7 +2520,7 @@ function renderTracker(){
   var val=S.timeLogs.reduce(function(a,l){var p=gp(l.projectId);return a+(p&&p.rate?p.rate*(l.duration/3600):0);},0);
   el('tt-h').textContent=(tot/3600).toFixed(2)+'h';el('tt-eur').textContent='\u20AC'+Math.round(val);
   var tb=el('log-body');
-  if(!S.timeLogs.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nema zapisa. Pokreni timer.</td></tr>';return;}
+  if(!S.timeLogs.length){tb.innerHTML='<tr><td colspan="6" class="empty">'+t('emptyTracker')+'</td></tr>';return;}
   tb.innerHTML=S.timeLogs.slice().reverse().map(function(l){var p=gp(l.projectId);var v=p&&p.rate?p.rate*(l.duration/3600):0;
     return '<tr onclick="editManualLog('+l.id+')" style="cursor:pointer"><td><div style="display:flex;align-items:center;gap:6px">'+(p?'<span class="badge" style="background:'+KB_CLR[p.status]+'15;color:'+KB_CLR[p.status]+'">'+escH(p.title)+'</span>':'<span style="color:var(--text3)">&mdash;</span>')+(l.manual?'<span style="font-size:10px;color:var(--text3);background:var(--bg3);padding:1px 5px;border-radius:4px">rucno</span>':'')+'</div></td><td style="color:var(--text3);font-size:12px">'+(l.note||'&mdash;')+'</td><td style="color:var(--text3);font-size:12px;font-family:var(--mono)">'+l.date+'</td><td style="font-family:var(--mono);font-weight:500;color:var(--text)">'+fmtD(l.duration)+'</td><td style="font-family:var(--mono);font-size:12px;color:'+(v>0?'var(--yellow)':'var(--text3)')+'">'+(v>0?'\u20AC'+v.toFixed(2):'&mdash;')+'</td><td onclick="event.stopPropagation()"><button class="btn btn-xs btn-danger" onclick="deleteLog('+l.id+')">x</button></td></tr>';
   }).join('');
@@ -2293,8 +2528,8 @@ function renderTracker(){
 
 // ─── EXPENSES
 function openExpenseModal(id){
-  if(id){var e=S.expenses.find(function(e){return e.id===id;});if(!e)return;el('exp-id').value=id;el('exp-desc').value=e.desc;el('exp-amount').value=e.amount;el('exp-date').value=e.date;el('exp-note').value=e.note||'';el('exp-cat').value=e.cat;el('exp-mtitle').textContent='Uredi trosak';el('exp-del').style.display='inline-flex';refreshProjSel();el('exp-project').value=e.projectId||'';}
-  else{el('exp-id').value='';el('exp-desc').value='';el('exp-amount').value='';el('exp-date').value=tod();el('exp-note').value='';el('exp-cat').value='gorivo';el('exp-mtitle').textContent='Novi trosak';el('exp-del').style.display='none';refreshProjSel();}
+  if(id){var e=S.expenses.find(function(e){return e.id===id;});if(!e)return;el('exp-id').value=id;el('exp-desc').value=e.desc;el('exp-amount').value=e.amount;el('exp-date').value=e.date;el('exp-note').value=e.note||'';el('exp-cat').value=e.cat;el('exp-mtitle').textContent=t('editExpenseTitle');el('exp-del').style.display='inline-flex';refreshProjSel();el('exp-project').value=e.projectId||'';}
+  else{el('exp-id').value='';el('exp-desc').value='';el('exp-amount').value='';el('exp-date').value=tod();el('exp-note').value='';el('exp-cat').value='gorivo';el('exp-mtitle').textContent=t('newExpenseTitle');el('exp-del').style.display='none';refreshProjSel();}
   openModal('modal-expense');setTimeout(function(){el('exp-desc').focus();},100);
 }
 function saveExpense(){var eid=el('exp-id').value;var d={desc:el('exp-desc').value||'Trosak',projectId:parseInt(el('exp-project').value)||null,cat:el('exp-cat').value,amount:flt(el('exp-amount').value),date:el('exp-date').value||tod(),note:el('exp-note').value};if(eid){Object.assign(S.expenses.find(function(e){return e.id==eid;}),d);}else{S.expenses.push(Object.assign({id:S.nextId++},d));}save();closeModal('modal-expense');renderExpenses();}
@@ -2303,18 +2538,18 @@ function exportExpenses(){var rows=[['Opis','Projekt','Kategorija','Datum','Izno
 function renderExpenses(){
   refreshProjSel();
   var fp=el('exp-filter-proj').value;var fc=el('exp-filter-cat').value;
-  var pOpts='<option value="">Svi projekti</option>'+S.projects.map(function(p){return '<option value="'+p.id+'"'+(fp==p.id?' selected':'')+'>'+escH(p.title)+'</option>';}).join('');
+  var pOpts='<option value="">'+t('allProjects')+'</option>'+S.projects.map(function(p){return '<option value="'+p.id+'"'+(fp==p.id?' selected':'')+'>'+escH(p.title)+'</option>';}).join('');
   el('exp-filter-proj').innerHTML=pOpts;
   var filtered=S.expenses.filter(function(e){return(!fp||e.projectId==fp)&&(!fc||e.cat===fc);});
   var byCat={};S.expenses.forEach(function(e){byCat[e.cat]=(byCat[e.cat]||0)+flt(e.amount);});
   el('exp-stats').innerHTML=[
-    {l:'Ukupni tro\u0161kovi',v:'\u20AC'+S.expenses.reduce(function(a,e){return a+flt(e.amount);},0).toFixed(0),c:'var(--red)',s:S.expenses.length+' stavki'},
-    {l:'Gorivo',v:'\u20AC'+(byCat.gorivo||0).toFixed(0),c:'var(--yellow)',s:''},
-    {l:'Softver',v:'\u20AC'+(byCat.softver||0).toFixed(0),c:'var(--purple)',s:''},
-    {l:'Ostalo',v:'\u20AC'+((byCat.materijal||0)+(byCat.putovanje||0)+(byCat.ostalo||0)).toFixed(0),c:'var(--text2)',s:''}
+    {l:t('allExpenses'),v:'\u20AC'+S.expenses.reduce(function(a,e){return a+flt(e.amount);},0).toFixed(0),c:'var(--red)',s:S.expenses.length+' '+t('lineItems')},
+    {l:t('catFuel'),v:'\u20AC'+(byCat.gorivo||0).toFixed(0),c:'var(--yellow)',s:''},
+    {l:t('catSoftware'),v:'\u20AC'+(byCat.softver||0).toFixed(0),c:'var(--purple)',s:''},
+    {l:t('catOther'),v:'\u20AC'+((byCat.materijal||0)+(byCat.putovanje||0)+(byCat.ostalo||0)).toFixed(0),c:'var(--text2)',s:''}
   ].map(function(s){return '<div class="stat-card"><div class="stat-label">'+s.l+'</div><div class="stat-val" style="color:'+s.c+'">'+s.v+'</div><div class="stat-sub">'+s.s+'</div></div>';}).join('');
   var tb=el('exp-body');
-  if(!filtered.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nema tro\u0161kova.</td></tr>';return;}
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="6" class="empty">'+t('emptyExpenses')+'</td></tr>';return;}
   tb.innerHTML=filtered.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(e){var p=gp(e.projectId);
     return '<tr onclick="openExpenseModal('+e.id+')" style="cursor:pointer"><td style="font-weight:500;color:var(--text)">'+escH(e.desc)+'</td><td style="font-size:12px;color:var(--text3)">'+(p?escH(p.title):'&mdash;')+'</td><td><span class="exp-cat '+e.cat+'">'+e.cat+'</span></td><td style="font-size:12px;color:var(--text3);font-family:var(--mono)">'+e.date+'</td><td style="font-family:var(--mono);font-weight:500;color:var(--red)">\u20AC'+flt(e.amount).toFixed(2)+'</td><td onclick="event.stopPropagation()"><button class="btn btn-xs btn-danger" onclick="S.expenses=S.expenses.filter(function(x){return x.id!=='+e.id+'});save();renderExpenses()">x</button></td></tr>';
   }).join('');
@@ -2323,7 +2558,7 @@ function renderExpenses(){
 // ─── GANTT
 function renderGantt(){
   refreshProjSel();var tb=el('gantt-body');
-  if(!S.ganttTasks.length){tb.innerHTML='<tr><td colspan="7" class="empty">Nema zadataka.</td></tr>';return;}
+  if(!S.ganttTasks.length){tb.innerHTML='<tr><td colspan="7" class="empty">'+t('emptyGantt')+'</td></tr>';return;}
   var ad=S.ganttTasks.reduce(function(a,t){a.push(new Date(t.start));a.push(new Date(t.end));return a;},[]);
   var minD=new Date(Math.min.apply(null,ad)),maxD=new Date(Math.max.apply(null,ad));
   var now=new Date();if(now>minD&&now<maxD)maxD.setDate(maxD.getDate()+3);
@@ -2331,7 +2566,7 @@ function renderGantt(){
   var tp=Math.max(0,Math.min(100,((now-minD)/86400000/range)*100));
   var SB={active:'var(--accent)',done:'var(--text3)',late:'var(--red)'};
   var SBG={active:'var(--accent-dim)',done:'#8b949e20',late:'var(--red-dim)'};
-  var SL={active:'U tijeku',done:'Zavrseno',late:'Kasni'};
+  var SL={active:t('statusActive'),done:t('statusDone2'),late:t('statusLate')};
   tb.innerHTML=S.ganttTasks.map(function(t){var p=gp(t.projectId);var s=new Date(t.start),e=new Date(t.end);var l=Math.max(0,((s-minD)/86400000/range)*100),w=Math.max(1,((e-s)/86400000/range)*100);
     return '<tr><td style="font-size:13px;font-weight:500">'+escH(t.title)+'</td><td style="font-size:12px;color:var(--text3)">'+(p?escH(p.title):'&mdash;')+'</td><td style="font-size:11px;color:var(--text3);font-family:var(--mono)">'+t.start+'</td><td style="font-size:11px;color:var(--text3);font-family:var(--mono)">'+t.end+'</td><td><span class="badge" style="background:'+SBG[t.status]+';color:'+SB[t.status]+'">'+SL[t.status]+'</span></td><td class="gantt-bar-cell"><div class="gantt-bg"></div><div class="gantt-bar '+t.status+'" style="left:'+l.toFixed(1)+'%;width:'+w.toFixed(1)+'%"></div><div class="gantt-today" style="left:'+tp.toFixed(1)+'%"></div></td><td><button class="btn btn-xs btn-danger" onclick="delGantt('+t.id+')">x</button></td></tr>';
   }).join('');
@@ -2342,13 +2577,13 @@ function delGantt(id){S.ganttTasks=S.ganttTasks.filter(function(t){return t.id!=
 
 // ─── INVOICE
 function applySettings(){var ss=S.settings;el('ifn').value=ss.name||'';el('ifa').value=ss.addr||'';el('ife').value=ss.email||'';el('ifu').value=ss.uid||'';el('ifib').value=ss.iban||'';el('ifbic').value=ss.bic||'';if(!el('inote').value)el('inote').value=ss.note||'';}
-function refreshInvClientSel(){var o='<option value="">Popuni iz klijenta...</option>'+S.clients.map(function(c){return '<option value="'+c.id+'">'+escH(c.name)+'</option>';}).join('');el('inv-client-sel').innerHTML=o;}
+function refreshInvClientSel(){var o='<option value="">'+t('clientFrom')+'</option>'+S.clients.map(function(c){return '<option value="'+c.id+'">'+escH(c.name)+'</option>';}).join('');el('inv-client-sel').innerHTML=o;}
 function fillClientFromSel(){var c=gc(el('inv-client-sel').value);if(!c)return;el('itn').value=c.name;el('ita').value=c.addr||'';el('ite').value=c.email||'';el('itu').value=c.uid||'';el('inv-client-sel').value='';}
 function addInvRow(desc,qty,price,vat){desc=desc||'';qty=qty||1;price=price!=null?price:(S.settings.rate||75);vat=vat!=null?vat:(S.settings.vat||20);S.invItems.push({id:S.invItemId++,desc:desc,qty:qty,price:price,vat:vat});renderInvItems();renderInvTotals();}
 function remInv(id){S.invItems=S.invItems.filter(function(i){return i.id!==id;});renderInvItems();renderInvTotals();}
 function updInv(id,f,v){var i=S.invItems.find(function(i){return i.id===id;});if(i){i[f]=v;renderInvTotals();}}
 function renderInvItems(){el('inv-body').innerHTML=S.invItems.map(function(i){return '<tr><td><input value="'+escH(i.desc)+'" placeholder="Opis rada" oninput="updInv('+i.id+',\'desc\',this.value)"></td><td><input type="number" value="'+i.qty+'" step="0.5" oninput="updInv('+i.id+',\'qty\',this.value)" style="text-align:center"></td><td><input type="number" value="'+i.price+'" step="0.5" oninput="updInv('+i.id+',\'price\',this.value)" style="text-align:right"></td><td><input type="number" value="'+i.vat+'" step="1" min="0" max="100" oninput="updInv('+i.id+',\'vat\',this.value)" style="text-align:center"></td><td style="text-align:right;font-family:var(--mono);font-size:13px;padding:6px 8px" id="ia'+i.id+'">0.00</td><td><button class="btn btn-xs btn-danger" onclick="remInv('+i.id+')">x</button></td></tr>';}).join('');}
-function renderInvTotals(){var c=curSym();var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;var e=el('ia'+i.id);if(e)e.textContent=(n+v).toFixed(2);});el('inv-totals').innerHTML='<div class="trow"><span class="tl">Neto:</span><span class="ta">'+c+' '+sub.toFixed(2)+'</span></div><div class="trow"><span class="tl">PDV:</span><span class="ta">'+c+' '+tv.toFixed(2)+'</span></div><div class="tdiv"></div><div class="trow grand"><span class="tl">Ukupno:</span><span class="ta" style="color:var(--accent)">'+c+' '+(sub+tv).toFixed(2)+'</span></div>';}
+function renderInvTotals(){var c=curSym();var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;var e=el('ia'+i.id);if(e)e.textContent=(n+v).toFixed(2);});var IL=L10N[el('inv-lang')?el('inv-lang').value:'de']||L10N.en;el('inv-totals').innerHTML='<div class="trow"><span class="tl">'+IL.sub+':</span><span class="ta">'+c+' '+sub.toFixed(2)+'</span></div><div class="trow"><span class="tl">'+IL.vatl+':</span><span class="ta">'+c+' '+tv.toFixed(2)+'</span></div><div class="tdiv"></div><div class="trow grand"><span class="tl">'+IL.total+':</span><span class="ta" style="color:var(--accent)">'+c+' '+(sub+tv).toFixed(2)+'</span></div>';}
 function getInvTotals(){var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;});return{sub:sub,tv:tv,grand:sub+tv};}
 function importHours(){var bp={};S.timeLogs.forEach(function(l){if(!l.projectId)return;bp[l.projectId]=(bp[l.projectId]||0)+l.duration;});var e=Object.keys(bp);if(!e.length){showToast('inv-toast','Nema pracenih sati za uvoz.',false);return;}e.forEach(function(pid){var p=gp(pid);if(!p)return;var cl=gc(p.clientId);addInvRow(p.title+(cl?' - '+cl.name:''),parseFloat((bp[pid]/3600).toFixed(2)),p.rate||S.settings.rate||75,S.settings.vat||20);});showToast('inv-toast','Uvezeno '+e.length+' projekt(a).',true);}
 
@@ -2458,18 +2693,18 @@ function renderInvHistory(){
   var pending=filtered.filter(function(i){return i.status==='sent';}).reduce(function(a,i){return a+flt(i.total);},0);
   var overdue=filtered.filter(function(i){return i.status==='overdue';}).reduce(function(a,i){return a+flt(i.total);},0);
   el('invh-stats').innerHTML=
-    '<div class="stat-card"><div class="stat-label">Ukupno racuna</div><div class="stat-val">'+filtered.length+'</div><div class="stat-sub">\u20AC'+total.toFixed(0)+' ukupno</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Placeno</div><div class="stat-val" style="color:var(--accent)">\u20AC'+paid.toFixed(0)+'</div><div class="stat-sub">'+filtered.filter(function(i){return i.status==='paid';}).length+' racuna</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Ceka uplatu</div><div class="stat-val" style="color:var(--yellow)">\u20AC'+pending.toFixed(0)+'</div><div class="stat-sub">'+filtered.filter(function(i){return i.status==='sent';}).length+' racuna</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Kasni</div><div class="stat-val" style="color:var(--red)">\u20AC'+overdue.toFixed(0)+'</div><div class="stat-sub">'+filtered.filter(function(i){return i.status==='overdue';}).length+' racuna</div></div>';
+    '<div class="stat-card"><div class="stat-label">'+t('allInvoices')+'</div><div class="stat-val">'+filtered.length+'</div><div class="stat-sub">\u20AC'+total.toFixed(0)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">'+t('invFilterPaid')+'</div><div class="stat-val" style="color:var(--accent)">\u20AC'+paid.toFixed(0)+'</div><div class="stat-sub">'+filtered.filter(function(i){return i.status==='paid';}).length+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">'+t('invFilterSent')+'</div><div class="stat-val" style="color:var(--yellow)">\u20AC'+pending.toFixed(0)+'</div><div class="stat-sub">'+filtered.filter(function(i){return i.status==='sent';}).length+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">'+t('invFilterOverdue')+'</div><div class="stat-val" style="color:var(--red)">\u20AC'+overdue.toFixed(0)+'</div><div class="stat-sub">'+filtered.filter(function(i){return i.status==='overdue';}).length+'</div></div>';
   var tb=el('invh-body');
-  if(!filtered.length){tb.innerHTML='<tr><td colspan="7" class="empty">Nema racuna.</td></tr>';return;}
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="7" class="empty">'+t('emptyInvHistory')+'</td></tr>';return;}
   tb.innerHTML=filtered.slice().reverse().map(function(i){
-    return '<tr style="cursor:pointer" onclick="openInvDetail(\''+i.id+'\')"><td style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)">'+escH(i.num)+'</td><td style="font-size:13px;color:var(--text)">'+escH(i.client)+'</td><td style="font-size:12px;color:var(--text3);font-family:var(--mono)">'+i.date+'</td><td style="font-size:12px;color:var(--text3);font-family:var(--mono)">'+(i.due||'&mdash;')+'</td><td style="font-family:var(--mono);font-weight:500;color:var(--text)">\u20AC'+flt(i.total).toFixed(2)+'</td><td onclick="event.stopPropagation()"><span class="inv-status '+i.status+'" onclick="cycleInvStatus(\''+i.id+'\')" title="Klikni za promjenu">'+INV_STATUSES[i.status]+'</span></td><td onclick="event.stopPropagation()"><button class="btn btn-xs btn-danger" onclick="S.invoiceHistory=S.invoiceHistory.filter(function(x){return x.id!==\''+i.id+'\';});save();renderInvHistory()">x</button></td></tr>';
+    return '<tr style="cursor:pointer" onclick="openInvDetail(\''+i.id+'\')"><td style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)">'+escH(i.num)+'</td><td style="font-size:13px;color:var(--text)">'+escH(i.client)+'</td><td style="font-size:12px;color:var(--text3);font-family:var(--mono)">'+i.date+'</td><td style="font-size:12px;color:var(--text3);font-family:var(--mono)">'+(i.due||'&mdash;')+'</td><td style="font-family:var(--mono);font-weight:500;color:var(--text)">\u20AC'+flt(i.total).toFixed(2)+'</td><td onclick="event.stopPropagation()"><span class="inv-status '+i.status+'" onclick="cycleInvStatus(\''+i.id+'\')" title="Klikni za promjenu">'+getInvStatuses()[i.status]+'</span></td><td onclick="event.stopPropagation()"><button class="btn btn-xs btn-danger" onclick="S.invoiceHistory=S.invoiceHistory.filter(function(x){return x.id!==\''+i.id+'\';});save();renderInvHistory()">x</button></td></tr>';
   }).join('');
 }
 function openInvDetail(id){var inv=S.invoiceHistory.find(function(i){return i.id===id;});if(!inv)return;currentHistoryInv=inv;
-  el('invh-detail').innerHTML='<div style="padding:4px 0 16px"><div style="display:flex;justify-content:space-between;margin-bottom:14px"><div><div style="font-size:18px;font-weight:600">'+escH(inv.num)+'</div><div style="font-size:12px;color:var(--text3);margin-top:3px">'+inv.date+' \u00b7 '+escH(inv.client)+'</div></div><span class="inv-status '+inv.status+'" onclick="cycleInvStatus(\''+inv.id+'\')">'+INV_STATUSES[inv.status]+'</span></div><table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:6px 0;color:var(--text3)">Opis</th><th style="text-align:right;padding:6px;color:var(--text3)">Sati</th><th style="text-align:right;padding:6px;color:var(--text3)">Cijena</th><th style="text-align:right;padding:6px 0;color:var(--text3)">Iznos</th></tr></thead><tbody>'+inv.items.map(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;return '<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text)">'+escH(i.desc)+'</td><td style="text-align:right;padding:8px 6px;font-family:var(--mono);color:var(--text2)">'+flt(i.qty)+'</td><td style="text-align:right;padding:8px 6px;font-family:var(--mono);color:var(--text2)">\u20AC'+flt(i.price).toFixed(2)+'</td><td style="text-align:right;padding:8px 0;font-family:var(--mono);font-weight:500;color:var(--text)">\u20AC'+(n+v).toFixed(2)+'</td></tr>';}).join('')+'</tbody></table><div style="text-align:right;font-size:14px;font-weight:600;color:var(--accent)">Ukupno: \u20AC'+flt(inv.total).toFixed(2)+'</div></div>';
+  el('invh-detail').innerHTML='<div style="padding:4px 0 16px"><div style="display:flex;justify-content:space-between;margin-bottom:14px"><div><div style="font-size:18px;font-weight:600">'+escH(inv.num)+'</div><div style="font-size:12px;color:var(--text3);margin-top:3px">'+inv.date+' \u00b7 '+escH(inv.client)+'</div></div><span class="inv-status '+inv.status+'" onclick="cycleInvStatus(\''+inv.id+'\')">'+getInvStatuses()[inv.status]+'</span></div><table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:6px 0;color:var(--text3)">'+t('thDesc')+'</th><th style="text-align:right;padding:6px;color:var(--text3)">'+t('hours')+'</th><th style="text-align:right;padding:6px;color:var(--text3)">\u20AC/h</th><th style="text-align:right;padding:6px 0;color:var(--text3)">'+t('thAmount')+'</th></tr></thead><tbody>'+inv.items.map(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;return '<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text)">'+escH(i.desc)+'</td><td style="text-align:right;padding:8px 6px;font-family:var(--mono);color:var(--text2)">'+flt(i.qty)+'</td><td style="text-align:right;padding:8px 6px;font-family:var(--mono);color:var(--text2)">\u20AC'+flt(i.price).toFixed(2)+'</td><td style="text-align:right;padding:8px 0;font-family:var(--mono);font-weight:500;color:var(--text)">\u20AC'+(n+v).toFixed(2)+'</td></tr>';}).join('')+'</tbody></table><div style="text-align:right;font-size:14px;font-weight:600;color:var(--accent)">'+t('thAmount')+': \u20AC'+flt(inv.total).toFixed(2)+'</div></div>';
   openModal('modal-invh');
 }
 function recurringFromSaved(){if(!currentHistoryInv)return;var inv=currentHistoryInv;S.invItems=JSON.parse(JSON.stringify(inv.items));S.invItemId=inv.items.length;var parts=inv.num.split('-');var last=parseInt(parts[parts.length-1])||0;parts[parts.length-1]=String(last+1).padStart(parts[parts.length-1].length,'0');closeModal('modal-invh');showPage('invoice');setTimeout(function(){el('inum').value=parts.join('-');el('itn').value=inv.to&&inv.to.name?inv.to.name:'';el('ita').value=inv.to&&inv.to.addr?inv.to.addr:'';el('ite').value=inv.to&&inv.to.email?inv.to.email:'';el('itu').value=inv.to&&inv.to.uid?inv.to.uid:'';el('idate').value=tod();var d=new Date();d.setDate(d.getDate()+30);el('idue').value=d.toISOString().split('T')[0];el('icur').value=inv.currency||'EUR';el('inv-lang').value=inv.lang||'de';el('inote').value=inv.note||'';renderInvItems();renderInvTotals();showToast('inv-toast','Novi racun kreiran iz '+inv.num+'.',true);},100);}
@@ -2480,7 +2715,7 @@ function regenPDF(){if(currentHistoryInv){var inv=currentHistoryInv;S.invItems=J
 function renderTemplates(){
   var grid=el('templates-grid');
   if(!S.emailTemplates||!S.emailTemplates.length){
-    grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nema predlozaka.</div>';return;
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1">'+t('emptyTemplates')+'</div>';return;
   }
   var langColor={'de':'var(--blue)','en':'var(--accent)','hr':'var(--yellow)'};
   var langLabel={'de':'DE','en':'EN','hr':'HR'};
@@ -2505,14 +2740,14 @@ function renderTemplates(){
 
 function openTemplateModal(){
   el('tmpl-id').value='';el('tmpl-name').value='';el('tmpl-subject').value='';el('tmpl-body').value='';el('tmpl-lang').value='de';
-  el('tmpl-mtitle').textContent='Novi predlozak';el('tmpl-del').style.display='none';
+  el('tmpl-mtitle').textContent=t('newTemplateTitle');el('tmpl-del').style.display='none';
   openModal('modal-template');setTimeout(function(){el('tmpl-name').focus();},100);
 }
 
 function editTemplate(id){
   var t=(S.emailTemplates||[]).find(function(t){return t.id===id;});if(!t)return;
   el('tmpl-id').value=id;el('tmpl-name').value=t.name;el('tmpl-subject').value=t.subject;el('tmpl-body').value=t.body;el('tmpl-lang').value=t.lang||'de';
-  el('tmpl-mtitle').textContent='Uredi predlozak';el('tmpl-del').style.display='inline-flex';
+  el('tmpl-mtitle').textContent=t('editTemplateTitle');el('tmpl-del').style.display='inline-flex';
   openModal('modal-template');
 }
 
@@ -2526,7 +2761,7 @@ function saveTemplate(){
 }
 
 function deleteTemplate(){
-  var id=el('tmpl-id').value;if(!confirm('Obrisati predlozak?'))return;
+  var id=el('tmpl-id').value;if(!confirm(t('confirmDeleteTemplate')))return;
   S.emailTemplates=S.emailTemplates.filter(function(t){return t.id!==id;});
   save();closeModal('modal-template');renderTemplates();refreshTemplateSelect();
 }
@@ -2604,8 +2839,8 @@ async function runSearch(){
   if(type==='contact')q+=' email kontakt';
   if(type==='linkedin')q+=' site:linkedin.com/company';
   if(type==='jobs')q+=' Stellenangebote CAM Programmierer';
-  el('pros-btn').disabled=true;el('pros-btn').textContent='Pretrazujem...';el('pros-status').textContent='';
-  el('pros-results-grid').innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:40px;justify-content:center;color:var(--text3);font-size:13px"><div class="pros-spinner"></div> Pretrazujem...</div>';
+  el('pros-btn').disabled=true;el('pros-btn').textContent=t('searching');el('pros-status').textContent='';
+  el('pros-results-grid').innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:40px;justify-content:center;color:var(--text3);font-size:13px"><div class="pros-spinner"></div> '+t('searching')+'</div>';
   switchTab('results');
   try{
     var searchType = type === 'maps' ? 'maps' : 'search';
@@ -2636,7 +2871,7 @@ async function runSearch(){
   }catch(err){
     el('pros-results-grid').innerHTML='<div class="empty" style="grid-column:1/-1;color:var(--red)">Greska: '+escH(err.message)+'</div>';
     el('pros-status').textContent='Greska.';
-  }finally{el('pros-btn').disabled=false;el('pros-btn').textContent='Pretrazi';}
+  }finally{el('pros-btn').disabled=false;el('pros-btn').textContent=t('search');}
 }
 function renderSearchResults(){
   var savedUrls={};
@@ -2743,9 +2978,9 @@ function saveAsLead(idx){
 function renderLeads(){
   el('leads-count').textContent=S.leads.length;
   var filtered=leadFilter?S.leads.filter(function(l){return l.status===leadFilter;}):S.leads;
-  if(!filtered.length){el('pros-leads-grid').innerHTML='<div class="empty" style="grid-column:1/-1">'+(S.leads.length?'Nema leadova s ovim statusom.':'Nema spremljenih leadova.')+'</div>';return;}
+  if(!filtered.length){el('pros-leads-grid').innerHTML='<div class="empty" style="grid-column:1/-1">'+(S.leads.length?t('emptyLeadStatus'):t('emptyLeads'))+'</div>';return;}
   el('pros-leads-grid').innerHTML=filtered.slice().reverse().map(function(l){var displayUrl=l.url.replace(/^https?:\/\//,'').split('/')[0];
-    return '<div class="pros-card" onclick="openLeadModal(\''+l.id+'\')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="pros-card-name">'+escH(l.name)+'</div><span class="pros-lead-status '+l.status+'" onclick="event.stopPropagation();cycleLead(\''+l.id+'\')">'+LEAD_STATUSES[l.status]+'</span></div><div class="pros-card-url">'+escH(displayUrl)+'</div><div class="pros-card-desc">'+escH(l.desc)+'</div>'+(l.note?'<div style="font-size:11px;color:var(--text3);font-style:italic;margin-bottom:6px">"'+escH(l.note)+'"</div>':'')+'<div class="pros-card-footer"><span style="font-size:11px;color:var(--text3)">'+l.savedAt+'</span><a href="'+l.url+'" target="_blank" class="btn btn-xs" onclick="event.stopPropagation()">Otvori &#8599;</a></div></div>';
+    return '<div class="pros-card" onclick="openLeadModal(\''+l.id+'\')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="pros-card-name">'+escH(l.name)+'</div><span class="pros-lead-status '+l.status+'" onclick="event.stopPropagation();cycleLead(\''+l.id+'\')">'+getLeadStatuses()[l.status]+'</span></div><div class="pros-card-url">'+escH(displayUrl)+'</div><div class="pros-card-desc">'+escH(l.desc)+'</div>'+(l.note?'<div style="font-size:11px;color:var(--text3);font-style:italic;margin-bottom:6px">"'+escH(l.note)+'"</div>':'')+'<div class="pros-card-footer"><span style="font-size:11px;color:var(--text3)">'+l.savedAt+'</span><a href="'+l.url+'" target="_blank" class="btn btn-xs" onclick="event.stopPropagation()">Otvori &#8599;</a></div></div>';
   }).join('');
 }
 function cycleLead(id){var l=S.leads.find(function(l){return l.id===id;});if(!l)return;var cycle={novi:'kontaktiran',kontaktiran:'zainteresiran',zainteresiran:'nije-odgovorio','nije-odgovorio':'odbijenica',odbijenica:'novi'};l.status=cycle[l.status]||'novi';save();renderLeads();}
@@ -2770,13 +3005,13 @@ function openLeadModal(id){
   openModal('modal-lead');setTimeout(function(){el('lead-note').focus();},100);
 }
 function saveLead(){var id=el('lead-id').value;var l=S.leads.find(function(l){return l.id===id;});if(!l)return;l.note=el('lead-note').value;l.status=el('lead-status').value;l.followup=el('lead-followup').value;save();closeModal('modal-lead');renderLeads();}
-function deleteLead(){var id=el('lead-id').value;if(!confirm('Obrisati lead?'))return;S.leads=S.leads.filter(function(l){return l.id!==id;});save();closeModal('modal-lead');renderLeads();}
-function clearAllLeads(){if(!confirm('Obrisati sve leadove?'))return;S.leads=[];save();renderProspecting();}
+function deleteLead(){var id=el('lead-id').value;if(!confirm(t('confirmDeleteLead')))return;S.leads=S.leads.filter(function(l){return l.id!==id;});save();closeModal('modal-lead');renderLeads();}
+function clearAllLeads(){if(!confirm(t('confirmDeleteLeads')))return;S.leads=[];save();renderProspecting();}
 
 // ─── CLIENTS
 function renderClients(){
   var grid=el('clients-grid');
-  if(!S.clients.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nema klijenata.</div>';return;}
+  if(!S.clients.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">'+t('emptyClients')+'</div>';return;}
   grid.innerHTML=S.clients.map(function(c){
     var pc=S.projects.filter(function(p){return p.clientId===c.id;}).length;
     var h=S.timeLogs.filter(function(l){var p=gp(l.projectId);return p&&p.clientId===c.id;}).reduce(function(a,l){return a+l.duration;},0)/3600;
@@ -2785,10 +3020,10 @@ function renderClients(){
   }).join('');
 }
 function fillInvFromClient(id){var c=gc(id);if(!c)return;showPage('invoice');setTimeout(function(){el('itn').value=c.name;el('ita').value=c.addr||'';el('ite').value=c.email||'';el('itu').value=c.uid||'';showToast('inv-toast','Popunjeno iz klijenta: '+c.name,true);},100);}
-function openClientModal(){['cl-name','cl-contact','cl-email','cl-phone','cl-addr','cl-note','cl-uid'].forEach(function(id){el(id).value='';});el('cl-rate').value=S.settings.rate||75;el('cl-country').value='DE';el('cl-id').value='';el('cl-mtitle').textContent='Novi klijent';el('cl-del').style.display='none';openModal('modal-client');setTimeout(function(){el('cl-name').focus();},100);}
-function editClient(id){var c=gc(id);if(!c)return;el('cl-id').value=id;el('cl-name').value=c.name;el('cl-contact').value=c.contact||'';el('cl-email').value=c.email||'';el('cl-phone').value=c.phone||'';el('cl-addr').value=c.addr||'';el('cl-country').value=c.country||'DE';el('cl-rate').value=c.rate||0;el('cl-uid').value=c.uid||'';el('cl-note').value=c.note||'';el('cl-mtitle').textContent='Uredi klijenta';el('cl-del').style.display='inline-flex';openModal('modal-client');}
+function openClientModal(){['cl-name','cl-contact','cl-email','cl-phone','cl-addr','cl-note','cl-uid'].forEach(function(id){el(id).value='';});el('cl-rate').value=S.settings.rate||75;el('cl-country').value='DE';el('cl-id').value='';el('cl-mtitle').textContent=t('newClientTitle');el('cl-del').style.display='none';openModal('modal-client');setTimeout(function(){el('cl-name').focus();},100);}
+function editClient(id){var c=gc(id);if(!c)return;el('cl-id').value=id;el('cl-name').value=c.name;el('cl-contact').value=c.contact||'';el('cl-email').value=c.email||'';el('cl-phone').value=c.phone||'';el('cl-addr').value=c.addr||'';el('cl-country').value=c.country||'DE';el('cl-rate').value=c.rate||0;el('cl-uid').value=c.uid||'';el('cl-note').value=c.note||'';el('cl-mtitle').textContent=t('editClientTitle');el('cl-del').style.display='inline-flex';openModal('modal-client');}
 function saveClient(){var eid=el('cl-id').value;var d={name:el('cl-name').value||'Klijent',contact:el('cl-contact').value,email:el('cl-email').value,phone:el('cl-phone').value,addr:el('cl-addr').value,country:el('cl-country').value,rate:flt(el('cl-rate').value),uid:el('cl-uid').value,note:el('cl-note').value};if(eid){Object.assign(gc(eid),d);}else{S.clients.push(Object.assign({id:S.nextId++},d));}save();closeModal('modal-client');renderClients();refreshClSel();}
-function deleteClient(){if(!confirm('Obrisati klijenta?'))return;S.clients=S.clients.filter(function(c){return c.id!=el('cl-id').value;});save();closeModal('modal-client');renderClients();}
+function deleteClient(){if(!confirm(t('confirmDeleteClient')))return;S.clients=S.clients.filter(function(c){return c.id!=el('cl-id').value;});save();closeModal('modal-client');renderClients();}
 
 // ─── SETTINGS
 function loadSettings(){var ss=S.settings;APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';el('s-note').value=ss.note||'';}

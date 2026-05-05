@@ -244,8 +244,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .auth-pw-toggle:hover{color:var(--text2)}
 /* Nav user */
 #nav-user-email{font-family:var(--mono);font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:148px}
-.nav-logout{background:none;border:none;cursor:pointer;color:var(--text3);padding:2px 3px;display:flex;align-items:center;border-radius:4px;flex-shrink:0}
-.nav-logout:hover{color:var(--red);background:var(--red-dim)}
+.nav-logout{background:var(--bg3);border:1px solid var(--border2);cursor:pointer;color:var(--text2);padding:2px 3px;display:flex;align-items:center;border-radius:4px;flex-shrink:0;transition:all .15s}
+.nav-logout:hover{color:var(--red);background:var(--red-dim);border-color:var(--red)}
 
 /* LANDING STYLES - fully scoped under #landing-page */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1166,15 +1166,6 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
     </div>
     <div class="field"><label>Default napomena na invoiceu</label><textarea id="s-note" rows="2"></textarea></div>
   </div>
-  <div class="settings-section">
-    <h3>Backup podataka</h3>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn" onclick="exportData()">&#8595; Export JSON</button>
-      <button class="btn" onclick="document.getElementById('import-file').click()">&#8593; Import JSON</button>
-      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
-      <button class="btn btn-danger" onclick="resetAll()">Obri&#353;i sve podatke</button>
-    </div>
-  </div>
   <div style="display:flex;justify-content:flex-end;margin-top:4px">
     <button class="btn btn-primary" onclick="saveSettings()">Spremi postavke</button>
   </div>
@@ -1414,7 +1405,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 
 <script>
 // ─── CONFIG
-var CLAUDE_API_KEY = '';
+var CLAUDE_API_KEY = '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';
 // ─── SUPABASE CONFIG
 var SUPABASE_URL = 'https://orjetlbyrunceopyhyal.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yamV0bGJ5cnVuY2VvcHloeWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDM4NjMsImV4cCI6MjA5MzQ3OTg2M30.vRzJEDmrjA8f8gKs3f-ZDpGpePW2mSTIuh4zpxpicyo';

@@ -818,21 +818,21 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
   </div>
   <div class="summary-grid" id="dash-stats"></div>
   <div class="grid2" style="gap:16px">
-    <div class="card"><div class="card-title">Aktivni projekti</div><div id="dash-projects"></div></div>
+    <div class="card"><div class="card-title" id="dash-title-projects"></div><div id="dash-projects"></div></div>
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between">
-        Nedavno praćeno
+        <span id="dash-title-tracked"></span>
         <span id="dash-th" style="font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:400;text-transform:none;letter-spacing:0"></span>
       </div>
       <div id="dash-logs"></div>
     </div>
   </div>
-  <div class="card" id="dash-followups-card" style="display:none"><div class="card-title" style="color:var(--yellow)">&#9888; Follow-up danas</div><div id="dash-followups"></div></div>
+  <div class="card" id="dash-followups-card" style="display:none"><div class="card-title" id="dash-title-followup" style="color:var(--yellow)"></div><div id="dash-followups"></div></div>
   <div class="grid2" style="gap:16px">
-    <div class="card"><div class="card-title">Prihod po projektu</div><div id="dash-revenue"></div></div>
+    <div class="card"><div class="card-title" id="dash-title-revenue"></div><div id="dash-revenue"></div></div>
     <div class="card">
       <div class="card-title" style="display:flex;justify-content:space-between">
-        Neplaćeni računi
+        <span id="dash-title-unpaid"></span>
         <span id="dash-unpaid-total" style="font-family:var(--mono);font-size:12px;color:var(--yellow);font-weight:400;text-transform:none;letter-spacing:0"></span>
       </div>
       <div id="dash-invoices"></div>
@@ -1729,6 +1729,13 @@ var TRANSLATIONS = {
     language:'Jezik', theme:'Tema',
     dark:'Tamna', light:'Svijetla',
     followupToday:'Praćenje danas',
+    dashWelcome:'Dobrodošli, {name}! 👋', dashWelcomeSub:'Sve je postavljeno. Odaberi gdje krenuti:',
+    dashAddProject:'➕ Dodaj prvi projekt', dashAddClient:'👤 Dodaj prvog klijenta', dashStartTimer:'⏱ Pokreni timer',
+    dashTotalHours:'Ukupno sati', dashBillable:'Fakturabilno', dashPerRate:'prema sat. cijeni',
+    dashWeek:'tjedan: ', dashOf:'od', dashTotal:'ukupno', dashInternal:'Interno',
+    dashProfit:'profit: ', dashNoActiveProj:'Nema aktivnih projekata.',
+    dashNoLogs:'Pokreni timer.', dashNoData:'Nema podataka.', dashNoUnpaid:'Nema neplaćenih računa.',
+    dashInvoicesCount:'{n} računa',
     meetings:'Sastanci', calIntegration:'Cal.com integracija',
     calUsername:'Tvoj Cal.com username', calSave:'Spremi',
     calPlaceholder:'npr. danko-camo',
@@ -1780,6 +1787,13 @@ var TRANSLATIONS = {
     language:'Sprache', theme:'Design',
     dark:'Dunkel', light:'Hell',
     followupToday:'Follow-up heute',
+    dashWelcome:'Willkommen, {name}! 👋', dashWelcomeSub:'Alles eingerichtet. Womit möchtest du beginnen?',
+    dashAddProject:'➕ Erstes Projekt anlegen', dashAddClient:'👤 Ersten Kunden anlegen', dashStartTimer:'⏱ Timer starten',
+    dashTotalHours:'Gesamtstunden', dashBillable:'Abrechenbar', dashPerRate:'nach Stundensatz',
+    dashWeek:'Woche: ', dashOf:'von', dashTotal:'gesamt', dashInternal:'Intern',
+    dashProfit:'Gewinn: ', dashNoActiveProj:'Keine aktiven Projekte.',
+    dashNoLogs:'Timer starten.', dashNoData:'Keine Daten.', dashNoUnpaid:'Keine offenen Rechnungen.',
+    dashInvoicesCount:'{n} Rechnungen',
     meetings:'Termine', calIntegration:'Cal.com-Integration',
     calUsername:'Dein Cal.com-Benutzername', calSave:'Speichern',
     calPlaceholder:'z.B. danko-camo',
@@ -1831,6 +1845,13 @@ var TRANSLATIONS = {
     language:'Language', theme:'Theme',
     dark:'Dark', light:'Light',
     followupToday:'Follow-up today',
+    dashWelcome:'Welcome, {name}! 👋', dashWelcomeSub:'All set. Choose where to start:',
+    dashAddProject:'➕ Add first project', dashAddClient:'👤 Add first client', dashStartTimer:'⏱ Start timer',
+    dashTotalHours:'Total hours', dashBillable:'Billable', dashPerRate:'by hourly rate',
+    dashWeek:'week: ', dashOf:'of', dashTotal:'total', dashInternal:'Internal',
+    dashProfit:'profit: ', dashNoActiveProj:'No active projects.',
+    dashNoLogs:'Start the timer.', dashNoData:'No data.', dashNoUnpaid:'No unpaid invoices.',
+    dashInvoicesCount:'{n} invoices',
     meetings:'Meetings', calIntegration:'Cal.com integration',
     calUsername:'Your Cal.com username', calSave:'Save',
     calPlaceholder:'e.g. danko-camo',
@@ -2155,15 +2176,23 @@ function closeModal(id){el(id).classList.remove('open');}
 // ─── DASHBOARD
 function renderDash(){
   var now=new Date();
-  el('dash-date').textContent=now.toLocaleDateString('de-AT',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var localeMap={hr:'hr-HR',de:'de-AT',en:'en-GB'};
+  el('dash-date').textContent=now.toLocaleDateString(localeMap[APP_LANG]||'hr-HR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var uMeta=currentUser&&currentUser.user_metadata;
+  var uName=uMeta&&uMeta.full_name?uMeta.full_name.split(' ')[0]:currentUser?currentUser.email.split('@')[0]:'';
+  if(el('dash-title-projects'))el('dash-title-projects').textContent=t('activeProjects');
+  if(el('dash-title-tracked'))el('dash-title-tracked').textContent=t('recentTracked');
+  if(el('dash-title-followup'))el('dash-title-followup').textContent='⚠ '+t('followupToday');
+  if(el('dash-title-revenue'))el('dash-title-revenue').textContent=t('revenueByProject');
+  if(el('dash-title-unpaid'))el('dash-title-unpaid').textContent=t('unpaidInvoices');
   if(S.projects.length===0&&S.clients.length===0&&S.timeLogs.length===0){
     el('dash-stats').innerHTML='<div style="grid-column:1/-1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:52px 32px;text-align:center">'
-      +'<div style="font-size:26px;font-weight:600;margin-bottom:10px">Dobrošao, Danko! 👋</div>'
-      +'<div style="font-size:14px;color:var(--text2);margin-bottom:32px">Sve je postavljeno. Odaberi gdje krenuti:</div>'
+      +'<div style="font-size:26px;font-weight:600;margin-bottom:10px">'+t('dashWelcome').replace('{name}',uName)+'</div>'
+      +'<div style="font-size:14px;color:var(--text2);margin-bottom:32px">'+t('dashWelcomeSub')+'</div>'
       +'<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">'
-      +'<button class="btn btn-primary" onclick="openKbModal()">➕ Dodaj prvi projekt</button>'
-      +'<button class="btn" onclick="openClientModal()">👤 Dodaj prvog klijenta</button>'
-      +'<button class="btn" onclick="showPage(\'tracker\')">⏱ Pokreni timer</button>'
+      +'<button class="btn btn-primary" onclick="openKbModal()">'+t('dashAddProject')+'</button>'
+      +'<button class="btn" onclick="openClientModal()">'+t('dashAddClient')+'</button>'
+      +'<button class="btn" onclick="showPage(\'tracker\')">'+t('dashStartTimer')+'</button>'
       +'</div></div>';
     el('dash-projects').innerHTML='';
     el('dash-logs').innerHTML='';
@@ -2182,26 +2211,26 @@ function renderDash(){
   var totalExp=S.expenses.reduce(function(a,e){return a+flt(e.amount);},0);
   renderFollowups();
   el('dash-stats').innerHTML=
-    '<div class="stat-card"><div class="stat-label">Aktivni projekti</div><div class="stat-val" style="color:var(--accent)">'+ap+'</div><div class="stat-sub">od '+S.projects.length+' ukupno</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Ukupno sati</div><div class="stat-val">'+(ts/3600).toFixed(1)+'h</div><div class="stat-sub">tjedan: '+(ws/3600).toFixed(1)+'h</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Fakturabilno</div><div class="stat-val" style="color:var(--yellow)">\u20AC'+Math.round(bil)+'</div><div class="stat-sub">prema hourly rate</div></div>'+
-    '<div class="stat-card"><div class="stat-label">Tro\u0161kovi</div><div class="stat-val" style="color:var(--red)">\u20AC'+totalExp.toFixed(0)+'</div><div class="stat-sub">profit: \u20AC'+Math.round(bil-totalExp)+'</div></div>';
+    '<div class="stat-card"><div class="stat-label">'+t('activeProjects')+'</div><div class="stat-val" style="color:var(--accent)">'+ap+'</div><div class="stat-sub">'+t('dashOf')+' '+S.projects.length+' '+t('dashTotal')+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">'+t('dashTotalHours')+'</div><div class="stat-val">'+(ts/3600).toFixed(1)+'h</div><div class="stat-sub">'+t('dashWeek')+(ws/3600).toFixed(1)+'h</div></div>'+
+    '<div class="stat-card"><div class="stat-label">'+t('dashBillable')+'</div><div class="stat-val" style="color:var(--yellow)">\u20AC'+Math.round(bil)+'</div><div class="stat-sub">'+t('dashPerRate')+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">'+t('expenses')+'</div><div class="stat-val" style="color:var(--red)">\u20AC'+totalExp.toFixed(0)+'</div><div class="stat-sub">'+t('dashProfit')+'\u20AC'+Math.round(bil-totalExp)+'</div></div>';
   var active=S.projects.filter(function(p){return p.status<3;});
   el('dash-projects').innerHTML=active.length?active.map(function(p){
     var cl=gc(p.clientId);var h=S.timeLogs.filter(function(l){return l.projectId===p.id;}).reduce(function(a,l){return a+l.duration;},0)/3600;
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(p.title)+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+(cl?escH(cl.name):'Interno')+(h>0?' \u00b7 '+h.toFixed(1)+'h':'')+'</div></div><span class="badge" style="background:'+KB_CLR[p.status]+'20;color:'+KB_CLR[p.status]+'">'+KB_COLS[p.status]+'</span></div>';
-  }).join(''):'<div class="empty">Nema aktivnih projekata.</div>';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(p.title)+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+(cl?escH(cl.name):t('dashInternal'))+(h>0?' \u00b7 '+h.toFixed(1)+'h':'')+'</div></div><span class="badge" style="background:'+KB_CLR[p.status]+'20;color:'+KB_CLR[p.status]+'">'+KB_COLS[p.status]+'</span></div>';
+  }).join(''):'<div class="empty">'+t('dashNoActiveProj')+'</div>';
   var rl=S.timeLogs.slice(-5).reverse();
   el('dash-th').textContent=(ts/3600).toFixed(1)+'h';
-  el('dash-logs').innerHTML=rl.length?rl.map(function(l){var p=gp(l.projectId);return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:500">'+(p?escH(p.title):'&mdash;')+'</div><div style="font-size:11px;color:var(--text3)">'+(l.note||'&mdash;')+' \u00b7 '+l.date+'</div></div><span style="font-family:var(--mono);font-size:12px;color:var(--accent)">'+fmtD(l.duration)+'</span></div>';}).join(''):'<div class="empty">Pokreni timer.</div>';
+  el('dash-logs').innerHTML=rl.length?rl.map(function(l){var p=gp(l.projectId);return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:500">'+(p?escH(p.title):'&mdash;')+'</div><div style="font-size:11px;color:var(--text3)">'+(l.note||'&mdash;')+' \u00b7 '+l.date+'</div></div><span style="font-family:var(--mono);font-size:12px;color:var(--accent)">'+fmtD(l.duration)+'</span></div>';}).join(''):'<div class="empty">'+t('dashNoLogs')+'</div>';
   var bp={};S.timeLogs.forEach(function(l){if(!l.projectId)return;bp[l.projectId]=(bp[l.projectId]||0)+l.duration;});
   var rr=Object.keys(bp).map(function(pid){var p=gp(pid);var h=bp[pid]/3600;return{name:p?p.title:'&mdash;',h:h,v:p&&p.rate?p.rate*h:0};}).sort(function(a,b){return b.h-a.h;});
   var maxH=rr.length?Math.max.apply(null,rr.map(function(r){return r.h;})):1;
-  el('dash-revenue').innerHTML=rr.length?rr.map(function(r){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+escH(r.name)+'</div><div style="margin-top:4px;height:3px;background:var(--bg3);border-radius:2px"><div style="height:100%;background:var(--accent);width:'+Math.round(r.h/maxH*100)+'%;border-radius:2px"></div></div></div><div style="text-align:right;margin-left:16px"><div style="font-family:var(--mono);font-size:13px;color:var(--yellow)">\u20AC'+Math.round(r.v)+'</div><div style="font-size:11px;color:var(--text3)">'+r.h.toFixed(1)+'h</div></div></div>';}).join(''):'<div class="empty">Nema podataka.</div>';
+  el('dash-revenue').innerHTML=rr.length?rr.map(function(r){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:13px;font-weight:500">'+escH(r.name)+'</div><div style="margin-top:4px;height:3px;background:var(--bg3);border-radius:2px"><div style="height:100%;background:var(--accent);width:'+Math.round(r.h/maxH*100)+'%;border-radius:2px"></div></div></div><div style="text-align:right;margin-left:16px"><div style="font-family:var(--mono);font-size:13px;color:var(--yellow)">\u20AC'+Math.round(r.v)+'</div><div style="font-size:11px;color:var(--text3)">'+r.h.toFixed(1)+'h</div></div></div>';}).join(''):'<div class="empty">'+t('dashNoData')+'</div>';
   var unpaid=S.invoiceHistory.filter(function(i){return i.status!=='paid';});
   var upTotal=unpaid.reduce(function(a,i){return a+flt(i.total);},0);
-  el('dash-unpaid-total').textContent=unpaid.length?unpaid.length+' ra\u010duna \u00b7 \u20AC'+upTotal.toFixed(0):'';
-  el('dash-invoices').innerHTML=unpaid.length?unpaid.slice(0,4).map(function(i){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(i.num)+'</div><div style="font-size:11px;color:var(--text3)">'+escH(i.client)+' \u00b7 '+i.date+'</div></div><div style="display:flex;align-items:center;gap:10px"><span style="font-family:var(--mono);font-size:13px">\u20AC'+flt(i.total).toFixed(0)+'</span><span class="inv-status '+i.status+'" onclick="cycleInvStatus(\''+i.id+'\')">'+INV_STATUSES[i.status]+'</span></div></div>';}).join(''):'<div class="empty">Nema neplacenih racuna.</div>';
+  el('dash-unpaid-total').textContent=unpaid.length?t('dashInvoicesCount').replace('{n}',unpaid.length)+' \u00b7 \u20AC'+upTotal.toFixed(0):'';
+  el('dash-invoices').innerHTML=unpaid.length?unpaid.slice(0,4).map(function(i){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:500">'+escH(i.num)+'</div><div style="font-size:11px;color:var(--text3)">'+escH(i.client)+' \u00b7 '+i.date+'</div></div><div style="display:flex;align-items:center;gap:10px"><span style="font-family:var(--mono);font-size:13px">\u20AC'+flt(i.total).toFixed(0)+'</span><span class="inv-status '+i.status+'" onclick="cycleInvStatus(\''+i.id+'\')">'+INV_STATUSES[i.status]+'</span></div></div>';}).join(''):'<div class="empty">'+t('dashNoUnpaid')+'</div>';
 }
 
 // ─── KANBAN

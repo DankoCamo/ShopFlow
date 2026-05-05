@@ -238,6 +238,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 .auth-google{width:100%;padding:9px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
 .auth-google:hover{background:var(--bg2);color:var(--text);border-color:var(--border)}
+.auth-pw-wrap{position:relative}
+.auth-pw-wrap input{padding-right:40px;width:100%}
+.auth-pw-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;display:flex;align-items:center;border-radius:4px;transition:color .15s}
+.auth-pw-toggle:hover{color:var(--text2)}
 /* Nav user */
 #nav-user-email{font-family:var(--mono);font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:148px}
 .nav-logout{background:none;border:none;cursor:pointer;color:var(--text3);padding:2px 3px;display:flex;align-items:center;border-radius:4px;flex-shrink:0}
@@ -681,15 +685,35 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 
     <div class="auth-form">
       <div id="auth-error" style="display:none;border-radius:var(--r);padding:9px 12px;font-size:12px;margin-bottom:14px;line-height:1.5"></div>
+      <div class="field auth-register-field" id="auth-name-field" style="display:none">
+        <label>Ime i prezime</label>
+        <input id="auth-name" type="text" placeholder="Ante Antić" autocomplete="name"
+               onkeydown="if(event.key==='Enter')handleAuthSubmit()">
+      </div>
       <div class="field">
         <label>Email</label>
         <input id="auth-email" type="email" placeholder="tvoj@email.com" autocomplete="email"
                onkeydown="if(event.key==='Enter')handleAuthSubmit()">
       </div>
-      <div class="field" style="margin-bottom:20px">
+      <div class="field" id="auth-pw-field" style="margin-bottom:20px">
         <label>Lozinka</label>
-        <input id="auth-password" type="password" placeholder="min. 6 znakova" autocomplete="current-password"
-               onkeydown="if(event.key==='Enter')handleAuthSubmit()">
+        <div class="auth-pw-wrap">
+          <input id="auth-password" type="password" placeholder="min. 6 znakova" autocomplete="current-password"
+                 onkeydown="if(event.key==='Enter')handleAuthSubmit()">
+          <button type="button" class="auth-pw-toggle" onclick="togglePwVisibility('auth-password',this)" tabindex="-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field auth-register-field" id="auth-confirm-field" style="display:none;margin-bottom:20px">
+        <label>Ponovi lozinku</label>
+        <div class="auth-pw-wrap">
+          <input id="auth-confirm" type="password" placeholder="ista lozinka" autocomplete="new-password"
+                 onkeydown="if(event.key==='Enter')handleAuthSubmit()">
+          <button type="button" class="auth-pw-toggle" onclick="togglePwVisibility('auth-confirm',this)" tabindex="-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
       </div>
       <button class="auth-submit" id="auth-submit" onclick="handleAuthSubmit()">Prijavi se</button>
       <div class="auth-divider">ili</div>
@@ -1391,7 +1415,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <script>
 // ─── SUPABASE CONFIG
 // Postavi svoje Supabase credentials:
-var SUPABASE_URL = 'https://orjetlbyrunceopyhyal.supabase.co/rest/v1/';
+var SUPABASE_URL = 'https://orjetlbyrunceopyhyal.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yamV0bGJ5cnVuY2VvcHloeWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDM4NjMsImV4cCI6MjA5MzQ3OTg2M30.vRzJEDmrjA8f8gKs3f-ZDpGpePW2mSTIuh4zpxpicyo';
 var authEnabled = SUPABASE_URL !== 'OVDJE_STAVI_TVOJ_PROJECT_URL' && SUPABASE_ANON_KEY !== 'OVDJE_STAVI_TVOJ_ANON_KEY';
 var supabaseClient = null;
@@ -1423,6 +1447,17 @@ function switchAuthTab(mode){
   if(ttl) ttl.textContent = isLogin ? 'Dobrodošao nazad' : 'Napravi besplatan račun';
   var err = document.getElementById('auth-error');
   if(err) err.style.display = 'none';
+  // Show/hide register-only fields
+  var regFields = document.querySelectorAll('.auth-register-field');
+  regFields.forEach(function(el){ el.style.display = isLogin ? 'none' : 'flex'; });
+  // In login mode the password field is last — keep its bottom margin; in register mode confirm is last
+  var pwField = document.getElementById('auth-pw-field');
+  if(pwField) pwField.style.marginBottom = isLogin ? '20px' : '14px';
+  // Reset confirm/name inputs when switching tabs
+  var conf = document.getElementById('auth-confirm');
+  if(conf) conf.value = '';
+  var nameEl = document.getElementById('auth-name');
+  if(nameEl) nameEl.value = '';
 }
 
 function showAuthMsg(msg, isInfo){
@@ -1435,6 +1470,17 @@ function showAuthMsg(msg, isInfo){
   } else {
     e.style.cssText = 'display:block;background:var(--red-dim);border:1px solid var(--red);color:var(--red);border-radius:var(--r);padding:9px 12px;font-size:12px;margin-bottom:14px;line-height:1.5';
   }
+}
+
+function togglePwVisibility(inputId, btn){
+  var inp = document.getElementById(inputId);
+  if(!inp) return;
+  var isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  var svg = btn.querySelector('svg');
+  if(svg) svg.innerHTML = isText
+    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
 }
 
 function translateAuthError(msg){
@@ -1454,6 +1500,10 @@ async function handleAuthSubmit(){
   var pass = document.getElementById('auth-password').value;
   if(!email || !email.includes('@')){ showAuthMsg('Unesi ispravnu email adresu.'); return; }
   if(!pass || pass.length < 6){ showAuthMsg('Lozinka mora imati najmanje 6 znakova.'); return; }
+  if(authMode === 'register'){
+    var conf = (document.getElementById('auth-confirm').value || '');
+    if(pass !== conf){ showAuthMsg('Lozinke se ne podudaraju.'); return; }
+  }
   if(!supabaseClient){ showAuthMsg('Supabase nije konfiguriran. Postavi SUPABASE_URL i SUPABASE_ANON_KEY.'); return; }
   var btn = document.getElementById('auth-submit');
   btn.disabled = true;
@@ -1464,10 +1514,15 @@ async function handleAuthSubmit(){
       var r = await supabaseClient.auth.signInWithPassword({ email: email, password: pass });
       if(r.error) showAuthMsg(translateAuthError(r.error.message));
     } else {
-      var r2 = await supabaseClient.auth.signUp({ email: email, password: pass });
+      var fullName = (document.getElementById('auth-name').value || '').trim();
+      var r2 = await supabaseClient.auth.signUp({
+        email: email,
+        password: pass,
+        options: { data: { full_name: fullName } }
+      });
       if(r2.error){ showAuthMsg(translateAuthError(r2.error.message)); return; }
       if(r2.data && r2.data.user){
-        await createUserProfile(r2.data.user);
+        await createUserProfile(r2.data.user, fullName);
         if(!r2.data.session) showAuthMsg('Provjeri email i potvrdi registraciju, zatim se prijavi.', true);
       }
     }
@@ -1494,15 +1549,12 @@ async function signOut(){
   goToLanding();
 }
 
-async function createUserProfile(user){
+async function createUserProfile(user, fullName){
   if(!supabaseClient) return;
   try {
-    await supabaseClient.from('profiles').upsert({
-      id: user.id,
-      email: user.email,
-      app_lang: 'hr',
-      app_theme: 'dark'
-    });
+    var payload = { id: user.id, email: user.email, app_lang: 'hr', app_theme: 'dark' };
+    if(fullName) payload.full_name = fullName;
+    await supabaseClient.from('profiles').upsert(payload);
   } catch(e){ /* Tablica možda još ne postoji — tih fail u Fazi 1 */ }
 }
 

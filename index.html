@@ -1986,6 +1986,7 @@ function applyLandingTranslations(){
 
 function setAppLang(lang){
   APP_LANG=lang;
+  window._userPickedLang=lang;
   S.settings.appLang=lang;
   save();
   applyTranslations();
@@ -1998,6 +1999,7 @@ function setAppLang(lang){
 
 function setTheme(theme){
   APP_THEME=theme;
+  window._userPickedTheme=theme;
   S.settings.appTheme=theme;
   save();
   applyTheme();
@@ -3063,8 +3065,11 @@ function initApp(){
   S.projects=[];S.clients=[];S.timeLogs=[];S.expenses=[];S.ganttTasks=[];
   S.invoiceHistory=[];S.leads=[];S.invItems=[];S.invItemId=0;S.nextId=1;
   S.emailTemplates=[];S.timer={running:false,start:null,interval:null};
-  S.settings={appLang:APP_LANG||'hr',appTheme:APP_THEME||'dark',name:'',email:'',addr:'',uid:'',iban:'',bic:'',rate:75,vat:20,currency:'EUR',note:'',calUsername:''};
+  S.settings={appLang:'hr',appTheme:'dark',name:'',email:'',addr:'',uid:'',iban:'',bic:'',rate:75,vat:20,currency:'EUR',note:'',calUsername:''};
   load();
+  // If user explicitly picked lang/theme before login, that takes priority over saved profile
+  if(window._userPickedLang){ S.settings.appLang=window._userPickedLang; window._userPickedLang=null; }
+  if(window._userPickedTheme){ S.settings.appTheme=window._userPickedTheme; window._userPickedTheme=null; }
   var now=new Date(),due=new Date(now);due.setDate(due.getDate()+30);
   el('idate').value=now.toISOString().split('T')[0];
   el('idue').value=due.toISOString().split('T')[0];

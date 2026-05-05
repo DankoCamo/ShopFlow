@@ -273,6 +273,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:h
 #landing-page /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:64px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid transparent;transition:all .3s}
 #landing-page nav.scrolled{background:rgba(8,8,8,.95);backdrop-filter:blur(16px);border-bottom-color:var(--border)}
+body.light #landing-page nav.scrolled{background:rgba(246,248,250,.96);border-bottom-color:#d0d7de}
 #landing-page .nav-logo{font-family:var(--display);font-size:20px;font-weight:800;color:var(--text);text-decoration:none;letter-spacing:-0.5px;display:flex;align-items:center;gap:8px}
 #landing-page .nav-logo-mark{width:24px;height:24px;background:var(--yellow);border-radius:4px;display:flex;align-items:center;justify-content:center}
 #landing-page .nav-logo-mark svg{width:14px;height:14px}
@@ -674,31 +675,31 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
         </div>
         <span class="auth-logo-name">Compallo</span>
       </div>
-      <div id="auth-title" style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px">Dobrodo&#353;ao nazad</div>
-      <div style="font-size:12px;color:var(--text3)">Upravljaj poslovanjem na jednom mjestu</div>
+      <div id="auth-title" style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px"></div>
+      <div id="auth-subtitle" style="font-size:12px;color:var(--text3)"></div>
     </div>
 
     <div class="auth-tabs">
-      <button class="auth-tab active" id="auth-tab-login" onclick="switchAuthTab('login')">Prijava</button>
-      <button class="auth-tab" id="auth-tab-register" onclick="switchAuthTab('register')">Registracija</button>
+      <button class="auth-tab active" id="auth-tab-login" onclick="switchAuthTab('login')"></button>
+      <button class="auth-tab" id="auth-tab-register" onclick="switchAuthTab('register')"></button>
     </div>
 
     <div class="auth-form">
       <div id="auth-error" style="display:none;border-radius:var(--r);padding:9px 12px;font-size:12px;margin-bottom:14px;line-height:1.5"></div>
       <div class="field auth-register-field" id="auth-name-field" style="display:none">
-        <label>Ime i prezime</label>
-        <input id="auth-name" type="text" placeholder="Ante Antić" autocomplete="name"
+        <label id="auth-label-name"></label>
+        <input id="auth-name" type="text" autocomplete="name"
                onkeydown="if(event.key==='Enter')handleAuthSubmit()">
       </div>
       <div class="field">
-        <label>Email</label>
-        <input id="auth-email" type="email" placeholder="tvoj@email.com" autocomplete="email"
+        <label id="auth-label-email"></label>
+        <input id="auth-email" type="email" autocomplete="email"
                onkeydown="if(event.key==='Enter')handleAuthSubmit()">
       </div>
       <div class="field" id="auth-pw-field" style="margin-bottom:20px">
-        <label>Lozinka</label>
+        <label id="auth-label-password"></label>
         <div class="auth-pw-wrap">
-          <input id="auth-password" type="password" placeholder="min. 6 znakova" autocomplete="current-password"
+          <input id="auth-password" type="password" autocomplete="current-password"
                  onkeydown="if(event.key==='Enter')handleAuthSubmit()">
           <button type="button" class="auth-pw-toggle" onclick="togglePwVisibility('auth-password',this)" tabindex="-1">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -706,33 +707,31 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
         </div>
       </div>
       <div class="field auth-register-field" id="auth-confirm-field" style="display:none;margin-bottom:20px">
-        <label>Ponovi lozinku</label>
+        <label id="auth-label-confirm"></label>
         <div class="auth-pw-wrap">
-          <input id="auth-confirm" type="password" placeholder="ista lozinka" autocomplete="new-password"
+          <input id="auth-confirm" type="password" autocomplete="new-password"
                  onkeydown="if(event.key==='Enter')handleAuthSubmit()">
           <button type="button" class="auth-pw-toggle" onclick="togglePwVisibility('auth-confirm',this)" tabindex="-1">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
       </div>
-      <button class="auth-submit" id="auth-submit" onclick="handleAuthSubmit()">Prijavi se</button>
-      <div class="auth-divider">ili</div>
-      <button class="auth-google" onclick="signInWithGoogle()">
+      <button class="auth-submit" id="auth-submit" onclick="handleAuthSubmit()"></button>
+      <div class="auth-divider" id="auth-divider"></div>
+      <button class="auth-google" id="auth-google-btn" onclick="signInWithGoogle()">
         <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
-        Nastavi s Google ra&#269;unom
+        <span id="auth-google-text"></span>
       </button>
     </div>
 
     <div style="text-align:center;margin-top:20px">
-      <span onclick="goToLanding()" style="cursor:pointer;color:var(--text3);font-size:13px;transition:color .15s"
-            onmouseover="this.style.color='var(--text2)'" onmouseout="this.style.color='var(--text3)'">
-        &#8592; Natrag na po&#269;etnu
-      </span>
+      <span id="auth-back-link" onclick="goToLanding()" style="cursor:pointer;color:var(--text3);font-size:13px;transition:color .15s"
+            onmouseover="this.style.color='var(--text2)'" onmouseout="this.style.color='var(--text3)'"></span>
     </div>
 
   </div>
@@ -1419,7 +1418,8 @@ function showAuthPage(){
   document.getElementById('app-page').style.display='none';
   document.getElementById('auth-page').style.display='flex';
   document.body.style.overflow='';
-  document.title='Compallo — Prijava';
+  document.title='Compallo';
+  applyAuthTranslations();
 }
 
 function switchAuthTab(mode){
@@ -1435,6 +1435,7 @@ function switchAuthTab(mode){
   if(ttl) ttl.textContent = isLogin ? 'Dobrodošao nazad' : 'Napravi besplatan račun';
   var err = document.getElementById('auth-error');
   if(err) err.style.display = 'none';
+  applyAuthTranslations();
   // Show/hide register-only fields
   var regFields = document.querySelectorAll('.auth-register-field');
   regFields.forEach(function(el){ el.style.display = isLogin ? 'none' : 'flex'; });
@@ -1460,6 +1461,27 @@ function showAuthMsg(msg, isInfo){
   }
 }
 
+function applyAuthTranslations(){
+  var isLogin = authMode === 'login';
+  var s = function(id, key){ var e = document.getElementById(id); if(e) e.textContent = t(key); };
+  s('auth-title', isLogin ? 'authWelcome' : 'authRegisterTitle');
+  s('auth-subtitle', 'authSubtitle');
+  s('auth-tab-login', 'authLogin');
+  s('auth-tab-register', 'authRegister');
+  s('auth-label-name', 'authName');
+  s('auth-label-email', 'authEmail');
+  s('auth-label-password', 'authPassword');
+  s('auth-label-confirm', 'authConfirm');
+  s('auth-submit', isLogin ? 'authSubmitLogin' : 'authSubmitRegister');
+  s('auth-divider', 'authOr');
+  s('auth-google-text', 'authGoogle');
+  s('auth-back-link', 'authBack');
+  var n = document.getElementById('auth-name'); if(n) n.placeholder = t('authNamePh');
+  var em = document.getElementById('auth-email'); if(em) em.placeholder = t('authEmailPh');
+  var pw = document.getElementById('auth-password'); if(pw) pw.placeholder = t('authPassPh');
+  var cf = document.getElementById('auth-confirm'); if(cf) cf.placeholder = t('authConfirmPh');
+}
+
 function togglePwVisibility(inputId, btn){
   var inp = document.getElementById(inputId);
   if(!inp) return;
@@ -1472,30 +1494,29 @@ function togglePwVisibility(inputId, btn){
 }
 
 function translateAuthError(msg){
-  if(!msg) return 'Nepoznata greška.';
-  if(msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) return 'Pogrešan email ili lozinka.';
-  if(msg.includes('Email not confirmed')) return 'Email nije potvrđen. Provjeri inbox.';
-  if(msg.includes('User already registered') || msg.includes('already registered')) return 'Email je već registriran. Prijavi se.';
-  if(msg.includes('Password should be') || msg.includes('password should')) return 'Lozinka mora imati najmanje 6 znakova.';
-  if(msg.includes('rate limit') || msg.includes('too many requests')) return 'Previše pokušaja. Pričekaj minutu.';
-  if(msg.includes('Unable to validate')) return 'Pogrešan email ili lozinka.';
-  if(msg.includes('Network')) return 'Nema veze s internetom.';
+  if(!msg) return t('errCredentials');
+  if(msg.includes('Invalid login credentials') || msg.includes('invalid_credentials') || msg.includes('Unable to validate')) return t('errCredentials');
+  if(msg.includes('Email not confirmed')) return t('errNotConfirmed');
+  if(msg.includes('User already registered') || msg.includes('already registered')) return t('errAlreadyReg');
+  if(msg.includes('Password should be') || msg.includes('password should')) return t('errPassLength');
+  if(msg.includes('rate limit') || msg.includes('too many requests')) return t('errRateLimit');
+  if(msg.includes('Network')) return t('errNetwork');
   return msg;
 }
 
 async function handleAuthSubmit(){
   var email = (document.getElementById('auth-email').value || '').trim();
   var pass = document.getElementById('auth-password').value;
-  if(!email || !email.includes('@')){ showAuthMsg('Unesi ispravnu email adresu.'); return; }
-  if(!pass || pass.length < 6){ showAuthMsg('Lozinka mora imati najmanje 6 znakova.'); return; }
+  if(!email || !email.includes('@')){ showAuthMsg(t('authErrEmail')); return; }
+  if(!pass || pass.length < 6){ showAuthMsg(t('authErrPass')); return; }
   if(authMode === 'register'){
     var conf = (document.getElementById('auth-confirm').value || '');
-    if(pass !== conf){ showAuthMsg('Lozinke se ne podudaraju.'); return; }
+    if(pass !== conf){ showAuthMsg(t('authErrMatch')); return; }
   }
-  if(!supabaseClient){ showAuthMsg('Supabase nije konfiguriran. Postavi SUPABASE_URL i SUPABASE_ANON_KEY.'); return; }
+  if(!supabaseClient){ showAuthMsg(t('authErrNoSupabase')); return; }
   var btn = document.getElementById('auth-submit');
   btn.disabled = true;
-  btn.textContent = authMode === 'login' ? 'Prijavljujem...' : 'Kreiram račun...';
+  btn.textContent = authMode === 'login' ? t('authChecking') : t('authCreating');
   document.getElementById('auth-error').style.display = 'none';
   try {
     if(authMode === 'login'){
@@ -1511,13 +1532,13 @@ async function handleAuthSubmit(){
       if(r2.error){ showAuthMsg(translateAuthError(r2.error.message)); return; }
       if(r2.data && r2.data.user){
         await createUserProfile(r2.data.user, fullName);
-        if(!r2.data.session) showAuthMsg('Provjeri email i potvrdi registraciju, zatim se prijavi.', true);
+        if(!r2.data.session) showAuthMsg(t('authOkVerify'), true);
       }
     }
   } catch(e){ showAuthMsg('Greška: ' + e.message); }
   finally {
     btn.disabled = false;
-    btn.textContent = authMode === 'login' ? 'Prijavi se' : 'Napravi račun';
+    btn.textContent = authMode === 'login' ? t('authSubmitLogin') : t('authSubmitRegister');
   }
 }
 
@@ -1712,7 +1733,28 @@ var TRANSLATIONS = {
     calUsername:'Tvoj Cal.com username', calSave:'Spremi',
     calPlaceholder:'npr. danko-camo',
     calNoAccount:'Nemaš Cal.com račun? Idi na cal.com, napravi besplatan račun i upiši username ovdje.',
-    calEmpty:'Upiši Cal.com username gore kako bi prikazao/la svoj kalendar.'
+    calEmpty:'Upiši Cal.com username gore kako bi prikazao/la svoj kalendar.',
+    authWelcome:'Dobrodošao nazad', authRegisterTitle:'Napravi besplatan račun',
+    authSubtitle:'Upravljaj poslovanjem na jednom mjestu',
+    authLogin:'Prijava', authRegister:'Registracija',
+    authName:'Ime i prezime', authEmail:'Email', authPassword:'Lozinka',
+    authConfirm:'Ponovi lozinku', authSubmitLogin:'Prijavi se',
+    authSubmitRegister:'Napravi račun', authOr:'ili',
+    authGoogle:'Nastavi s Google računom', authBack:'← Natrag na početnu',
+    authNamePh:'Ante Antić', authEmailPh:'tvoj@email.com',
+    authPassPh:'min. 6 znakova', authConfirmPh:'ista lozinka',
+    authChecking:'Prijavljujem...', authCreating:'Kreiram račun...',
+    authErrEmail:'Unesi ispravnu email adresu.',
+    authErrPass:'Lozinka mora imati najmanje 6 znakova.',
+    authErrMatch:'Lozinke se ne podudaraju.',
+    authErrNoSupabase:'Supabase nije konfiguriran.',
+    authOkVerify:'Provjeri email i potvrdi registraciju, zatim se prijavi.',
+    errCredentials:'Pogrešan email ili lozinka.',
+    errNotConfirmed:'Email nije potvrđen. Provjeri inbox.',
+    errAlreadyReg:'Email je već registriran. Prijavi se.',
+    errPassLength:'Lozinka mora imati najmanje 6 znakova.',
+    errRateLimit:'Previše pokušaja. Pričekaj minutu.',
+    errNetwork:'Nema veze s internetom.'
   },
   de: {
     dashboard:'Dashboard', projects:'Projekte', tracker:'Zeiterfassung',
@@ -1742,7 +1784,28 @@ var TRANSLATIONS = {
     calUsername:'Dein Cal.com-Benutzername', calSave:'Speichern',
     calPlaceholder:'z.B. danko-camo',
     calNoAccount:'Kein Cal.com-Konto? Geh auf cal.com, erstelle ein kostenloses Konto und trag deinen Benutzernamen hier ein.',
-    calEmpty:'Trag deinen Cal.com-Benutzernamen oben ein, um deinen Kalender anzuzeigen.'
+    calEmpty:'Trag deinen Cal.com-Benutzernamen oben ein, um deinen Kalender anzuzeigen.',
+    authWelcome:'Willkommen zurück', authRegisterTitle:'Kostenloses Konto erstellen',
+    authSubtitle:'Verwalte dein Business an einem Ort',
+    authLogin:'Anmelden', authRegister:'Registrieren',
+    authName:'Vor- und Nachname', authEmail:'E-Mail', authPassword:'Passwort',
+    authConfirm:'Passwort wiederholen', authSubmitLogin:'Anmelden',
+    authSubmitRegister:'Konto erstellen', authOr:'oder',
+    authGoogle:'Mit Google-Konto fortfahren', authBack:'← Zurück zur Startseite',
+    authNamePh:'Max Mustermann', authEmailPh:'deine@email.com',
+    authPassPh:'min. 6 Zeichen', authConfirmPh:'gleiches Passwort',
+    authChecking:'Anmelden...', authCreating:'Konto erstellen...',
+    authErrEmail:'Bitte gültige E-Mail-Adresse eingeben.',
+    authErrPass:'Passwort muss mindestens 6 Zeichen haben.',
+    authErrMatch:'Passwörter stimmen nicht überein.',
+    authErrNoSupabase:'Supabase ist nicht konfiguriert.',
+    authOkVerify:'Bitte E-Mail bestätigen und dann anmelden.',
+    errCredentials:'Falsche E-Mail oder Passwort.',
+    errNotConfirmed:'E-Mail nicht bestätigt. Bitte Posteingang prüfen.',
+    errAlreadyReg:'E-Mail bereits registriert. Bitte anmelden.',
+    errPassLength:'Passwort muss mindestens 6 Zeichen haben.',
+    errRateLimit:'Zu viele Versuche. Bitte eine Minute warten.',
+    errNetwork:'Keine Internetverbindung.'
   },
   en: {
     dashboard:'Dashboard', projects:'Projects', tracker:'Time tracker',
@@ -1772,7 +1835,28 @@ var TRANSLATIONS = {
     calUsername:'Your Cal.com username', calSave:'Save',
     calPlaceholder:'e.g. danko-camo',
     calNoAccount:'No Cal.com account? Go to cal.com, create a free account and enter your username here.',
-    calEmpty:'Enter your Cal.com username above to display your calendar.'
+    calEmpty:'Enter your Cal.com username above to display your calendar.',
+    authWelcome:'Welcome back', authRegisterTitle:'Create a free account',
+    authSubtitle:'Manage your business in one place',
+    authLogin:'Login', authRegister:'Register',
+    authName:'Full name', authEmail:'Email', authPassword:'Password',
+    authConfirm:'Confirm password', authSubmitLogin:'Sign in',
+    authSubmitRegister:'Create account', authOr:'or',
+    authGoogle:'Continue with Google', authBack:'← Back to homepage',
+    authNamePh:'John Smith', authEmailPh:'your@email.com',
+    authPassPh:'min. 6 characters', authConfirmPh:'same password',
+    authChecking:'Signing in...', authCreating:'Creating account...',
+    authErrEmail:'Please enter a valid email address.',
+    authErrPass:'Password must be at least 6 characters.',
+    authErrMatch:'Passwords do not match.',
+    authErrNoSupabase:'Supabase is not configured.',
+    authOkVerify:'Check your email to confirm registration, then sign in.',
+    errCredentials:'Incorrect email or password.',
+    errNotConfirmed:'Email not confirmed. Please check your inbox.',
+    errAlreadyReg:'Email already registered. Please sign in.',
+    errPassLength:'Password must be at least 6 characters.',
+    errRateLimit:'Too many attempts. Please wait a minute.',
+    errNetwork:'No internet connection.'
   }
 };
 
@@ -2020,6 +2104,8 @@ function applyTranslations(){
   // Update email lang
   var emailLang=el('email-lang');
   if(emailLang)emailLang.value=APP_LANG;
+  // Auth page strings (if visible)
+  if(document.getElementById('auth-page') && document.getElementById('auth-page').style.display==='flex') applyAuthTranslations();
   // Meetings page strings
   if(el('meetings-card-title'))el('meetings-card-title').textContent=t('calIntegration');
   if(el('meetings-label-username'))el('meetings-label-username').textContent=t('calUsername');

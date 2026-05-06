@@ -1086,8 +1086,8 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 
   <div id="agent-panel" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px"><div class="pros-spinner"></div> Agent radi...</div>
-      <button class="btn btn-sm btn-danger" onclick="stopAgent()">Zaustavi</button>
+      <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px"><div class="pros-spinner" id="agent-spinner"></div><span id="agent-title">Agent radi...</span></div>
+      <button class="btn btn-sm btn-danger" id="agent-stop-btn" onclick="stopAgent()">Zaustavi</button>
     </div>
     <div class="agent-bar-track"><div id="agent-bar" class="agent-bar-fill"></div></div>
     <div id="agent-step" style="font-size:12px;color:var(--text3)">Pripremam...</div>
@@ -2869,7 +2869,13 @@ function extractCompanyFromText(text){
 function agentSetStep(t){el('agent-step').textContent=t;}
 function agentSetProgress(done,total){el('agent-bar').style.width=(total>0?Math.round(done/total*100):0)+'%';}
 function agentDelay(ms){return new Promise(function(r){setTimeout(r,ms);});}
-function stopAgent(){agentRunning=false;agentSetStep('Zaustavljeno.');}
+function stopAgent(){
+  agentRunning=false;
+  el('agent-spinner').style.display='none';
+  el('agent-title').textContent='Zaustavljeno.';
+  el('agent-stop-btn').style.display='none';
+  agentSetStep('');
+}
 function agentSelectAll(val){agentQueue.forEach(function(i){i.approved=val;});renderAgentReview();}
 
 async function runAutoAgent(){
@@ -2968,9 +2974,13 @@ async function runAutoAgent(){
     el('agent-review').style.display='block';
     await agentDelay(700);
   }
-  agentSetStep('Gotovo! Agent pronašao '+agentQueue.length+' leadova s emailovima od '+results.length+' oglasa.');
+  agentSetStep('Agent pronašao '+agentQueue.length+' leadova s emailovima od '+results.length+' oglasa.');
   agentSetProgress(results.length,results.length);
-  agentRunning=false;el('agent-start-btn').disabled=false;
+  agentRunning=false;
+  el('agent-spinner').style.display='none';
+  el('agent-title').textContent='Gotovo!';
+  el('agent-stop-btn').style.display='none';
+  el('agent-start-btn').disabled=false;
 }
 
 function renderAgentReview(){

@@ -3130,31 +3130,32 @@ async function generateAIEmail() {
   el('ai-status').style.display = 'block';
   el('ai-status').style.color = 'var(--accent)';
   el('ai-status').style.background = 'var(--accent-dim)';
-  el('ai-status').textContent = 'Korak 1/2: Citam stranicu firme...';
+  el('ai-status').textContent = isPortal ? 'AI sastavlja email iz oglasa...' : 'Korak 1/2: Citam stranicu firme...';
 
   var pageContent = '';
   var fetchData = {};
-  try {
-    var fetchRes = await fetch(FETCH_WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: lead.url })
-    });
-    fetchData = await fetchRes.json();
-    if (fetchData.ok && fetchData.text) {
-      pageContent = fetchData.text;
-      // Auto-fill email if found by Worker
-      if (fetchData.primaryEmail && !el('email-to').value) {
-        el('email-to').value = fetchData.primaryEmail;
-        el('ai-status').textContent = 'Email pronadjen: ' + fetchData.primaryEmail + ' | Korak 2/2: AI pise email...';
+  if (!isPortal) {
+    try {
+      var fetchRes = await fetch(FETCH_WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: lead.url })
+      });
+      fetchData = await fetchRes.json();
+      if (fetchData.ok && fetchData.text) {
+        pageContent = fetchData.text;
+        if (fetchData.primaryEmail && !el('email-to').value) {
+          el('email-to').value = fetchData.primaryEmail;
+          el('ai-status').textContent = 'Email pronadjen: ' + fetchData.primaryEmail + ' | Korak 2/2: AI pise email...';
+        } else {
+          el('ai-status').textContent = 'Korak 2/2: AI pise personalizirani email...';
+        }
       } else {
-        el('ai-status').textContent = 'Korak 2/2: AI pise personalizirani email...';
+        el('ai-status').textContent = 'Korak 2/2: AI pise email (koristim opis iz pretrage)...';
       }
-    } else {
+    } catch(e) {
       el('ai-status').textContent = 'Korak 2/2: AI pise email (koristim opis iz pretrage)...';
     }
-  } catch(e) {
-    el('ai-status').textContent = 'Korak 2/2: AI pise email (koristim opis iz pretrage)...';
   }
 
   var contextInfo = pageContent
@@ -3163,26 +3164,23 @@ async function generateAIEmail() {
 
   var prompt;
   if (isPortal) {
-    prompt = 'A freelance CAM programmer (CAMOutput, Graz, Austria) found a job listing on a job portal.\n\n'
+    prompt = 'You are helping a freelance CAM programmer (CAMOutput, Graz, Austria) write a cold outreach email.\n\n'
+      + 'They found a job listing where a company is HIRING a CAM programmer — which means the company uses CNC machines and CAM software. Perfect lead for freelance CAM services.\n\n'
       + 'Job listing title: ' + lead.name + '\n'
-      + 'Portal: ' + displayUrl + '\n\n'
-      + 'Page content:\n' + contextInfo + '\n\n'
-      + 'TASK:\n'
-      + '1. Find the actual hiring company name from the page content above\n'
-      + '2. Find any contact email address on the page\n'
-      + '3. Write a short personalized email in ' + langName + ' to that company\n\n'
-      + 'The email should:\n'
-      + '- Start with: Hallo [ActualCompanyName]-Team, (personalized greeting with real company name)\n'
-      + '- Second sentence: introduce Danko from CAMOutput as remote CAM programmer with 10+ years experience\n'
-      + '- Mention you saw they are looking for CAM programmers - freelance remote is faster and cheaper than hiring\n'
-      + '- CTA: Weitere Infos auf www.camoutput.com - NO phone calls\n'
-      + '- Offer freelance CAM services (Mastercam/Fusion360/Hypermill, post-processors, optimization)\n'
-      + '- Be max 100 words, direct and human\n'
-      + '- No placeholder like [Your Name] - sign: CAMOutput | info@camoutput.com\n\n'
-      + 'Format your response EXACTLY as:\n'
-      + 'COMPANY:[company name you found]\n'
-      + 'EMAIL:[email if found, else none]\n'
-      + 'SUBJECT:[max 8 word subject]\n'
+      + 'Portal: ' + displayUrl + '\n'
+      + 'Google snippet: ' + lead.desc + '\n\n'
+      + 'TASK: Extract company name from the title/snippet (it is often mentioned there), then write a short cold email in ' + langName + '.\n\n'
+      + 'Rules:\n'
+      + '1. Greeting: if company name visible → "Hallo [CompanyName]-Team," — if not → "Hallo,"\n'
+      + '2. First line: mention you saw their CAM programmer job listing\n'
+      + '3. Offer: remote freelance CAM programming — faster and more flexible than hiring a full-time employee\n'
+      + '4. Brief intro: Danko von CAMOutput, 10+ Jahre Erfahrung, Mastercam / Fusion 360 / HyperMill\n'
+      + '5. CTA: Weitere Infos auf www.camoutput.com — NO phone calls\n'
+      + '6. Max 100 words, direct and human, not corporate\n'
+      + '7. Sign as: CAMOutput | info@camoutput.com\n\n'
+      + 'Format EXACTLY as:\n'
+      + 'COMPANY:[company name extracted, or "Unbekannt" if not found]\n'
+      + 'SUBJECT:[max 8 word subject line]\n'
       + '[email body only, nothing else]';
   } else {
     prompt = 'A freelance CAM programmer (CAMOutput, Graz, Austria) wants to cold email this company.\n\n'
@@ -3250,7 +3248,7 @@ async function generateAIEmail() {
     if (subjectLine) el('email-subject').value = subjectLine.replace('SUBJECT:', '').trim();
 
     // Extract body
-    var headerPrefixes = ['COMPANY:', 'EMAIL:', 'SUBJECT:'];
+    var headerPrefixes = ['COMPANY:', 'EMAIL:', 'SUBJECT:', 'NOT_IDENTIFIABLE', 'Not identifiable'];
     var bodyLines = [];
     var pastHeaders = false;
     for (var i = 0; i < lines.length; i++) {

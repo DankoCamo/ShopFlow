@@ -3259,9 +3259,42 @@ async function generateAIEmail() {
     var body = bodyLines.join('\n').trim();
     if (body) el('email-body').value = body;
 
+    // For portal leads: search for company website and extract email
+    if (isPortal && extractedCompany && extractedCompany !== 'Unbekannt' && !el('email-to').value) {
+      try {
+        el('ai-status').textContent = 'Firma: ' + extractedCompany + ' | Trazim web stranicu...';
+        var searchRes2 = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({query:'"'+extractedCompany+'" Impressum Kontakt', country:'de', num:3, lang:'de', type:'search'})
+        });
+        var searchData2 = await searchRes2.json();
+        var companyUrl = '';
+        if (searchData2.organic) {
+          var companyResult = searchData2.organic.find(function(r){ return r.link && !isJobPortal(r.link); });
+          if (companyResult) companyUrl = companyResult.link;
+        }
+        if (companyUrl) {
+          el('ai-status').textContent = 'Firma: ' + extractedCompany + ' | Citam Impressum...';
+          var fetchRes2 = await fetch(FETCH_WORKER_URL, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({url: companyUrl})
+          });
+          var fetchData2 = await fetchRes2.json();
+          if (fetchData2.primaryEmail) {
+            if (!el('email-to').value) el('email-to').value = fetchData2.primaryEmail;
+            var leadToUpdate2 = S.leads.find(function(l){ return l.id === currentEmailLeadId; });
+            if (leadToUpdate2 && !leadToUpdate2.email) { leadToUpdate2.email = fetchData2.primaryEmail; save(); }
+            foundEmail = fetchData2.primaryEmail;
+          }
+        }
+      } catch(e) { /* silently continue without email */ }
+    }
+
     // Status
     var statusParts = [];
-    if (extractedCompany) statusParts.push('Firma: ' + extractedCompany);
+    if (extractedCompany && extractedCompany !== 'Unbekannt') statusParts.push('Firma: ' + extractedCompany);
     if (foundEmail && foundEmail !== 'none' && foundEmail.includes('@')) statusParts.push('Email: ' + foundEmail);
     statusParts.push('Gotovo!');
     el('ai-status').textContent = statusParts.join(' | ');

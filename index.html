@@ -179,6 +179,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 @keyframes spin{to{transform:rotate(360deg)}}
 .pros-tab{padding:8px 4px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);margin-bottom:-1px}
 .pros-tab.active{border-bottom-color:var(--accent);color:var(--accent)}
+.pros-mode-btn{background:var(--bg3);color:var(--text2);border-color:var(--border)}
+.pros-mode-btn.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent)}
 .empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px}
 
 
@@ -1042,41 +1044,36 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- PROSPECTING -->
 <div class="page" id="page-prospecting">
   <div class="page-header">
-    <div class="page-title">Prospecting</div>
+    <div class="page-title" data-i18n="prospecting"></div>
     <div class="page-actions">
       <button class="btn btn-sm btn-danger" onclick="clearAllLeads()" data-i18n="confirmDeleteLeads"></button>
     </div>
   </div>
   <div class="card">
-    <div style="font-size:13px;font-weight:500;margin-bottom:14px" data-i18n="searchFirms"></div>
-    <div class="grid3" style="margin-bottom:12px">
-      <div class="field" style="margin:0"><label id="label-keyword">Djelatnost / klju&#269;na rije&#269;</label><input id="pros-query" placeholder="CNC Fr&#228;sen, Maschinenbau..."></div>
-      <div class="field" style="margin:0"><label id="label-city">Grad / regija</label><input id="pros-location" placeholder="Graz, Bayern, &#214;sterreich..."></div>
-      <div class="field" style="margin:0"><label id="label-country">Zemlja</label>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="btn btn-sm pros-mode-btn active" id="pros-mode-jobs" onclick="setProsMode('jobs')" data-i18n="prosModeJobs"></button>
+      <button class="btn btn-sm pros-mode-btn" id="pros-mode-maps" onclick="setProsMode('maps')" data-i18n="prosModeMaps"></button>
+    </div>
+    <div class="grid2" style="margin-bottom:12px">
+      <div class="field" style="margin:0"><label id="label-keyword" data-i18n="keyword"></label><input id="pros-query" data-i18n-ph="prosKeywordPh"></div>
+      <div class="field" style="margin:0"><label id="label-city" data-i18n="city"></label><input id="pros-location" data-i18n-ph="prosLocationPh"></div>
+    </div>
+    <div id="pros-country-row" style="margin-bottom:12px;display:none">
+      <div class="field" style="margin:0"><label id="label-country" data-i18n="country"></label>
         <select id="pros-country">
-          <option value="at">Austrija</option><option value="de">Njema&#269;ka</option>
-          <option value="ch">&#352;vicarska</option><option value="hr">Hrvatska</option><option value="ba">BiH</option>
+          <option value="at" data-i18n="cntAT"></option><option value="de" data-i18n="cntDE"></option>
+          <option value="ch" data-i18n="cntCH"></option><option value="hr" data-i18n="cntHR"></option>
         </select>
       </div>
     </div>
-    <div class="grid2" style="margin-bottom:14px">
-      <div class="field" style="margin:0"><label id="label-searchtype">Tip pretrage</label>
-        <select id="pros-type">
-          <option value="general">Firme (op&#263;enito)</option>
-          <option value="contact">Firme + kontakt email</option>
-          <option value="maps">Google Maps (lokalne firme)</option>
-          <option value="jobs">Job oglasi (tko treba CAM)</option>
-          <option value="linkedin">LinkedIn profili</option>
-        </select>
-      </div>
-      <div class="field" style="margin:0"><label id="label-numresults">Broj rezultata</label>
-        <select id="pros-num"><option value="10">10</option><option value="20">20</option><option value="30">30</option></select>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center">
-      <button class="btn btn-primary" id="pros-btn" onclick="runSearch()">Pretra&#382;i</button>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" id="pros-btn" onclick="runSearch()" data-i18n="search"></button>
+      <select id="pros-num" class="btn btn-sm" style="cursor:pointer">
+        <option value="10">10</option><option value="20">20</option><option value="30">30</option>
+      </select>
       <span id="pros-status" style="font-size:12px;color:var(--text3)"></span>
     </div>
+    <div id="pros-jobs-hint" style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.5" data-i18n="prosJobsHint"></div>
   </div>
 
   <div style="display:flex;gap:16px;margin-bottom:16px;border-bottom:1px solid var(--border)">
@@ -1682,6 +1679,7 @@ var L10N = {
 };
 
 var prosTab = 'results';
+var prosMode = 'jobs';
 var prosResults = [];
 var leadFilter = '';
 var currentHistoryInv = null;
@@ -1817,6 +1815,10 @@ var TRANSLATIONS = {
     searchFirms:'Pretraži firme', keyword:'Djelatnost / ključna riječ',
     city:'Grad / regija', country:'Zemlja', searchType:'Tip pretrage',
     numResults:'Broj rezultata',
+    prosModeJobs:'Oglasi za posao', prosModeMaps:'Lokalne firme',
+    prosKeywordPh:'npr. CNC Fräsen, Schlosser, Web Design...',
+    prosLocationPh:'grad ili regija (npr. Bayern, Wien...)',
+    prosJobsHint:'Pretražuje job portale (StepStone, Karriere.at, Indeed...) — vraća konkretne oglase, ne agencije.',
     results:'Rezultati', leads:'Leadovi',
     general:'Firme (općenito)', contact:'Firme + kontakt e-mail',
     maps:'Google Maps (lokalne firme)', jobs:'Oglasi za posao',
@@ -1876,6 +1878,10 @@ var TRANSLATIONS = {
     searchFirms:'Unternehmen suchen', keyword:'Branche / Stichwort',
     city:'Stadt / Region', country:'Land', searchType:'Suchtyp',
     numResults:'Anzahl Ergebnisse', search:'Suchen',
+    prosModeJobs:'Stellenanzeigen', prosModeMaps:'Lokale Firmen',
+    prosKeywordPh:'z.B. CNC Fräsen, Schlosser, Webdesign...',
+    prosLocationPh:'Stadt oder Region (z.B. Bayern, Wien...)',
+    prosJobsHint:'Durchsucht Jobportale (StepStone, Karriere.at, Indeed...) — gibt konkrete Stellenanzeigen zurück, keine Agenturen.',
     results:'Ergebnisse', leads:'Leads',
     general:'Unternehmen (allgemein)', contact:'Unternehmen + E-Mail',
     maps:'Google Maps (lokale Firmen)', jobs:'Stellenanzeigen',
@@ -1997,6 +2003,10 @@ var TRANSLATIONS = {
     searchFirms:'Search companies', keyword:'Industry / keyword',
     city:'City / region', country:'Country', searchType:'Search type',
     numResults:'Number of results', search:'Search',
+    prosModeJobs:'Job listings', prosModeMaps:'Local firms',
+    prosKeywordPh:'e.g. CNC machining, welder, web design...',
+    prosLocationPh:'city or region (e.g. Bavaria, Vienna...)',
+    prosJobsHint:'Searches job portals (StepStone, Karriere.at, Indeed...) — returns actual job listings, not agencies.',
     results:'Results', leads:'Leads',
     general:'Companies (general)', contact:'Companies + contact email',
     maps:'Google Maps (local firms)', jobs:'Job listings',
@@ -2315,25 +2325,6 @@ function applyTranslations(){
     var title=page.querySelector('.page-title');
     if(title)title.textContent=t(titleMap[id]).charAt(0).toUpperCase()+t(titleMap[id]).slice(1);
   });
-
-  // Search form labels
-  var labelMap={
-    'label-keyword':'keyword','label-city':'city','label-country':'country',
-    'label-searchtype':'searchType','label-numresults':'numResults'
-  };
-  Object.keys(labelMap).forEach(function(id){
-    var lbl=el(id);if(lbl)lbl.textContent=t(labelMap[id]);
-  });
-
-  // Search type options
-  var typeSelect=el('pros-type');
-  if(typeSelect){
-    typeSelect.options[0].text=t('general');
-    typeSelect.options[1].text=t('contact');
-    typeSelect.options[2].text=t('maps');
-    typeSelect.options[3].text=t('jobs');
-    typeSelect.options[4].text=t('linkedin');
-  }
 
   // Search button
   var searchBtn=el('pros-btn');
@@ -2827,45 +2818,56 @@ function quickOpenLead(id){
 function renderProspecting(){el('leads-count').textContent=S.leads.length;}
 function switchTab(tab){prosTab=tab;var isR=tab==='results';el('tab-content-results').style.display=isR?'block':'none';el('tab-content-leads').style.display=isR?'none':'block';el('tab-results').className='pros-tab'+(isR?' active':'');el('tab-leads').className='pros-tab'+(isR?'':' active');if(!isR)renderLeads();}
 function setLeadFilter(f){leadFilter=f;renderLeads();}
+function setProsMode(mode){
+  prosMode=mode;
+  el('pros-mode-jobs').className='btn btn-sm pros-mode-btn'+(mode==='jobs'?' active':'');
+  el('pros-mode-maps').className='btn btn-sm pros-mode-btn'+(mode==='maps'?' active':'');
+  el('pros-country-row').style.display=mode==='maps'?'block':'none';
+  el('pros-jobs-hint').style.display=mode==='jobs'?'block':'none';
+  prosResults=[];
+  el('pros-results-grid').innerHTML='<div class="empty" style="grid-column:1/-1">'+t('emptySearch')+'</div>';
+}
 async function runSearch(){
   var query=el('pros-query').value.trim();
   var location=el('pros-location').value.trim();
-  var country=el('pros-country').value;
-  var type=el('pros-type').value;
+  var country=el('pros-country').value||'de';
   var num=parseInt(el('pros-num').value)||10;
-  if(!query){el('pros-status').textContent='Upisi kljucnu rijec.';return;}
-  var q=query;
-  if(location)q+=' '+location;
-  if(type==='contact')q+=' email kontakt';
-  if(type==='linkedin')q+=' site:linkedin.com/company';
-  if(type==='jobs')q+=' Stellenangebote CAM Programmierer';
+  if(!query){el('pros-status').textContent=t('searching');return;}
+  var q, searchType, lang;
+  if(prosMode==='jobs'){
+    q='"'+query+'"';
+    if(location)q+=' '+location;
+    q+=' (site:stepstone.de OR site:stepstone.at OR site:karriere.at OR site:indeed.com OR site:indeed.de OR site:indeed.at OR site:jobs.ch OR site:jobscout24.ch OR site:linkedin.com/jobs OR site:stellenanzeigen.de OR site:jobware.de)';
+    searchType='search';
+    lang='de';
+    country='de';
+  }else{
+    q=query;
+    if(location)q+=' '+location;
+    searchType='maps';
+    lang=country==='hr'||country==='ba'?'hr':(country==='de'||country==='at'||country==='ch'?'de':'en');
+  }
   el('pros-btn').disabled=true;el('pros-btn').textContent=t('searching');el('pros-status').textContent='';
   el('pros-results-grid').innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:40px;justify-content:center;color:var(--text3);font-size:13px"><div class="pros-spinner"></div> '+t('searching')+'</div>';
   switchTab('results');
   try{
-    var searchType = type === 'maps' ? 'maps' : 'search';
-    var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:country,num:num,lang:country==='hr'||country==='ba'?'hr':'de',type:searchType})});
+    var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:country,num:num,lang:lang,type:searchType})});
     if(!res.ok)throw new Error('Worker greska: '+res.status);
     var data=await res.json();
-    var rawResults = [];
-    if(searchType === 'maps') {
-      rawResults = (data.places||[]).map(function(r,i){
-        return{
-          id:'r'+Date.now()+i,
-          name:r.title||r.name||'',
-          url:r.website||r.link||'',
+    var rawResults=[];
+    if(searchType==='maps'){
+      rawResults=(data.places||[]).map(function(r,i){
+        return{id:'r'+Date.now()+i,name:r.title||r.name||'',url:r.website||r.link||'',
           desc:[r.address||'',r.category||'',r.phone||'',r.rating?'Rating: '+r.rating:''].filter(Boolean).join(' | '),
-          phone:r.phone||'',
-          address:r.address||'',
-          rating:r.rating||'',
-          query:q,
-          isMaps:true
-        };
+          phone:r.phone||'',address:r.address||'',rating:r.rating||'',query:q,isMaps:true};
       });
-    } else {
-      rawResults = (data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||'',query:q};});
+    }else{
+      rawResults=(data.organic||[]).map(function(r,i){
+        var domain=r.link?r.link.replace(/^https?:\/\//,'').split('/')[0]:'';
+        return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||'',domain:domain,query:q,isJob:true};
+      });
     }
-    prosResults = rawResults;
+    prosResults=rawResults;
     el('pros-status').textContent=prosResults.length+' rezultata';
     renderSearchResults();
   }catch(err){
@@ -2881,14 +2883,13 @@ function renderSearchResults(){
   grid.innerHTML=prosResults.map(function(r,idx){
     var isSaved=!!savedUrls[r.url];
     var displayUrl=r.url?r.url.replace(/^https?:\/\//,'').split('/')[0]:'';
-    var portal=r.url&&isJobPortal(r.url);
     var btns='';
     if(r.url)btns+='<a href="'+r.url+'" target="_blank" class="btn btn-xs" onclick="event.stopPropagation()">Otvori &#8599;</a> ';
-    if(portal)btns+='<button class="btn btn-xs" style="background:var(--blue-dim);color:var(--blue);border-color:var(--blue)" onclick="findCompanyFromPortal('+idx+')">&#128269; Pronadi firmu</button> ';
     if(isSaved)btns+='<span style="font-size:11px;color:var(--text3)">Spremljeno</span>';
     else btns+='<button class="btn btn-xs btn-primary" onclick="saveAsLead('+idx+')">+ Spremi</button>';
-    var mapsBadge=r.isMaps?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--blue-dim);color:var(--blue);margin-left:4px">Maps</span>':'';
-    var portalBadge=portal?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow);margin-left:4px">Job portal</span>':'';
+    var typeBadge=r.isJob
+      ?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow);margin-left:4px">'+escH(r.domain||'oglas')+'</span>'
+      :(r.isMaps?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--blue-dim);color:var(--blue);margin-left:4px">Maps</span>':'');
     var extraInfo='';
     if(r.isMaps){
       if(r.phone)extraInfo+='<span style="font-size:11px;color:var(--text2)">&#9742; '+escH(r.phone)+'</span> ';
@@ -2898,10 +2899,10 @@ function renderSearchResults(){
     }
     return '<div class="pros-card">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
-      +'<div class="pros-card-name">'+escH(r.name)+mapsBadge+portalBadge+'</div>'
+      +'<div class="pros-card-name">'+escH(r.name)+typeBadge+'</div>'
       +(isSaved?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--accent-dim);color:var(--accent)">Sprem.</span>':'')
       +'</div>'
-      +(displayUrl?'<div class="pros-card-url">'+escH(displayUrl)+'</div>':'')
+      +(displayUrl&&!r.isJob?'<div class="pros-card-url">'+escH(displayUrl)+'</div>':'')
       +extraInfo
       +'<div class="pros-card-desc">'+escH(r.desc)+'</div>'
       +'<div class="pros-card-footer" style="gap:6px">'+btns+'</div>'
@@ -2909,61 +2910,10 @@ function renderSearchResults(){
   }).join('')||'<div class="empty" style="grid-column:1/-1">Nema rezultata.</div>';
 }
 
-async function findCompanyFromPortal(idx){
-  var r=prosResults[idx];if(!r)return;
-  el('pros-status').textContent='Citam oglas...';
-  el('pros-btn').disabled=true;
-  try{
-    var pageText=r.desc;
-    var fetchRes=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:r.url})});
-    var fd=await fetchRes.json();
-    if(fd.ok&&fd.text)pageText=fd.text;
-    // Store email if found for later use
-    if(fd.primaryEmail)r._foundEmail=fd.primaryEmail;
-    var apiKey=CLAUDE_API_KEY;
-    if(!apiKey){
-      var cn=r.name.replace(/Jobs?[^a-zA-Z].*$/i,'').replace(/Stellen.*$/i,'').trim();
-      searchForCompany(cn);return;
-    }
-    var res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,messages:[{role:'user',content:
-        'From this job listing, extract ALL hiring company names (not the job portal).\nJob title: '+r.name+'\nContent:\n'+pageText.substring(0,2000)+'\n\nReturn ONLY comma-separated company names. Example: Mustermann GmbH, Schmidt AG'
-      }]})
-    });
-    var data=await res.json();
-    var companies=data.content&&data.content[0]?data.content[0].text.trim():'';
-    if(companies){
-      var first=companies.split(',')[0].trim();
-      el('pros-status').textContent='Nasao: '+companies+' | Pretrazujem: '+first;
-      searchForCompany(first);
-    }else{
-      el('pros-status').textContent='Nisu pronadene firme u oglasu.';
-      el('pros-btn').disabled=false;
-    }
-  }catch(err){
-    el('pros-status').textContent='Greska: '+err.message;
-    el('pros-btn').disabled=false;
-  }
-}
-
-function searchForCompany(name){
-  if(!name)return;
-  el('pros-query').value=name;
-  el('pros-location').value='';
-  el('pros-type').value='general';
-  runSearch();
-}
-
 function saveAsLead(idx){
   var r=prosResults[idx];
   if(!r)return;
   if(S.leads.find(function(l){return l.url===r.url;})){return;}
-
-  if(isJobPortal(r.url)){
-    if(!confirm('Ova stranica izgleda kao job portal (' + r.url.replace(/^https?:\/\//, '').split('/')[0] + ').\n\nJob portali nisu tvoji klijenti — iz oglasa ces izvuci pravu firmu.\n\nSvejedno spremi?')) return;
-  }
 
   S.leads.push({
     id:'lead'+S.nextId++,

@@ -2837,7 +2837,7 @@ async function runSearch(){
   if(prosMode==='jobs'){
     q='"'+query+'"';
     if(location)q+=' '+location;
-    q+=' ("m/w/d" OR "(m/w)") (site:stepstone.de OR site:stepstone.at OR site:karriere.at OR site:indeed.com OR site:indeed.de OR site:indeed.at OR site:jobs.ch OR site:jobscout24.ch OR site:linkedin.com/jobs OR site:stellenanzeigen.de OR site:jobware.de)';
+    q+=' (site:stepstone.de/stellenangebote OR site:stepstone.at/stellenangebote OR site:karriere.at/stellen OR site:indeed.com/viewjob OR site:indeed.de/viewjob OR site:indeed.at/viewjob OR site:linkedin.com/jobs/view OR site:jobware.de/stellenangebote OR site:stellenanzeigen.de/stellenangebote)';
     searchType='search';
     lang='de';
     country='de';

@@ -1054,9 +1054,10 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
       <button class="btn btn-sm pros-mode-btn active" id="pros-mode-jobs" onclick="setProsMode('jobs')" data-i18n="prosModeJobs"></button>
       <button class="btn btn-sm pros-mode-btn" id="pros-mode-maps" onclick="setProsMode('maps')" data-i18n="prosModeMaps"></button>
     </div>
-    <div class="grid2" style="margin-bottom:12px">
-      <div class="field" style="margin:0"><label id="label-keyword" data-i18n="keyword"></label><input id="pros-query" data-i18n-ph="prosKeywordPh"></div>
-      <div class="field" style="margin:0"><label id="label-city" data-i18n="city"></label><input id="pros-location" data-i18n-ph="prosLocationPh"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="field" style="margin:0"><label data-i18n="prosIndustry"></label><input id="pros-query" data-i18n-ph="prosIndustryPh"></div>
+      <div class="field" style="margin:0"><label data-i18n="prosKeyword"></label><input id="pros-keyword" data-i18n-ph="prosKeywordPh2"></div>
+      <div class="field" style="margin:0"><label data-i18n="city"></label><input id="pros-location" data-i18n-ph="prosLocationPh"></div>
     </div>
     <div id="pros-country-row" style="margin-bottom:12px;display:none">
       <div class="field" style="margin:0"><label id="label-country" data-i18n="country"></label>
@@ -1816,7 +1817,8 @@ var TRANSLATIONS = {
     city:'Grad / regija', country:'Zemlja', searchType:'Tip pretrage',
     numResults:'Broj rezultata',
     prosModeJobs:'Oglasi za posao', prosModeMaps:'Lokalne firme',
-    prosKeywordPh:'npr. CNC Fräsen, Schlosser, Web Design...',
+    prosIndustry:'Djelatnost', prosIndustryPh:'npr. CAM programmierer, Schlosser...',
+    prosKeyword:'Ključna riječ (opcionalno)', prosKeywordPh2:'npr. SolidCAM, Mastercam, Heidenhain...',
     prosLocationPh:'grad ili regija (npr. Bayern, Wien...)',
     prosJobsHint:'Pretražuje job portale (StepStone, Karriere.at, Indeed...) — vraća konkretne oglase, ne agencije.',
     results:'Rezultati', leads:'Leadovi',
@@ -1879,7 +1881,8 @@ var TRANSLATIONS = {
     city:'Stadt / Region', country:'Land', searchType:'Suchtyp',
     numResults:'Anzahl Ergebnisse', search:'Suchen',
     prosModeJobs:'Stellenanzeigen', prosModeMaps:'Lokale Firmen',
-    prosKeywordPh:'z.B. CNC Fräsen, Schlosser, Webdesign...',
+    prosIndustry:'Branche', prosIndustryPh:'z.B. CAM Programmierer, Schlosser...',
+    prosKeyword:'Stichwort (optional)', prosKeywordPh2:'z.B. SolidCAM, Mastercam, Heidenhain...',
     prosLocationPh:'Stadt oder Region (z.B. Bayern, Wien...)',
     prosJobsHint:'Durchsucht Jobportale (StepStone, Karriere.at, Indeed...) — gibt konkrete Stellenanzeigen zurück, keine Agenturen.',
     results:'Ergebnisse', leads:'Leads',
@@ -2004,7 +2007,8 @@ var TRANSLATIONS = {
     city:'City / region', country:'Country', searchType:'Search type',
     numResults:'Number of results', search:'Search',
     prosModeJobs:'Job listings', prosModeMaps:'Local firms',
-    prosKeywordPh:'e.g. CNC machining, welder, web design...',
+    prosIndustry:'Industry', prosIndustryPh:'e.g. CAM programmer, machinist...',
+    prosKeyword:'Keyword (optional)', prosKeywordPh2:'e.g. SolidCAM, Mastercam, Heidenhain...',
     prosLocationPh:'city or region (e.g. Bavaria, Vienna...)',
     prosJobsHint:'Searches job portals (StepStone, Karriere.at, Indeed...) — returns actual job listings, not agencies.',
     results:'Results', leads:'Leads',
@@ -2829,6 +2833,7 @@ function setProsMode(mode){
 }
 async function runSearch(){
   var query=el('pros-query').value.trim();
+  var keyword=el('pros-keyword')?el('pros-keyword').value.trim():'';
   var location=el('pros-location').value.trim();
   var country=el('pros-country').value||'de';
   var num=parseInt(el('pros-num').value)||10;
@@ -2836,6 +2841,7 @@ async function runSearch(){
   var q, searchType, lang;
   if(prosMode==='jobs'){
     q='"'+query+'"';
+    if(keyword)q+=' "'+keyword+'"';
     if(location)q+=' '+location;
     q+=' (site:stepstone.de/stellenangebote OR site:stepstone.at/stellenangebote OR site:karriere.at/stellen OR site:indeed.com/viewjob OR site:indeed.de/viewjob OR site:indeed.at/viewjob OR site:linkedin.com/jobs/view OR site:jobware.de/stellenangebote OR site:stellenanzeigen.de/stellenangebote)';
     searchType='search';

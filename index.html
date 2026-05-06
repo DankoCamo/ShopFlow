@@ -1065,7 +1065,58 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
       <div class="field" style="margin:0"><label data-i18n="prosIndustry"></label><input id="pros-query" data-i18n-ph="prosIndustryPh"></div>
       <div class="field" style="margin:0"><label data-i18n="prosKeyword"></label><input id="pros-keyword" data-i18n-ph="prosKeywordPh2"></div>
-      <div class="field" style="margin:0"><label data-i18n="city"></label><input id="pros-location" data-i18n-ph="prosLocationPh"></div>
+      <div class="field" style="margin:0"><label data-i18n="city"></label>
+        <select id="pros-location">
+          <option value="">— sve lokacije —</option>
+          <optgroup label="🇩🇪 Njemačka">
+            <option value="Bayern">Bayern</option>
+            <option value="Baden-Württemberg">Baden-Württemberg</option>
+            <option value="Nordrhein-Westfalen">Nordrhein-Westfalen</option>
+            <option value="Niedersachsen">Niedersachsen</option>
+            <option value="Sachsen">Sachsen</option>
+            <option value="Hamburg">Hamburg</option>
+            <option value="Berlin">Berlin</option>
+            <option value="Hessen">Hessen</option>
+          </optgroup>
+          <optgroup label="🇦🇹 Austrija">
+            <option value="Wien">Wien</option>
+            <option value="Steiermark">Steiermark</option>
+            <option value="Oberösterreich">Oberösterreich</option>
+            <option value="Niederösterreich">Niederösterreich</option>
+            <option value="Tirol">Tirol</option>
+            <option value="Vorarlberg">Vorarlberg</option>
+            <option value="Kärnten">Kärnten</option>
+          </optgroup>
+          <optgroup label="🇨🇭 Švicarska">
+            <option value="Zürich">Zürich</option>
+            <option value="Bern">Bern</option>
+            <option value="Basel">Basel</option>
+            <option value="St. Gallen">St. Gallen</option>
+            <option value="Aargau">Aargau</option>
+          </optgroup>
+          <optgroup label="🇬🇧 UK">
+            <option value="London">London</option>
+            <option value="Manchester">Manchester</option>
+            <option value="Birmingham">Birmingham</option>
+            <option value="Leeds">Leeds</option>
+            <option value="Glasgow">Glasgow</option>
+          </optgroup>
+          <optgroup label="🇺🇸 USA">
+            <option value="California">California</option>
+            <option value="Texas">Texas</option>
+            <option value="Michigan">Michigan</option>
+            <option value="Ohio">Ohio</option>
+            <option value="New York">New York</option>
+            <option value="Illinois">Illinois</option>
+          </optgroup>
+          <optgroup label="🌍 Balkan">
+            <option value="Hrvatska">Hrvatska</option>
+            <option value="Slovenija">Slovenija</option>
+            <option value="Srbija">Srbija</option>
+            <option value="Bosna i Hercegovina">Bosna i Hercegovina</option>
+          </optgroup>
+        </select>
+      </div>
     </div>
     <div id="pros-country-row" style="margin-bottom:12px;display:none">
       <div class="field" style="margin:0"><label id="label-country" data-i18n="country"></label>

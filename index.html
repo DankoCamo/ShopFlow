@@ -1060,8 +1060,27 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
       <button class="btn btn-sm pros-mode-btn active" id="pros-mode-jobs" onclick="setProsMode('jobs')" data-i18n="prosModeJobs"></button>
       <button class="btn btn-sm pros-mode-btn" id="pros-mode-maps" onclick="setProsMode('maps')" data-i18n="prosModeMaps"></button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-      <div class="field" style="margin:0"><label data-i18n="prosIndustry"></label><input id="pros-query" data-i18n-ph="prosIndustryPh"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="field" style="margin:0"><label data-i18n="struka"></label>
+        <select id="pros-industry">
+          <option value="">— odaberi —</option>
+          <option value="strojarstvo">⚙️ Strojarstvo / CNC</option>
+          <option value="elektro">⚡ Elektrotehnika</option>
+          <option value="gradjevina">🏗️ Građevina</option>
+          <option value="it">💻 IT / Software</option>
+          <option value="logistika">📦 Logistika</option>
+          <option value="auto">🚗 Autoindustrija</option>
+          <option value="kemija">🧪 Kemija / Plastika</option>
+          <option value="drvo">🪵 Drvo / Namještaj</option>
+          <option value="prehrambena">🍎 Prehrambena ind.</option>
+          <option value="energetika">⚡ Energetika</option>
+          <option value="medicina">🏥 Medicina / Medtech</option>
+          <option value="trgovina">🛒 Trgovina / Prodaja</option>
+          <option value="marketing">📣 Marketing</option>
+          <option value="ostalo">✏️ Ostalo</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0"><label data-i18n="pozicija"></label><input id="pros-query" data-i18n-ph="prosIndustryPh"></div>
       <div class="field" style="margin:0"><label data-i18n="prosKeyword"></label><input id="pros-keyword" data-i18n-ph="prosKeywordPh2"></div>
       <div class="field" style="margin:0"><label data-i18n="city"></label>
         <select id="pros-location">
@@ -1901,7 +1920,8 @@ var TRANSLATIONS = {
     city:'Lokacija (opcionalno)', country:'Zemlja', searchType:'Tip pretrage',
     numResults:'Broj rezultata',
     prosModeJobs:'Oglasi za posao', prosModeMaps:'Lokalne firme',
-    prosIndustry:'Djelatnost', prosIndustryPh:'npr. CAM programmierer, Schlosser...',
+    struka:'Struka', pozicija:'Pozicija',
+    prosIndustry:'Djelatnost', prosIndustryPh:'npr. CNC operater, Schlosser...',
     prosKeyword:'Ključna riječ (opcionalno)', prosKeywordPh2:'npr. SolidCAM, Mastercam, Heidenhain...',
     prosLocationPh:'grad ili regija (npr. Bayern, Wien...)',
     prosJobsHint:'Pretražuje job portale (StepStone, Karriere.at, Indeed...) — vraća konkretne oglase, ne agencije.',
@@ -1968,7 +1988,8 @@ var TRANSLATIONS = {
     city:'Ort (optional)', country:'Land', searchType:'Suchtyp',
     numResults:'Anzahl Ergebnisse', search:'Suchen',
     prosModeJobs:'Stellenanzeigen', prosModeMaps:'Lokale Firmen',
-    prosIndustry:'Branche', prosIndustryPh:'z.B. CAM Programmierer, Schlosser...',
+    struka:'Branche', pozicija:'Position',
+    prosIndustry:'Branche', prosIndustryPh:'z.B. CNC Operateur, Schlosser...',
     prosKeyword:'Stichwort (optional)', prosKeywordPh2:'z.B. SolidCAM, Mastercam, Heidenhain...',
     prosLocationPh:'Stadt oder Region (z.B. Bayern, Wien...)',
     prosJobsHint:'Durchsucht Jobportale (StepStone, Karriere.at, Indeed...) — gibt konkrete Stellenanzeigen zurück, keine Agenturen.',
@@ -2097,7 +2118,8 @@ var TRANSLATIONS = {
     city:'Location (optional)', country:'Country', searchType:'Search type',
     numResults:'Number of results', search:'Search',
     prosModeJobs:'Job listings', prosModeMaps:'Local firms',
-    prosIndustry:'Industry', prosIndustryPh:'e.g. CAM programmer, machinist...',
+    struka:'Industry', pozicija:'Position',
+    prosIndustry:'Industry', prosIndustryPh:'e.g. CNC operator, machinist...',
     prosKeyword:'Keyword (optional)', prosKeywordPh2:'e.g. SolidCAM, Mastercam, Heidenhain...',
     prosLocationPh:'city or region (e.g. Bavaria, Vienna...)',
     prosJobsHint:'Searches job portals (StepStone, Karriere.at, Indeed...) — returns actual job listings, not agencies.',
@@ -2923,6 +2945,24 @@ var REGION_CONFIGS = {
   balkan:{label:'Balkan',flag:'🌍',lang:'hr',country:'hr',emailLang:'Croatian',locationSuffix:'',
     portals:'site:posao.hr OR site:moj-posao.hr OR site:mojedelo.com OR site:posao.ba OR site:poslovi.infostud.com OR site:linkedin.com/jobs/view'}
 };
+var INDUSTRY_CONFIG={
+  '':         {de:'',                        en:'',                          hr:''},
+  'strojarstvo':{de:'Maschinenbau Fertigung CNC',en:'machining manufacturing CNC',hr:'strojarstvo CNC obrada'},
+  'elektro':  {de:'Elektrotechnik Elektronik',en:'electrical engineering electronics',hr:'elektrotehnika elektronika'},
+  'gradjevina':{de:'Bauwesen Bau Tiefbau',   en:'construction civil engineering',   hr:'građevina'},
+  'it':       {de:'Softwareentwicklung IT',   en:'software development IT',          hr:'IT programiranje'},
+  'logistika':{de:'Logistik Transport Lager', en:'logistics transport warehouse',    hr:'logistika transport'},
+  'auto':     {de:'Automobil Automotive KFZ', en:'automotive car industry',          hr:'autoindustrija'},
+  'kemija':   {de:'Chemie Kunststoff Labor',  en:'chemical plastics laboratory',     hr:'kemija plastika'},
+  'drvo':     {de:'Holz Möbel Tischlerei',   en:'woodworking furniture carpentry',  hr:'drvo namještaj'},
+  'prehrambena':{de:'Lebensmittel Nahrung',  en:'food industry beverage',           hr:'prehrambena industrija'},
+  'energetika':{de:'Energie Erneuerbare',    en:'energy renewable',                 hr:'energetika'},
+  'medicina': {de:'Medizintechnik Gesundheit',en:'medical devices healthcare',      hr:'medicina zdravstvo'},
+  'trgovina': {de:'Handel Vertrieb Verkauf', en:'sales retail trade',               hr:'trgovina prodaja'},
+  'marketing':{de:'Marketing Werbung',       en:'marketing advertising',            hr:'marketing'},
+  'ostalo':   {de:'',                        en:'',                                 hr:''}
+};
+function getIndustryTerms(key,lang){var c=INDUSTRY_CONFIG[key];if(!c)return '';return c[lang==='hr'?'hr':lang==='en'?'en':'de']||'';}
 var LOCATION_REGION_MAP={
   'Bayern':'dach','Baden-Württemberg':'dach','Nordrhein-Westfalen':'dach','Niedersachsen':'dach',
   'Sachsen':'dach','Hamburg':'dach','Berlin':'dach','Hessen':'dach',
@@ -2966,12 +3006,15 @@ async function runAutoAgent(){
   el('agent-start-btn').disabled=true;
   var num=parseInt(el('pros-num').value)||10;
   var keyword=el('pros-keyword')?el('pros-keyword').value.trim():'';
+  var industryKey=el('pros-industry')?el('pros-industry').value:'';
   var loc=el('pros-location').value;
   var region=getRegionForLocation(loc);
   var rlabel='['+region.flag+' '+region.label+']';
+  var iTerms=getIndustryTerms(industryKey,region.lang);
   var q='"'+query+'"';
+  if(iTerms)q+=' '+iTerms;
   if(keyword)q+=' "'+keyword+'"';
-  if(loc)q+=' '+loc;
+  if(loc&&region.locationSuffix)q+=' '+region.locationSuffix;
   q+=' ('+region.portals+')';
   var results=[];
   try{
@@ -3008,7 +3051,9 @@ async function runAutoAgent(){
       agentSetStep(rlabel+' '+companyName+' — provjera relevantnosti...');
       var isRelevant=true;
       try{
-        var rfRes=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'Is this a manufacturing/engineering company that uses CNC machines and CAM software (answer YES), or is it a staffing agency/HR company/recruiter (answer NO)?\n\nCompany: '+companyName+'\nJob: '+r.name+'\nSnippet: '+r.desc.substring(0,200)+'\n\nAnswer only YES or NO.'}]})});
+        var industryLabel=industryKey?industryKey:'manufacturing/engineering';
+        var rfPrompt='Is "'+companyName+'" an actual company in the '+industryLabel+' sector that is directly hiring (answer YES), or is it a staffing agency/HR recruiter/headhunter posting on behalf of others (answer NO)?\n\nJob: '+r.name+'\nSnippet: '+r.desc.substring(0,200)+'\n\nAnswer only YES or NO.';
+        var rfRes=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:rfPrompt}]})});
         var rfData=await rfRes.json();
         var rfAnswer=(rfData.content&&rfData.content[0]?rfData.content[0].text:'YES').trim().toUpperCase();
         if(rfAnswer.startsWith('NO'))isRelevant=false;
@@ -3139,20 +3184,29 @@ async function runSearch(){
   var country=el('pros-country').value||'de';
   var num=parseInt(el('pros-num').value)||10;
   if(!query){el('pros-status').textContent=t('searching');return;}
+  var industryKey=el('pros-industry')?el('pros-industry').value:'';
   var q, searchType, lang;
   if(prosMode==='jobs'){
+    var region=getRegionForLocation(location);
+    lang=region.lang||'de';
+    var iTerms=getIndustryTerms(industryKey,lang);
     q='"'+query+'"';
+    if(iTerms)q+=' '+iTerms;
     if(keyword)q+=' "'+keyword+'"';
-    if(location)q+=' '+location;
-    q+=' (site:stepstone.de/stellenangebote OR site:stepstone.at/stellenangebote OR site:karriere.at/stellen OR site:indeed.com/viewjob OR site:indeed.de/viewjob OR site:indeed.at/viewjob OR site:linkedin.com/jobs/view OR site:jobware.de/stellenangebote OR site:stellenanzeigen.de/stellenangebote)';
+    if(location&&region.locationSuffix)q+=' '+region.locationSuffix;
+    else if(location&&!LOCATION_REGION_MAP[location])q+=' '+location;
+    q+=' ('+region.portals+')';
     searchType='search';
-    lang='de';
-    country='de';
+    country=region.country||'de';
   }else{
+    var region2=getRegionForLocation(location);
+    lang=region2.lang||'de';
+    var iTerms2=getIndustryTerms(industryKey,lang);
     q=query;
+    if(iTerms2)q+=' '+iTerms2;
     if(location)q+=' '+location;
     searchType='maps';
-    lang=country==='hr'||country==='ba'?'hr':(country==='de'||country==='at'||country==='ch'?'de':'en');
+    country=region2.country||country;
   }
   el('pros-btn').disabled=true;el('pros-btn').textContent=t('searching');el('pros-status').textContent='';
   el('pros-results-grid').innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:40px;justify-content:center;color:var(--text3);font-size:13px"><div class="pros-spinner"></div> '+t('searching')+'</div>';

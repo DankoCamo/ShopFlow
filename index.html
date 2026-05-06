@@ -2898,9 +2898,16 @@ async function runAutoAgent(){
   agentSetStep('Pretražujem oglase...');agentSetProgress(0,1);
   var results=[];
   try{
-    var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:'de',num:num,lang:'de',type:'search'})});
-    var data=await res.json();
-    results=(data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||''};});
+    var pages=Math.ceil(num/10);
+    for(var p=0;p<pages;p++){
+      agentSetStep('Pretražujem oglase (stranica '+(p+1)+'/'+pages+')...');
+      var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:'de',num:10,start:p*10,lang:'de',type:'search'})});
+      var data=await res.json();
+      var pageRes=(data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||''};});
+      results=results.concat(pageRes);
+      if(pageRes.length<10)break;
+      await agentDelay(300);
+    }
   }catch(e){agentSetStep('Greška pri pretrazi: '+e.message);agentRunning=false;el('agent-start-btn').disabled=false;return;}
   if(!results.length){agentSetStep('Nema rezultata.');agentRunning=false;el('agent-start-btn').disabled=false;return;}
   for(var i=0;i<results.length;i++){

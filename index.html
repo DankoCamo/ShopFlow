@@ -1897,7 +1897,10 @@ var TRANSLATIONS = {
     errAlreadyReg:'Email je već registriran. Prijavi se.',
     errPassLength:'Lozinka mora imati najmanje 6 znakova.',
     errRateLimit:'Previše pokušaja. Pričekaj minutu.',
-    errNetwork:'Nema veze s internetom.'
+    errNetwork:'Nema veze s internetom.',
+    agentRunning:'Agent radi...', agentStop:'Zaustavi', agentReview:'Pregled emailova',
+    agentSendAll:'Pošalji označene', agentSelectAll:'Označi sve', agentDeselectAll:'Odznači sve',
+    agentDone:'Gotovo!', agentNoEmail:'email nije pronađen, preskačem', agentNoCompany:'ime firme nije pronađeno, preskačem'
   },
   de: {
     dashboard:'Dashboard', projects:'Projekte', tracker:'Zeiterfassung',
@@ -1962,6 +1965,9 @@ var TRANSLATIONS = {
     errPassLength:'Passwort muss mindestens 6 Zeichen haben.',
     errRateLimit:'Zu viele Versuche. Bitte eine Minute warten.',
     errNetwork:'Keine Internetverbindung.',
+    agentRunning:'Agent läuft...', agentStop:'Stoppen', agentReview:'E-Mail-Überprüfung',
+    agentSendAll:'Ausgewählte senden', agentSelectAll:'Alle markieren', agentDeselectAll:'Alle abwählen',
+    agentDone:'Fertig!', agentNoEmail:'E-Mail nicht gefunden, überspringe', agentNoCompany:'Firmenname nicht gefunden, überspringe',
     cancel:'Abbrechen', save:'Speichern', delete:'Löschen', close:'Schließen', send:'Senden',
     edit:'Bearbeiten', add:'Hinzufügen', preview:'Vorschau', export:'Exportieren',
     fieldName:'Name', fieldAddr:'Adresse', fieldEmail:'E-Mail', fieldPhone:'Telefon',
@@ -2088,6 +2094,9 @@ var TRANSLATIONS = {
     errPassLength:'Password must be at least 6 characters.',
     errRateLimit:'Too many attempts. Please wait a minute.',
     errNetwork:'No internet connection.',
+    agentRunning:'Agent running...', agentStop:'Stop', agentReview:'Email review',
+    agentSendAll:'Send selected', agentSelectAll:'Select all', agentDeselectAll:'Deselect all',
+    agentDone:'Done!', agentNoEmail:'email not found, skipping', agentNoCompany:'company name not found, skipping',
     cancel:'Cancel', save:'Save', delete:'Delete', close:'Close', send:'Send',
     edit:'Edit', add:'Add', preview:'Preview', export:'Export',
     fieldName:'Name', fieldAddr:'Address', fieldEmail:'Email', fieldPhone:'Phone',
@@ -2424,6 +2433,7 @@ function storageKey(){return 'shopflow_v1_'+(currentUser?currentUser.id:'local')
 function save(){try{localStorage.setItem(storageKey(),JSON.stringify(S));}catch(e){}}
 function load(){try{var d=localStorage.getItem(storageKey());if(d){var p=JSON.parse(d);Object.keys(p).forEach(function(k){if(k in S)S[k]=p[k];});}}catch(e){}}
 function escH(str){var d=document.createElement('div');d.appendChild(document.createTextNode(String(str||'')));return d.innerHTML;}
+function escAttr(str){return String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function showToast(id,msg,ok){var t=el(id);if(!t)return;t.className='toast '+(ok?'ok':'err');t.textContent=msg;setTimeout(function(){t.className='toast';},5000);}
 function dlCSV(rows,name){var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
 
@@ -2892,7 +2902,16 @@ async function runAutoAgent(){
     var r=results[i];
     agentSetProgress(i+1,results.length);
     var companyName=extractCompanyFromText(r.name+' '+r.desc);
-    if(!companyName){agentSetStep('Oglas '+(i+1)+'/'+results.length+': ime firme nije vidljivo — preskačem');await agentDelay(200);continue;}
+    if(!companyName){
+      agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+r.name.substring(0,50)+' — pitam AI za ime firme...');
+      try{
+        var cr2=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:60,messages:[{role:'user',content:'Extract ONLY the hiring company name from this job listing title and snippet. Return just the company name, nothing else. If not identifiable, return: NONE\n\nTitle: '+r.name+'\nSnippet: '+r.desc}]})});
+        var cd=await cr2.json();
+        var cn=(cd.content&&cd.content[0]?cd.content[0].text:'').trim();
+        if(cn&&cn!=='NONE'&&cn.length>1)companyName=cn;
+      }catch(e){}
+    }
+    if(!companyName){agentSetStep('Oglas '+(i+1)+'/'+results.length+': ime firme nije pronađeno — preskačem');await agentDelay(200);continue;}
     agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' — tražim stranicu...');
     var companyEmail='',companyUrl='';
     try{
@@ -2957,9 +2976,10 @@ function renderAgentReview(){
       +'<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap">'
       +'<input type="checkbox"'+(item.approved?' checked':'')+' onchange="agentQueue['+idx+'].approved=this.checked;renderAgentReview()"> Pošalji'
       +'</label></div>'
-      +'<div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.4">'+escH(item.jobTitle.substring(0,80))+'</div>'
-      +'<input value="'+escH(item.subject)+'" oninput="agentQueue['+idx+'].subject=this.value" style="font-size:12px;margin-bottom:6px">'
-      +'<textarea rows="5" oninput="agentQueue['+idx+'].body=this.value" style="font-size:11px">'+escH(item.body)+'</textarea>'
+      +'<div style="font-size:11px;color:var(--text3);margin-bottom:6px;line-height:1.4">'+escH(item.jobTitle.substring(0,80))+'</div>'
+      +'<div style="margin-bottom:8px"><a href="'+escAttr(item.jobUrl)+'" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none">'+escH(item.jobUrl.replace(/^https?:\/\//,'').split('/')[0])+' ↗</a></div>'
+      +'<input value="'+escAttr(item.subject)+'" oninput="agentQueue['+idx+'].subject=this.value" style="font-size:12px;margin-bottom:6px">'
+      +'<textarea rows="5" oninput="agentQueue['+idx+'].body=this.value" style="font-size:11px">'+escAttr(item.body)+'</textarea>'
       +'</div>';
   }).join('');
 }

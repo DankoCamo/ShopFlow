@@ -176,8 +176,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .pros-lead-status.odbijenica{background:var(--red-dim);color:var(--red)}
 .pros-lead-status.nije-odgovorio{background:var(--yellow-dim);color:var(--yellow)}
 .pros-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
-.region-btn{background:var(--bg3);color:var(--text2);border-color:var(--border);font-size:12px}
-.region-btn.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent)}
 .agent-bar-track{background:var(--bg3);border-radius:6px;height:6px;overflow:hidden;margin-bottom:10px}
 .agent-bar-fill{height:100%;background:var(--accent);width:0%;transition:width 0.4s ease}
 .agent-review-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;transition:border-color .2s}
@@ -1135,15 +1133,6 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
       <span id="pros-status" style="font-size:12px;color:var(--text3)"></span>
     </div>
     <div id="pros-jobs-hint" style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.5" data-i18n="prosJobsHint"></div>
-    <div id="pros-region-row" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Regije (⚡ Auto agent)</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn btn-sm region-btn active" data-region="dach" onclick="toggleRegion(this)">🇩🇪 DACH</button>
-        <button class="btn btn-sm region-btn" data-region="uk" onclick="toggleRegion(this)">🇬🇧 UK</button>
-        <button class="btn btn-sm region-btn" data-region="usa" onclick="toggleRegion(this)">🇺🇸 USA</button>
-        <button class="btn btn-sm region-btn" data-region="balkan" onclick="toggleRegion(this)">🌍 Balkan</button>
-      </div>
-    </div>
   </div>
 
   <div id="agent-panel" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px">
@@ -2934,8 +2923,17 @@ var REGION_CONFIGS = {
   balkan:{label:'Balkan',flag:'🌍',lang:'hr',country:'hr',emailLang:'Croatian',locationSuffix:'',
     portals:'site:posao.hr OR site:moj-posao.hr OR site:mojedelo.com OR site:posao.ba OR site:poslovi.infostud.com OR site:linkedin.com/jobs/view'}
 };
-function toggleRegion(btn){btn.classList.toggle('active');}
-function getSelectedRegions(){return Array.from(document.querySelectorAll('.region-btn.active')).map(function(b){return b.getAttribute('data-region');});}
+var LOCATION_REGION_MAP={
+  'Bayern':'dach','Baden-Württemberg':'dach','Nordrhein-Westfalen':'dach','Niedersachsen':'dach',
+  'Sachsen':'dach','Hamburg':'dach','Berlin':'dach','Hessen':'dach',
+  'Wien':'dach','Steiermark':'dach','Oberösterreich':'dach','Niederösterreich':'dach',
+  'Tirol':'dach','Vorarlberg':'dach','Kärnten':'dach',
+  'Zürich':'dach','Bern':'dach','Basel':'dach','St. Gallen':'dach','Aargau':'dach',
+  'London':'uk','Manchester':'uk','Birmingham':'uk','Leeds':'uk','Glasgow':'uk',
+  'California':'usa','Texas':'usa','Michigan':'usa','Ohio':'usa','New York':'usa','Illinois':'usa',
+  'Hrvatska':'balkan','Slovenija':'balkan','Srbija':'balkan','Bosna i Hercegovina':'balkan'
+};
+function getRegionForLocation(loc){return REGION_CONFIGS[LOCATION_REGION_MAP[loc]||'dach'];}
 function extractCompanyFromText(text){
   var m=text.match(/([A-ZÄÖÜ][A-Za-zÄÖÜäöüß\-\.&\s]{1,35}(?:GmbH(?:\s*&\s*Co\.?\s*KG)?|AG\b|KG\b|SE\b|GbR\b|UG\b|OHG\b|GesmbH\b))/);
   return m?m[1].trim():'';
@@ -2957,8 +2955,6 @@ async function runAutoAgent(){
   if(!query){el('pros-status').textContent='Upiši djelatnost.';return;}
   var apiKey=CLAUDE_API_KEY;
   if(!apiKey){alert('CLAUDE_API_KEY nije postavljen u kodu.');return;}
-  var selectedRegions=getSelectedRegions();
-  if(!selectedRegions.length){alert('Odaberi barem jednu regiju.');return;}
   agentRunning=true;agentQueue=[];
   var seenEmails={};
   el('agent-panel').style.display='block';
@@ -2970,37 +2966,32 @@ async function runAutoAgent(){
   el('agent-start-btn').disabled=true;
   var num=parseInt(el('pros-num').value)||10;
   var keyword=el('pros-keyword')?el('pros-keyword').value.trim():'';
-  var customLoc=el('pros-location').value.trim();
-  var totalMax=selectedRegions.length*num;
-  var totalDone=0;
-  for(var ri=0;ri<selectedRegions.length;ri++){
-    if(!agentRunning)break;
-    var region=REGION_CONFIGS[selectedRegions[ri]];
-    var rlabel='['+region.flag+' '+region.label+']';
-    var q='"'+query+'"';
-    if(keyword)q+=' "'+keyword+'"';
-    var loc=customLoc||region.locationSuffix;
-    if(loc)q+=' '+loc;
-    q+=' ('+region.portals+')';
-    var results=[];
-    try{
-      var pages=Math.ceil(num/10);
-      for(var p=0;p<pages;p++){
-        if(!agentRunning)break;
-        agentSetStep(rlabel+' Pretražujem — str.'+(p+1)+'/'+pages+'...');
-        var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:region.country,num:10,start:p*10,lang:region.lang,type:'search'})});
-        var data=await res.json();
-        var pg=(data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||''};});
-        results=results.concat(pg);
-        if(pg.length<10)break;
-        await agentDelay(300);
-      }
-    }catch(e){agentSetStep(rlabel+' Greška: '+e.message);totalDone+=num;agentSetProgress(totalDone,totalMax);await agentDelay(400);continue;}
-    if(!results.length){agentSetStep(rlabel+' Nema rezultata, prelazim...');totalDone+=num;agentSetProgress(totalDone,totalMax);await agentDelay(300);continue;}
-    for(var i=0;i<results.length;i++){
+  var loc=el('pros-location').value;
+  var region=getRegionForLocation(loc);
+  var rlabel='['+region.flag+' '+region.label+']';
+  var q='"'+query+'"';
+  if(keyword)q+=' "'+keyword+'"';
+  if(loc)q+=' '+loc;
+  q+=' ('+region.portals+')';
+  var results=[];
+  try{
+    var pages=Math.ceil(num/10);
+    for(var p=0;p<pages;p++){
       if(!agentRunning)break;
-      var r=results[i];
-      totalDone++;agentSetProgress(totalDone,totalMax);
+      agentSetStep('Pretražujem — str.'+(p+1)+'/'+pages+'...');
+      var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:region.country,num:10,start:p*10,lang:region.lang,type:'search'})});
+      var data=await res.json();
+      var pg=(data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||''};});
+      results=results.concat(pg);
+      if(pg.length<10)break;
+      await agentDelay(300);
+    }
+  }catch(e){agentSetStep('Greška: '+e.message);agentRunning=false;el('agent-start-btn').disabled=false;return;}
+  if(!results.length){agentSetStep('Nema rezultata.');agentRunning=false;el('agent-start-btn').disabled=false;return;}
+  for(var i=0;i<results.length;i++){
+    if(!agentRunning)break;
+    var r=results[i];
+    agentSetProgress(i+1,results.length);
       // 1. Extract company
       var companyName=extractCompanyFromText(r.name+' '+r.desc);
       if(!companyName){
@@ -3073,9 +3064,8 @@ async function runAutoAgent(){
       el('agent-review').style.display='block';
       await agentDelay(700);
     }
-  }
-  agentSetStep('Gotovo! Pronađeno '+agentQueue.length+' leadova s emailovima.');
-  agentSetProgress(totalMax,totalMax);
+  agentSetStep('Gotovo! Pronađeno '+agentQueue.length+' leadova s emailovima od '+results.length+' oglasa.');
+  agentSetProgress(results.length,results.length);
   agentRunning=false;
   el('agent-spinner').style.display='none';
   el('agent-title').textContent='Gotovo!';
@@ -3138,7 +3128,6 @@ function setProsMode(mode){
   el('pros-mode-maps').className='btn btn-sm pros-mode-btn'+(mode==='maps'?' active':'');
   el('pros-country-row').style.display=mode==='maps'?'block':'none';
   el('pros-jobs-hint').style.display=mode==='jobs'?'block':'none';
-  el('pros-region-row').style.display=mode==='jobs'?'block':'none';
   el('agent-start-btn').style.display=mode==='jobs'?'':'none';
   prosResults=[];
   el('pros-results-grid').innerHTML='<div class="empty" style="grid-column:1/-1">'+t('emptySearch')+'</div>';

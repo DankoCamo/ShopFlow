@@ -176,6 +176,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .pros-lead-status.odbijenica{background:var(--red-dim);color:var(--red)}
 .pros-lead-status.nije-odgovorio{background:var(--yellow-dim);color:var(--yellow)}
 .pros-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+.region-btn{background:var(--bg3);color:var(--text2);border-color:var(--border);font-size:12px}
+.region-btn.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent)}
 .agent-bar-track{background:var(--bg3);border-radius:6px;height:6px;overflow:hidden;margin-bottom:10px}
 .agent-bar-fill{height:100%;background:var(--accent);width:0%;transition:width 0.4s ease}
 .agent-review-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;transition:border-color .2s}
@@ -1082,6 +1084,15 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
       <span id="pros-status" style="font-size:12px;color:var(--text3)"></span>
     </div>
     <div id="pros-jobs-hint" style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.5" data-i18n="prosJobsHint"></div>
+    <div id="pros-region-row" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Regije (⚡ Auto agent)</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-sm region-btn active" data-region="dach" onclick="toggleRegion(this)">🇩🇪 DACH</button>
+        <button class="btn btn-sm region-btn" data-region="uk" onclick="toggleRegion(this)">🇬🇧 UK</button>
+        <button class="btn btn-sm region-btn" data-region="usa" onclick="toggleRegion(this)">🇺🇸 USA</button>
+        <button class="btn btn-sm region-btn" data-region="balkan" onclick="toggleRegion(this)">🌍 Balkan</button>
+      </div>
+    </div>
   </div>
 
   <div id="agent-panel" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px">
@@ -2862,6 +2873,18 @@ function quickOpenLead(id){
 }
 
 // ─── AUTO AGENT
+var REGION_CONFIGS = {
+  dach:{label:'DACH',flag:'🇩🇪',lang:'de',country:'de',emailLang:'German',locationSuffix:'',
+    portals:'site:stepstone.de/stellenangebote OR site:stepstone.at/stellenangebote OR site:karriere.at/stellen OR site:indeed.de/viewjob OR site:indeed.at/viewjob OR site:jobware.de/stellenangebote OR site:stellenanzeigen.de/stellenangebote OR site:linkedin.com/jobs/view'},
+  uk:{label:'UK',flag:'🇬🇧',lang:'en',country:'gb',emailLang:'English',locationSuffix:'UK',
+    portals:'site:reed.co.uk/jobs OR site:totaljobs.com/job OR site:cv-library.co.uk/job OR site:indeed.co.uk/viewjob OR site:linkedin.com/jobs/view'},
+  usa:{label:'USA',flag:'🇺🇸',lang:'en',country:'us',emailLang:'English',locationSuffix:'USA',
+    portals:'site:indeed.com/viewjob OR site:linkedin.com/jobs/view OR site:ziprecruiter.com/c OR site:glassdoor.com/job-listing'},
+  balkan:{label:'Balkan',flag:'🌍',lang:'hr',country:'hr',emailLang:'Croatian',locationSuffix:'',
+    portals:'site:posao.hr OR site:moj-posao.hr OR site:mojedelo.com OR site:posao.ba OR site:poslovi.infostud.com OR site:linkedin.com/jobs/view'}
+};
+function toggleRegion(btn){btn.classList.toggle('active');}
+function getSelectedRegions(){return Array.from(document.querySelectorAll('.region-btn.active')).map(function(b){return b.getAttribute('data-region');});}
 function extractCompanyFromText(text){
   var m=text.match(/([A-ZÄÖÜ][A-Za-zÄÖÜäöüß\-\.&\s]{1,35}(?:GmbH(?:\s*&\s*Co\.?\s*KG)?|AG\b|KG\b|SE\b|GbR\b|UG\b|OHG\b|GesmbH\b))/);
   return m?m[1].trim():'';
@@ -2883,106 +2906,125 @@ async function runAutoAgent(){
   if(!query){el('pros-status').textContent='Upiši djelatnost.';return;}
   var apiKey=CLAUDE_API_KEY;
   if(!apiKey){alert('CLAUDE_API_KEY nije postavljen u kodu.');return;}
+  var selectedRegions=getSelectedRegions();
+  if(!selectedRegions.length){alert('Odaberi barem jednu regiju.');return;}
   agentRunning=true;agentQueue=[];
+  var seenEmails={};
   el('agent-panel').style.display='block';
+  el('agent-spinner').style.display='';
+  el('agent-title').textContent='Agent radi...';
+  el('agent-stop-btn').style.display='';
   el('agent-review').style.display='none';
   el('agent-review-grid').innerHTML='';
   el('agent-start-btn').disabled=true;
   var num=parseInt(el('pros-num').value)||10;
   var keyword=el('pros-keyword')?el('pros-keyword').value.trim():'';
-  var location=el('pros-location').value.trim();
-  var q='"'+query+'"';
-  if(keyword)q+=' "'+keyword+'"';
-  if(location)q+=' '+location;
-  q+=' (site:stepstone.de/stellenangebote OR site:stepstone.at/stellenangebote OR site:karriere.at/stellen OR site:indeed.com/viewjob OR site:indeed.de/viewjob OR site:indeed.at/viewjob OR site:linkedin.com/jobs/view OR site:jobware.de/stellenangebote OR site:stellenanzeigen.de/stellenangebote)';
-  agentSetStep('Pretražujem oglase...');agentSetProgress(0,1);
-  var results=[];
-  try{
-    var pages=Math.ceil(num/10);
-    for(var p=0;p<pages;p++){
-      agentSetStep('Pretražujem oglase (stranica '+(p+1)+'/'+pages+')...');
-      var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:'de',num:10,start:p*10,lang:'de',type:'search'})});
-      var data=await res.json();
-      var pageRes=(data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||''};});
-      results=results.concat(pageRes);
-      if(pageRes.length<10)break;
-      await agentDelay(300);
-    }
-  }catch(e){agentSetStep('Greška pri pretrazi: '+e.message);agentRunning=false;el('agent-start-btn').disabled=false;return;}
-  if(!results.length){agentSetStep('Nema rezultata.');agentRunning=false;el('agent-start-btn').disabled=false;return;}
-  for(var i=0;i<results.length;i++){
+  var customLoc=el('pros-location').value.trim();
+  var totalMax=selectedRegions.length*num;
+  var totalDone=0;
+  for(var ri=0;ri<selectedRegions.length;ri++){
     if(!agentRunning)break;
-    var r=results[i];
-    agentSetProgress(i+1,results.length);
-    var companyName=extractCompanyFromText(r.name+' '+r.desc);
-    if(!companyName){
-      agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+r.name.substring(0,50)+' — pitam AI za ime firme...');
+    var region=REGION_CONFIGS[selectedRegions[ri]];
+    var rlabel='['+region.flag+' '+region.label+']';
+    var q='"'+query+'"';
+    if(keyword)q+=' "'+keyword+'"';
+    var loc=customLoc||region.locationSuffix;
+    if(loc)q+=' '+loc;
+    q+=' ('+region.portals+')';
+    var results=[];
+    try{
+      var pages=Math.ceil(num/10);
+      for(var p=0;p<pages;p++){
+        if(!agentRunning)break;
+        agentSetStep(rlabel+' Pretražujem — str.'+(p+1)+'/'+pages+'...');
+        var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:region.country,num:10,start:p*10,lang:region.lang,type:'search'})});
+        var data=await res.json();
+        var pg=(data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||''};});
+        results=results.concat(pg);
+        if(pg.length<10)break;
+        await agentDelay(300);
+      }
+    }catch(e){agentSetStep(rlabel+' Greška: '+e.message);totalDone+=num;agentSetProgress(totalDone,totalMax);await agentDelay(400);continue;}
+    if(!results.length){agentSetStep(rlabel+' Nema rezultata, prelazim...');totalDone+=num;agentSetProgress(totalDone,totalMax);await agentDelay(300);continue;}
+    for(var i=0;i<results.length;i++){
+      if(!agentRunning)break;
+      var r=results[i];
+      totalDone++;agentSetProgress(totalDone,totalMax);
+      // 1. Extract company
+      var companyName=extractCompanyFromText(r.name+' '+r.desc);
+      if(!companyName){
+        agentSetStep(rlabel+' Oglas '+(i+1)+'/'+results.length+': pitam AI za ime firme...');
+        try{
+          var cr2=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:60,messages:[{role:'user',content:'Extract ONLY the hiring company name from this job listing. Return just the company name, nothing else. If not identifiable, return: NONE\n\nTitle: '+r.name+'\nSnippet: '+r.desc}]})});
+          var cd=await cr2.json();
+          var cn=(cd.content&&cd.content[0]?cd.content[0].text:'').trim();
+          if(cn&&cn!=='NONE'&&cn.length>1)companyName=cn;
+        }catch(e){}
+      }
+      if(!companyName){agentSetStep(rlabel+' Oglas '+(i+1)+': ime firme nije pronađeno, preskačem');await agentDelay(200);continue;}
+      // 2. Relevance filter
+      agentSetStep(rlabel+' '+companyName+' — provjera relevantnosti...');
+      var isRelevant=true;
       try{
-        var cr2=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:60,messages:[{role:'user',content:'Extract ONLY the hiring company name from this job listing title and snippet. Return just the company name, nothing else. If not identifiable, return: NONE\n\nTitle: '+r.name+'\nSnippet: '+r.desc}]})});
-        var cd=await cr2.json();
-        var cn=(cd.content&&cd.content[0]?cd.content[0].text:'').trim();
-        if(cn&&cn!=='NONE'&&cn.length>1)companyName=cn;
+        var rfRes=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'Is this a manufacturing/engineering company that uses CNC machines and CAM software (answer YES), or is it a staffing agency/HR company/recruiter (answer NO)?\n\nCompany: '+companyName+'\nJob: '+r.name+'\nSnippet: '+r.desc.substring(0,200)+'\n\nAnswer only YES or NO.'}]})});
+        var rfData=await rfRes.json();
+        var rfAnswer=(rfData.content&&rfData.content[0]?rfData.content[0].text:'YES').trim().toUpperCase();
+        if(rfAnswer.startsWith('NO'))isRelevant=false;
       }catch(e){}
-    }
-    if(!companyName){agentSetStep('Oglas '+(i+1)+'/'+results.length+': ime firme nije pronađeno — preskačem');await agentDelay(200);continue;}
-    // Relevance filter — skip HR agencies, staffing firms, etc.
-    agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' — provjera relevantnosti...');
-    var isRelevant=true;
-    try{
-      var rfRes=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'Is this a manufacturing/engineering company that uses CNC machines and CAM software (answer YES), or is it a staffing agency/HR company/recruiter (answer NO)?\n\nCompany: '+companyName+'\nJob: '+r.name+'\nSnippet: '+r.desc.substring(0,200)+'\n\nAnswer only YES or NO.'}]})});
-      var rfData=await rfRes.json();
-      var rfAnswer=(rfData.content&&rfData.content[0]?rfData.content[0].text:'YES').trim().toUpperCase();
-      if(rfAnswer.startsWith('NO'))isRelevant=false;
-    }catch(e){}
-    if(!isRelevant){agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' — agencija/HR, preskačem');await agentDelay(200);continue;}
-    agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' — tražim stranicu...');
-    var companyEmail='',companyUrl='';
-    try{
-      var sr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Impressum Kontakt',country:'de',num:3,lang:'de',type:'search'})});
-      var sd=await sr.json();
-      if(sd.organic){var cr=sd.organic.find(function(x){return x.link&&!isJobPortal(x.link);});if(cr)companyUrl=cr.link;}
-    }catch(e){}
-    if(companyUrl){
-      agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' — čitam Impressum...');
+      if(!isRelevant){agentSetStep(rlabel+' '+companyName+' — agencija/HR, preskačem');await agentDelay(200);continue;}
+      // 3. Find email
+      agentSetStep(rlabel+' '+companyName+' — tražim web i email...');
+      var companyEmail='',companyUrl='';
       try{
-        var fr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:companyUrl})});
-        var fd=await fr.json();
-        if(fd.primaryEmail)companyEmail=fd.primaryEmail;
+        var sr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Impressum Kontakt',country:region.country,num:3,lang:region.lang,type:'search'})});
+        var sd=await sr.json();
+        if(sd.organic){var crr=sd.organic.find(function(x){return x.link&&!isJobPortal(x.link);});if(crr)companyUrl=crr.link;}
       }catch(e){}
+      if(companyUrl){
+        agentSetStep(rlabel+' '+companyName+' — čitam kontakt...');
+        try{
+          var fr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:companyUrl})});
+          var fd=await fr.json();
+          if(fd.primaryEmail)companyEmail=fd.primaryEmail;
+        }catch(e){}
+      }
+      if(!companyEmail){agentSetStep(rlabel+' '+companyName+' — email nije pronađen, preskačem');await agentDelay(200);continue;}
+      // 4. Deduplicate
+      if(seenEmails[companyEmail]){agentSetStep(rlabel+' '+companyName+' — duplikat ('+companyEmail+'), preskačem');await agentDelay(200);continue;}
+      seenEmails[companyEmail]=true;
+      // 5. Generate email
+      agentSetStep(rlabel+' '+companyName+' ('+companyEmail+') — generiram email...');
+      var emailSubject='',emailBody='';
+      try{
+        var prompt='You are helping a freelance CAM programmer (CAMOutput, Graz, Austria) write a cold outreach email.\n\n'
+          +'Company "'+companyName+'" is hiring a CAM programmer — they use CNC machines and CAM software.\n\n'
+          +'Job listing: '+r.name+'\nSnippet: '+r.desc+'\n\n'
+          +'Write a short cold email in '+region.emailLang+'.\n\n'
+          +'Rules:\n1. Greeting in '+region.emailLang+' (e.g. "Hallo [Company]-Team," or "Dear [Company] Team,")\n'
+          +'2. Mention you saw their CAM programmer listing\n'
+          +'3. Offer remote freelance CAM programming — faster and more flexible than hiring full-time\n'
+          +'4. Brief intro: Danko from CAMOutput, 10+ years experience, Mastercam/Fusion 360/HyperMill\n'
+          +'5. CTA: www.camoutput.com — NO phone calls\n'
+          +'6. Max 100 words, direct and human\n7. Sign: CAMOutput | info@camoutput.com\n\n'
+          +'Format EXACTLY:\nSUBJECT:[max 8 words in '+region.emailLang+']\n[email body only]';
+        var ar=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+        var ad=await ar.json();
+        var aiText=ad.content&&ad.content[0]?ad.content[0].text:'';
+        var aiLines=aiText.split('\n');
+        var sl=aiLines.find(function(l){return l.startsWith('SUBJECT:');});
+        if(sl)emailSubject=sl.replace('SUBJECT:','').trim();
+        var bl=[],ps=false;
+        for(var j=0;j<aiLines.length;j++){if(aiLines[j].startsWith('SUBJECT:')){ps=true;continue;}if(ps)bl.push(aiLines[j]);}
+        emailBody=bl.join('\n').trim();
+      }catch(e){await agentDelay(400);continue;}
+      agentQueue.push({jobTitle:r.name,jobUrl:r.url,companyName:companyName,companyEmail:companyEmail,region:region.flag+' '+region.label,subject:emailSubject,body:emailBody,approved:true});
+      renderAgentReview();
+      el('agent-review').style.display='block';
+      await agentDelay(700);
     }
-    if(!companyEmail){agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' — email nije pronađen, preskačem');await agentDelay(200);continue;}
-    agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' ('+companyEmail+') — generiram email...');
-    var lang=APP_LANG||'de';var langName=lang==='de'?'German':lang==='hr'?'Croatian':'English';
-    var prompt='You are helping a freelance CAM programmer (CAMOutput, Graz, Austria) write a cold outreach email.\n\n'
-      +'Company "'+companyName+'" is hiring a CAM programmer — they use CNC machines and CAM software.\n\n'
-      +'Job listing: '+r.name+'\nSnippet: '+r.desc+'\n\n'
-      +'Write a short cold email in '+langName+'.\n\n'
-      +'Rules:\n1. Greeting: "Hallo '+companyName+'-Team,"\n'
-      +'2. Mention you saw their CAM programmer listing\n'
-      +'3. Offer remote freelance CAM programming — faster and more flexible than hiring\n'
-      +'4. Brief intro: Danko von CAMOutput, 10+ Jahre Erfahrung, Mastercam/Fusion 360/HyperMill\n'
-      +'5. CTA: Weitere Infos auf www.camoutput.com — NO phone calls\n'
-      +'6. Max 100 words, direct and human\n7. Sign: CAMOutput | info@camoutput.com\n\n'
-      +'Format EXACTLY:\nSUBJECT:[max 8 words]\n[email body only]';
-    var emailSubject='',emailBody='';
-    try{
-      var ar=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:prompt}]})});
-      var ad=await ar.json();
-      var at2=ad.content&&ad.content[0]?ad.content[0].text:'';
-      var al=at2.split('\n');
-      var sl=al.find(function(l){return l.startsWith('SUBJECT:');});
-      if(sl)emailSubject=sl.replace('SUBJECT:','').trim();
-      var bl=[],ps=false;
-      for(var j=0;j<al.length;j++){if(al[j].startsWith('SUBJECT:')){ps=true;continue;}if(ps)bl.push(al[j]);}
-      emailBody=bl.join('\n').trim();
-    }catch(e){await agentDelay(400);continue;}
-    agentQueue.push({jobTitle:r.name,jobUrl:r.url,companyName:companyName,companyEmail:companyEmail,subject:emailSubject,body:emailBody,approved:true});
-    renderAgentReview();
-    el('agent-review').style.display='block';
-    await agentDelay(700);
   }
-  agentSetStep('Agent pronašao '+agentQueue.length+' leadova s emailovima od '+results.length+' oglasa.');
-  agentSetProgress(results.length,results.length);
+  agentSetStep('Gotovo! Pronađeno '+agentQueue.length+' leadova s emailovima.');
+  agentSetProgress(totalMax,totalMax);
   agentRunning=false;
   el('agent-spinner').style.display='none';
   el('agent-title').textContent='Gotovo!';
@@ -2998,7 +3040,7 @@ function renderAgentReview(){
   grid.innerHTML=agentQueue.map(function(item,idx){
     return '<div class="agent-review-card'+(item.approved?' approved':'')+'">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
-      +'<div><div class="pros-card-name">'+escH(item.companyName)+'</div>'
+      +'<div><div class="pros-card-name">'+escH(item.companyName)+(item.region?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--bg3);color:var(--text3);margin-left:6px">'+escH(item.region)+'</span>':'')+'</div>'
       +'<div style="font-size:12px;color:var(--accent)">'+escH(item.companyEmail)+'</div></div>'
       +'<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap">'
       +'<input type="checkbox"'+(item.approved?' checked':'')+' onchange="agentQueue['+idx+'].approved=this.checked;renderAgentReview()"> Pošalji'
@@ -3045,6 +3087,8 @@ function setProsMode(mode){
   el('pros-mode-maps').className='btn btn-sm pros-mode-btn'+(mode==='maps'?' active':'');
   el('pros-country-row').style.display=mode==='maps'?'block':'none';
   el('pros-jobs-hint').style.display=mode==='jobs'?'block':'none';
+  el('pros-region-row').style.display=mode==='jobs'?'block':'none';
+  el('agent-start-btn').style.display=mode==='jobs'?'':'none';
   prosResults=[];
   el('pros-results-grid').innerHTML='<div class="empty" style="grid-column:1/-1">'+t('emptySearch')+'</div>';
 }

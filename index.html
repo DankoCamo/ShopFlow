@@ -2912,6 +2912,16 @@ async function runAutoAgent(){
       }catch(e){}
     }
     if(!companyName){agentSetStep('Oglas '+(i+1)+'/'+results.length+': ime firme nije pronađeno — preskačem');await agentDelay(200);continue;}
+    // Relevance filter — skip HR agencies, staffing firms, etc.
+    agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' — provjera relevantnosti...');
+    var isRelevant=true;
+    try{
+      var rfRes=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'Is this a manufacturing/engineering company that uses CNC machines and CAM software (answer YES), or is it a staffing agency/HR company/recruiter (answer NO)?\n\nCompany: '+companyName+'\nJob: '+r.name+'\nSnippet: '+r.desc.substring(0,200)+'\n\nAnswer only YES or NO.'}]})});
+      var rfData=await rfRes.json();
+      var rfAnswer=(rfData.content&&rfData.content[0]?rfData.content[0].text:'YES').trim().toUpperCase();
+      if(rfAnswer.startsWith('NO'))isRelevant=false;
+    }catch(e){}
+    if(!isRelevant){agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' — agencija/HR, preskačem');await agentDelay(200);continue;}
     agentSetStep('Oglas '+(i+1)+'/'+results.length+': '+companyName+' — tražim stranicu...');
     var companyEmail='',companyUrl='';
     try{

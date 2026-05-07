@@ -1086,6 +1086,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
         <select id="pros-location">
           <option value="">— sve lokacije —</option>
           <optgroup label="🇩🇪 Njemačka">
+            <option value="Deutschland">🇩🇪 Cijela Njemačka</option>
             <option value="Bayern">Bayern</option>
             <option value="Baden-Württemberg">Baden-Württemberg</option>
             <option value="Nordrhein-Westfalen">Nordrhein-Westfalen</option>
@@ -1096,6 +1097,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
             <option value="Hessen">Hessen</option>
           </optgroup>
           <optgroup label="🇦🇹 Austrija">
+            <option value="Österreich">🇦🇹 Cijela Austrija</option>
             <option value="Wien">Wien</option>
             <option value="Steiermark">Steiermark</option>
             <option value="Oberösterreich">Oberösterreich</option>
@@ -1105,6 +1107,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
             <option value="Kärnten">Kärnten</option>
           </optgroup>
           <optgroup label="🇨🇭 Švicarska">
+            <option value="Schweiz">🇨🇭 Cijela Švicarska</option>
             <option value="Zürich">Zürich</option>
             <option value="Bern">Bern</option>
             <option value="Basel">Basel</option>
@@ -1112,6 +1115,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
             <option value="Aargau">Aargau</option>
           </optgroup>
           <optgroup label="🇬🇧 UK">
+            <option value="United Kingdom">🇬🇧 Cijeli UK</option>
             <option value="London">London</option>
             <option value="Manchester">Manchester</option>
             <option value="Birmingham">Birmingham</option>
@@ -1119,6 +1123,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
             <option value="Glasgow">Glasgow</option>
           </optgroup>
           <optgroup label="🇺🇸 USA">
+            <option value="United States">🇺🇸 Cijeli SAD</option>
             <option value="California">California</option>
             <option value="Texas">Texas</option>
             <option value="Michigan">Michigan</option>
@@ -1127,6 +1132,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
             <option value="Illinois">Illinois</option>
           </optgroup>
           <optgroup label="🌍 Balkan">
+            <option value="Balkan">🌍 Cijeli Balkan</option>
             <option value="Hrvatska">Hrvatska</option>
             <option value="Slovenija">Slovenija</option>
             <option value="Srbija">Srbija</option>
@@ -2964,14 +2970,15 @@ var INDUSTRY_CONFIG={
 };
 function getIndustryTerms(key,lang){var c=INDUSTRY_CONFIG[key];if(!c)return '';return c[lang==='hr'?'hr':lang==='en'?'en':'de']||'';}
 var LOCATION_REGION_MAP={
+  'Deutschland':'dach','Österreich':'dach','Schweiz':'dach',
   'Bayern':'dach','Baden-Württemberg':'dach','Nordrhein-Westfalen':'dach','Niedersachsen':'dach',
   'Sachsen':'dach','Hamburg':'dach','Berlin':'dach','Hessen':'dach',
   'Wien':'dach','Steiermark':'dach','Oberösterreich':'dach','Niederösterreich':'dach',
   'Tirol':'dach','Vorarlberg':'dach','Kärnten':'dach',
   'Zürich':'dach','Bern':'dach','Basel':'dach','St. Gallen':'dach','Aargau':'dach',
-  'London':'uk','Manchester':'uk','Birmingham':'uk','Leeds':'uk','Glasgow':'uk',
-  'California':'usa','Texas':'usa','Michigan':'usa','Ohio':'usa','New York':'usa','Illinois':'usa',
-  'Hrvatska':'balkan','Slovenija':'balkan','Srbija':'balkan','Bosna i Hercegovina':'balkan'
+  'United Kingdom':'uk','London':'uk','Manchester':'uk','Birmingham':'uk','Leeds':'uk','Glasgow':'uk',
+  'United States':'usa','California':'usa','Texas':'usa','Michigan':'usa','Ohio':'usa','New York':'usa','Illinois':'usa',
+  'Balkan':'balkan','Hrvatska':'balkan','Slovenija':'balkan','Srbija':'balkan','Bosna i Hercegovina':'balkan'
 };
 function getRegionForLocation(loc){return REGION_CONFIGS[LOCATION_REGION_MAP[loc]||'dach'];}
 function extractCompanyFromText(text){
@@ -3014,7 +3021,7 @@ async function runAutoAgent(){
   var q='"'+query+'"';
   if(iTerms)q+=' '+iTerms;
   if(keyword)q+=' "'+keyword+'"';
-  if(loc)q+=' '+(region.locationSuffix||loc);
+  if(loc)q+=' '+loc;
   q+=' ('+region.portals+')';
   var results=[];
   try{
@@ -3193,7 +3200,7 @@ async function runSearch(){
     q='"'+query+'"';
     if(iTerms)q+=' '+iTerms;
     if(keyword)q+=' "'+keyword+'"';
-    if(location)q+=' '+(region.locationSuffix||location);
+    if(location)q+=' '+location;
     q+=' ('+region.portals+')';
     searchType='search';
     country=region.country||'de';

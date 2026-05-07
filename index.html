@@ -2943,7 +2943,7 @@ function quickOpenLead(id){
 // ─── AUTO AGENT
 var REGION_CONFIGS = {
   dach:{label:'DACH',flag:'🇩🇪',lang:'de',country:'de',emailLang:'German',locationSuffix:'',
-    portals:'site:stepstone.de/stellenangebote OR site:stepstone.at/stellenangebote OR site:karriere.at/stellen OR site:indeed.de/viewjob OR site:indeed.at/viewjob OR site:jobware.de/stellenangebote OR site:stellenanzeigen.de/stellenangebote OR site:linkedin.com/jobs/view'},
+    portals:'site:stepstone.de/stellenangebote OR site:stepstone.at/stellenangebote OR site:karriere.at/jobs OR site:indeed.de/viewjob OR site:indeed.at/viewjob OR site:jobware.de/stellenangebote OR site:stellenanzeigen.de/stellenangebote OR site:linkedin.com/jobs/view OR site:monster.de/jobs/suche'},
   uk:{label:'UK',flag:'🇬🇧',lang:'en',country:'gb',emailLang:'English',locationSuffix:'UK',
     portals:'site:reed.co.uk/jobs OR site:totaljobs.com/job OR site:cv-library.co.uk/job OR site:indeed.co.uk/viewjob OR site:linkedin.com/jobs/view'},
   usa:{label:'USA',flag:'🇺🇸',lang:'en',country:'us',emailLang:'English',locationSuffix:'USA',
@@ -3029,8 +3029,8 @@ async function runAutoAgent(){
   var region=getRegionForLocation(loc);
   var country=getCountryForLocation(loc,region);
   var rlabel='['+region.flag+' '+region.label+']';
-  var q='"'+query+'"';
-  if(keyword)q+=' "'+keyword+'"';
+  var q=query;
+  if(keyword)q+=' '+keyword;
   if(loc)q+=' '+loc;
   q+=' ('+region.portals+')';
   var results=[];
@@ -3214,12 +3214,12 @@ async function runSearch(){
   if(prosMode==='jobs'){
     var region=getRegionForLocation(location);
     lang=region.lang||'de';
-    q='"'+query+'"';
-    if(keyword)q+=' "'+keyword+'"';
+    q=query;
+    if(keyword)q+=' '+keyword;
     if(location)q+=' '+location;
     q+=' ('+region.portals+')';
     searchType='search';
-    country=region.country||'de';
+    country=getCountryForLocation(location,region);
   }else{
     var region2=getRegionForLocation(location);
     lang=region2.lang||'de';

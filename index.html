@@ -3017,9 +3017,7 @@ async function runAutoAgent(){
   var loc=el('pros-location').value;
   var region=getRegionForLocation(loc);
   var rlabel='['+region.flag+' '+region.label+']';
-  var iTerms=getIndustryTerms(industryKey,region.lang);
   var q='"'+query+'"';
-  if(iTerms)q+=' '+iTerms;
   if(keyword)q+=' "'+keyword+'"';
   if(loc)q+=' '+loc;
   q+=' ('+region.portals+')';
@@ -3196,9 +3194,7 @@ async function runSearch(){
   if(prosMode==='jobs'){
     var region=getRegionForLocation(location);
     lang=region.lang||'de';
-    var iTerms=getIndustryTerms(industryKey,lang);
     q='"'+query+'"';
-    if(iTerms)q+=' '+iTerms;
     if(keyword)q+=' "'+keyword+'"';
     if(location)q+=' '+location;
     q+=' ('+region.portals+')';

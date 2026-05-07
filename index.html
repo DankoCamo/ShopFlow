@@ -1056,10 +1056,6 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
     </div>
   </div>
   <div class="card">
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <button class="btn btn-sm pros-mode-btn active" id="pros-mode-jobs" onclick="setProsMode('jobs')" data-i18n="prosModeJobs"></button>
-      <button class="btn btn-sm pros-mode-btn" id="pros-mode-maps" onclick="setProsMode('maps')" data-i18n="prosModeMaps"></button>
-    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px">
       <div class="field" style="margin:0"><label data-i18n="struka"></label>
         <select id="pros-industry">
@@ -3023,7 +3019,7 @@ async function runAutoAgent(){
     var mq=query;
     var iTerms=getIndustryTerms(industryKey,region.lang);
     if(iTerms)mq+=' '+iTerms;
-    if(loc)mq+=' '+loc;
+    if(loc)mq+=' in '+loc;
     agentSetStep('Google Maps — tražim lokalne firme...');
     try{
       var mr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:mq,country:country,num:mapsNum,lang:region.lang,type:'maps'})});
@@ -3031,7 +3027,7 @@ async function runAutoAgent(){
       var mplaces=(md.places||[]).map(function(p,i){
         return{id:'m'+Date.now()+i,name:p.title||p.name||'',url:p.website||p.link||'',
           desc:[p.address||'',p.category||'',p.phone||''].filter(Boolean).join(' | '),
-          phone:p.phone||'',isMaps:true};
+          address:p.address||'',phone:p.phone||'',isMaps:true};
       });
       results=results.concat(mplaces);
     }catch(e){agentSetStep('Maps greška: '+e.message);}
@@ -3043,7 +3039,7 @@ async function runAutoAgent(){
     var jobsNum=agentSrc==='combined'?Math.ceil(num/2):num;
     var jq=query;
     if(keyword)jq+=' '+keyword;
-    if(loc)jq+=' '+loc;
+    if(loc)jq+=' in '+loc;
     jq+=' ('+region.portals+')';
     try{
       var jpages=Math.ceil(jobsNum/10);
@@ -3214,7 +3210,7 @@ async function runAutoAgent(){
       for(var j=0;j<aiLines.length;j++){if(aiLines[j].startsWith('SUBJECT:')){ps=true;continue;}if(ps)bl.push(aiLines[j]);}
       emailBody=bl.join('\n').trim();
     }catch(e){await agentDelay(400);continue;}
-    agentQueue.push({jobTitle:r.isMaps?r.name+' (lokalna firma)':r.name,jobUrl:r.isMaps?(companyUrl||r.url||''):r.url,companyName:companyName,companyEmail:companyEmail,companyUrl:companyUrl,country:country,lang:region.lang,region:region.flag+' '+region.label,subject:emailSubject,body:emailBody,approved:true,isMaps:r.isMaps});
+    agentQueue.push({jobTitle:r.isMaps?r.name+' (lokalna firma)':r.name,jobUrl:r.isMaps?(companyUrl||r.url||''):r.url,companyName:companyName,companyEmail:companyEmail,companyUrl:companyUrl,country:country,lang:region.lang,region:region.flag+' '+region.label,subject:emailSubject,body:emailBody,approved:true,address:r.address||'',isMaps:r.isMaps});
     renderAgentReview();
     el('agent-review').style.display='block';
     await agentDelay(700);
@@ -3245,6 +3241,7 @@ function renderAgentReview(){
     return '<div class="agent-review-card'+(item.approved?' approved':'')+'">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
       +'<div><div class="pros-card-name">'+escH(item.companyName)+(item.region?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--bg3);color:var(--text3);margin-left:6px">'+escH(item.region)+'</span>':'')+'</div>'
+      +(item.address?'<div style="font-size:11px;color:var(--text3);margin-top:1px">&#128205; '+escH(item.address)+'</div>':'')
       +'<div style="display:flex;gap:5px;align-items:center;margin-top:3px">'
       +'<input value="'+escAttr(item.companyEmail)+'" onblur="agentQueue['+idx+'].companyEmail=this.value" placeholder="email@firma.de" style="font-size:12px;color:var(--accent);flex:1;min-width:0;border-color:'+(item.companyEmail?'var(--border)':'var(--yellow)')+';">'
       +(!item.companyEmail?'<button data-find-email="'+idx+'" onclick="findEmailForCard('+idx+')" class="btn btn-sm" style="font-size:11px;color:var(--yellow);background:var(--yellow-dim);border-color:var(--yellow);padding:2px 7px;white-space:nowrap">🔍</button>':'')
@@ -3348,7 +3345,7 @@ async function runSearch(){
     var iTerms2=getIndustryTerms(industryKey,lang);
     q=query;
     if(iTerms2)q+=' '+iTerms2;
-    if(location)q+=' '+location;
+    if(location)q+=' in '+location;
     searchType='maps';
     country=region2.country||country;
   }

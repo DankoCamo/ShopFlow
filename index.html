@@ -3031,12 +3031,23 @@ async function runAutoAgent(){
     if(!agentRunning)break;
     var r=results[i];
     agentSetProgress(i+1,results.length);
-      // 0. Keyword pre-filter — skip if title+snippet don't mention any search term
-      var resultText=(r.name+' '+r.desc).toLowerCase();
+      // 0a. Category page filter — skip portal list/category pages by title and URL patterns
+      var titleLow=r.name.toLowerCase();
+      var urlLow=(r.url||'').toLowerCase();
+      var urlPath=(r.url||'').replace(/^https?:\/\/[^\/]+/,'');
+      var isCategoryPage=
+        /aktuell \d+ offen/i.test(r.name)||
+        /\d+ (jobs?|stelle)/i.test(r.name)||
+        / jobs? (in|bei|für|at|in der) /i.test(r.name)||
+        /jobs? overview/i.test(r.name)||
+        (urlPath.length<8&&(urlLow.indexOf('karriere')>=0||urlLow.indexOf('stepstone')>=0||urlLow.indexOf('indeed')>=0||urlLow.indexOf('linkedin')>=0));
+      if(isCategoryPage){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': category stranica, preskačem');await agentDelay(100);continue;}
+      // 0b. Keyword pre-filter — title must contain at least one search term
+      var titleOnly=r.name.toLowerCase();
       var queryWords=query.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;});
       if(keyword)queryWords=queryWords.concat(keyword.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;}));
-      var hasMatch=queryWords.some(function(w){return resultText.indexOf(w)>=0;});
-      if(!hasMatch){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': nije relevantan za "'+query+'", preskačem');await agentDelay(100);continue;}
+      var titleMatch=queryWords.some(function(w){return titleOnly.indexOf(w)>=0;});
+      if(!titleMatch){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': naslov ne odgovara "'+query+'", preskačem');await agentDelay(100);continue;}
       // 1. Extract company
       var companyName=extractCompanyFromText(r.name+' '+r.desc);
       if(!companyName){

@@ -3037,6 +3037,10 @@ async function runAutoAgent(){
       if(keyword)queryWords=queryWords.concat(keyword.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;}));
       var hasMatch=queryWords.some(function(w){return resultText.indexOf(w)>=0;});
       if(!hasMatch){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': nije relevantan za "'+query+'", preskačem');await agentDelay(100);continue;}
+      // 0b. URL filter — skip category/search pages (no job ID in path)
+      var urlPath=(r.url||'').replace(/^https?:\/\/[^\/]+/,'');
+      var isSpecificJob=/\/\d{5,}/.test(urlPath)||/[?&]jk=/.test(r.url)||/jobs\/view\/\d/.test(r.url)||/viewjob/.test(r.url)||/stellenangebote\/\d/.test(urlPath)||/stellenangebote\/.+-\d/.test(urlPath);
+      if(!isSpecificJob){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': category stranica, preskačem');await agentDelay(100);continue;}
       // 1. Extract company
       var companyName=extractCompanyFromText(r.name+' '+r.desc);
       if(!companyName){
@@ -3053,8 +3057,7 @@ async function runAutoAgent(){
       agentSetStep(rlabel+' '+companyName+' — provjera relevantnosti...');
       var isRelevant=true;
       try{
-        var industryLabel=industryKey?industryKey:'manufacturing/engineering';
-        var rfPrompt='Is "'+companyName+'" clearly a staffing agency, HR recruiter, or headhunter posting this job on behalf of another company (answer NO), or is it any other kind of company directly looking for staff (answer YES)? When in doubt, answer YES.\n\nJob: '+r.name+'\nSnippet: '+r.desc.substring(0,200)+'\n\nAnswer only YES or NO.';
+        var rfPrompt='A freelance CAM programmer is looking for companies that use CNC machines and CAM software (Mastercam, HyperMill, Fusion 360, etc.) as potential clients.\n\nDoes "'+companyName+'" likely use CNC machines or CAM software in their work (answer YES), or is it a company that clearly would NOT need CAM programming — e.g. health organization, government, bank, insurance, retail, HR agency, school, media (answer NO)?\n\nJob: '+r.name+'\nSnippet: '+r.desc.substring(0,200)+'\n\nAnswer only YES or NO.';
         var rfRes=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:rfPrompt}]})});
         var rfData=await rfRes.json();
         var rfAnswer=(rfData.content&&rfData.content[0]?rfData.content[0].text:'YES').trim().toUpperCase();

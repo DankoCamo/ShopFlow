@@ -3037,10 +3037,6 @@ async function runAutoAgent(){
       if(keyword)queryWords=queryWords.concat(keyword.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;}));
       var hasMatch=queryWords.some(function(w){return resultText.indexOf(w)>=0;});
       if(!hasMatch){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': nije relevantan za "'+query+'", preskačem');await agentDelay(100);continue;}
-      // 0b. URL filter — skip category/search pages (no job ID in path)
-      var urlPath=(r.url||'').replace(/^https?:\/\/[^\/]+/,'');
-      var isSpecificJob=/\/\d{5,}/.test(urlPath)||/[?&]jk=/.test(r.url)||/jobs\/view\/\d/.test(r.url)||/viewjob/.test(r.url)||/stellenangebote\/\d/.test(urlPath)||/stellenangebote\/.+-\d/.test(urlPath);
-      if(!isSpecificJob){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': category stranica, preskačem');await agentDelay(100);continue;}
       // 1. Extract company
       var companyName=extractCompanyFromText(r.name+' '+r.desc);
       if(!companyName){

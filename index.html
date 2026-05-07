@@ -3036,9 +3036,11 @@ async function runAutoAgent(){
       var urlLow=(r.url||'').toLowerCase();
       var urlPath=(r.url||'').replace(/^https?:\/\/[^\/]+/,'');
       var isCategoryPage=
-        /aktuell \d+ offen/i.test(r.name)||
-        /\d+ (jobs?|stelle)/i.test(r.name)||
+        /aktuell \d+\+?\s*offen/i.test(r.name)||
+        /\d+\+?\s*(jobs?|stellen|offene)/i.test(r.name)||
         / jobs? (in|bei|für|at|in der) /i.test(r.name)||
+        /karriere\.at$/i.test(r.name.trim())||
+        /- karriere\.at$/i.test(r.name.trim())||
         /jobs? overview/i.test(r.name)||
         (urlPath.length<8&&(urlLow.indexOf('karriere')>=0||urlLow.indexOf('stepstone')>=0||urlLow.indexOf('indeed')>=0||urlLow.indexOf('linkedin')>=0));
       if(isCategoryPage){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': category stranica, preskačem');await agentDelay(100);continue;}
@@ -3075,9 +3077,14 @@ async function runAutoAgent(){
       agentSetStep(rlabel+' '+companyName+' — tražim web i email...');
       var companyEmail='',companyUrl='';
       try{
-        var sr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Impressum Kontakt',country:country,num:3,lang:region.lang,type:'search'})});
+        var sr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Impressum Kontakt email',country:country,num:5,lang:region.lang,type:'search'})});
         var sd=await sr.json();
-        if(sd.organic){var crr=sd.organic.find(function(x){return x.link&&!isJobPortal(x.link);});if(crr)companyUrl=crr.link;}
+        if(sd.organic){
+          var hits=(sd.organic||[]).filter(function(x){return x.link&&!isJobPortal(x.link);});
+          // prefer pages with impressum/kontakt in URL
+          var preferred=hits.find(function(x){return /impressum|kontakt|contact|about/i.test(x.link);});
+          companyUrl=(preferred||hits[0]||{}).link||'';
+        }
       }catch(e){}
       if(companyUrl){
         agentSetStep(rlabel+' '+companyName+' — čitam kontakt...');
@@ -3085,6 +3092,14 @@ async function runAutoAgent(){
           var fr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:companyUrl})});
           var fd=await fr.json();
           if(fd.primaryEmail)companyEmail=fd.primaryEmail;
+          // fallback: try /kontakt and /impressum subpages
+          if(!companyEmail&&companyUrl){
+            var base=companyUrl.replace(/^(https?:\/\/[^\/]+).*/,'$1');
+            for(var fb=0;fb<2&&!companyEmail;fb++){
+              var fbUrl=base+(fb===0?'/kontakt':'/impressum');
+              try{var fbr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:fbUrl})});var fbd=await fbr.json();if(fbd.primaryEmail)companyEmail=fbd.primaryEmail;}catch(e){}
+            }
+          }
         }catch(e){}
       }
       // 4. Deduplicate

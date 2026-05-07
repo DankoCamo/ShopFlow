@@ -2980,7 +2980,18 @@ var LOCATION_REGION_MAP={
   'United States':'usa','California':'usa','Texas':'usa','Michigan':'usa','Ohio':'usa','New York':'usa','Illinois':'usa',
   'Balkan':'balkan','Hrvatska':'balkan','Slovenija':'balkan','Srbija':'balkan','Bosna i Hercegovina':'balkan'
 };
+var LOCATION_COUNTRY_MAP={
+  'Deutschland':'de','Bayern':'de','Baden-Württemberg':'de','Nordrhein-Westfalen':'de',
+  'Niedersachsen':'de','Sachsen':'de','Hamburg':'de','Berlin':'de','Hessen':'de',
+  'Österreich':'at','Wien':'at','Steiermark':'at','Oberösterreich':'at','Niederösterreich':'at',
+  'Tirol':'at','Vorarlberg':'at','Kärnten':'at',
+  'Schweiz':'ch','Zürich':'ch','Bern':'ch','Basel':'ch','St. Gallen':'ch','Aargau':'ch',
+  'United Kingdom':'gb','London':'gb','Manchester':'gb','Birmingham':'gb','Leeds':'gb','Glasgow':'gb',
+  'United States':'us','California':'us','Texas':'us','Michigan':'us','Ohio':'us','New York':'us','Illinois':'us',
+  'Hrvatska':'hr','Slovenija':'si','Srbija':'rs','Bosna i Hercegovina':'ba','Balkan':'hr'
+};
 function getRegionForLocation(loc){return REGION_CONFIGS[LOCATION_REGION_MAP[loc]||'dach'];}
+function getCountryForLocation(loc,region){return LOCATION_COUNTRY_MAP[loc]||region.country||'de';}
 function extractCompanyFromText(text){
   var m=text.match(/([A-ZÄÖÜ][A-Za-zÄÖÜäöüß\-\.&\s]{1,35}(?:GmbH(?:\s*&\s*Co\.?\s*KG)?|AG\b|KG\b|SE\b|GbR\b|UG\b|OHG\b|GesmbH\b))/);
   return m?m[1].trim():'';
@@ -3016,18 +3027,20 @@ async function runAutoAgent(){
   var industryKey=el('pros-industry')?el('pros-industry').value:'';
   var loc=el('pros-location').value;
   var region=getRegionForLocation(loc);
+  var country=getCountryForLocation(loc,region);
   var rlabel='['+region.flag+' '+region.label+']';
   var q='"'+query+'"';
   if(keyword)q+=' "'+keyword+'"';
   if(loc)q+=' '+loc;
   q+=' ('+region.portals+')';
   var results=[];
+  var skipStats={noName:0,agency:0,noEmail:0,dup:0};
   try{
     var pages=Math.ceil(num/10);
     for(var p=0;p<pages;p++){
       if(!agentRunning)break;
       agentSetStep('Pretražujem — str.'+(p+1)+'/'+pages+'...');
-      var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:region.country,num:10,start:p*10,lang:region.lang,type:'search'})});
+      var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:country,num:10,start:p*10,lang:region.lang,type:'search'})});
       var data=await res.json();
       var pg=(data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||''};});
       results=results.concat(pg);
@@ -3051,7 +3064,7 @@ async function runAutoAgent(){
           if(cn&&cn!=='NONE'&&cn.length>1)companyName=cn;
         }catch(e){}
       }
-      if(!companyName){agentSetStep(rlabel+' Oglas '+(i+1)+': ime firme nije pronađeno, preskačem');await agentDelay(200);continue;}
+      if(!companyName){skipStats.noName++;agentSetStep(rlabel+' Oglas '+(i+1)+': ime firme nije pronađeno, preskačem');await agentDelay(200);continue;}
       // 2. Relevance filter
       agentSetStep(rlabel+' '+companyName+' — provjera relevantnosti...');
       var isRelevant=true;
@@ -3063,12 +3076,12 @@ async function runAutoAgent(){
         var rfAnswer=(rfData.content&&rfData.content[0]?rfData.content[0].text:'YES').trim().toUpperCase();
         if(rfAnswer.startsWith('NO'))isRelevant=false;
       }catch(e){}
-      if(!isRelevant){agentSetStep(rlabel+' '+companyName+' — agencija/HR, preskačem');await agentDelay(200);continue;}
+      if(!isRelevant){skipStats.agency++;agentSetStep(rlabel+' '+companyName+' — agencija/HR, preskačem');await agentDelay(200);continue;}
       // 3. Find email
       agentSetStep(rlabel+' '+companyName+' — tražim web i email...');
       var companyEmail='',companyUrl='';
       try{
-        var sr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Impressum Kontakt',country:region.country,num:3,lang:region.lang,type:'search'})});
+        var sr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Impressum Kontakt',country:country,num:3,lang:region.lang,type:'search'})});
         var sd=await sr.json();
         if(sd.organic){var crr=sd.organic.find(function(x){return x.link&&!isJobPortal(x.link);});if(crr)companyUrl=crr.link;}
       }catch(e){}
@@ -3080,9 +3093,9 @@ async function runAutoAgent(){
           if(fd.primaryEmail)companyEmail=fd.primaryEmail;
         }catch(e){}
       }
-      if(!companyEmail){agentSetStep(rlabel+' '+companyName+' — email nije pronađen, preskačem');await agentDelay(200);continue;}
+      if(!companyEmail){skipStats.noEmail++;agentSetStep(rlabel+' '+companyName+' — email nije pronađen, preskačem');await agentDelay(200);continue;}
       // 4. Deduplicate
-      if(seenEmails[companyEmail]){agentSetStep(rlabel+' '+companyName+' — duplikat ('+companyEmail+'), preskačem');await agentDelay(200);continue;}
+      if(seenEmails[companyEmail]){skipStats.dup++;agentSetStep(rlabel+' '+companyName+' — duplikat ('+companyEmail+'), preskačem');await agentDelay(200);continue;}
       seenEmails[companyEmail]=true;
       // 5. Generate email
       agentSetStep(rlabel+' '+companyName+' ('+companyEmail+') — generiram email...');
@@ -3114,7 +3127,14 @@ async function runAutoAgent(){
       el('agent-review').style.display='block';
       await agentDelay(700);
     }
-  agentSetStep('Gotovo! Pronađeno '+agentQueue.length+' leadova s emailovima od '+results.length+' oglasa.');
+  var summary='Gotovo! '+agentQueue.length+' leadova od '+results.length+' oglasa.';
+  var reasons=[];
+  if(skipStats.noName)reasons.push(skipStats.noName+' bez imena firme');
+  if(skipStats.agency)reasons.push(skipStats.agency+' agencija');
+  if(skipStats.noEmail)reasons.push(skipStats.noEmail+' bez emaila');
+  if(skipStats.dup)reasons.push(skipStats.dup+' duplikata');
+  if(reasons.length)summary+=' Preskočeno: '+reasons.join(', ')+'.';
+  agentSetStep(summary);
   agentSetProgress(results.length,results.length);
   agentRunning=false;
   el('agent-spinner').style.display='none';

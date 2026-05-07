@@ -3014,7 +3014,7 @@ async function runAutoAgent(){
   var q='"'+query+'"';
   if(iTerms)q+=' '+iTerms;
   if(keyword)q+=' "'+keyword+'"';
-  if(loc&&region.locationSuffix)q+=' '+region.locationSuffix;
+  if(loc)q+=' '+(region.locationSuffix||loc);
   q+=' ('+region.portals+')';
   var results=[];
   try{
@@ -3193,8 +3193,7 @@ async function runSearch(){
     q='"'+query+'"';
     if(iTerms)q+=' '+iTerms;
     if(keyword)q+=' "'+keyword+'"';
-    if(location&&region.locationSuffix)q+=' '+region.locationSuffix;
-    else if(location&&!LOCATION_REGION_MAP[location])q+=' '+location;
+    if(location)q+=' '+(region.locationSuffix||location);
     q+=' ('+region.portals+')';
     searchType='search';
     country=region.country||'de';

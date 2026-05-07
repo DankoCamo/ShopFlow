@@ -3034,7 +3034,7 @@ async function runAutoAgent(){
   if(loc)q+=' '+loc;
   q+=' ('+region.portals+')';
   var results=[];
-  var skipStats={noName:0,agency:0,noEmail:0,dup:0};
+  var skipStats={noKeyword:0,noName:0,agency:0,noEmail:0,dup:0};
   try{
     var pages=Math.ceil(num/10);
     for(var p=0;p<pages;p++){
@@ -3053,6 +3053,12 @@ async function runAutoAgent(){
     if(!agentRunning)break;
     var r=results[i];
     agentSetProgress(i+1,results.length);
+      // 0. Keyword pre-filter — skip if title+snippet don't mention any search term
+      var resultText=(r.name+' '+r.desc).toLowerCase();
+      var queryWords=query.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;});
+      if(keyword)queryWords=queryWords.concat(keyword.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;}));
+      var hasMatch=queryWords.some(function(w){return resultText.indexOf(w)>=0;});
+      if(!hasMatch){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': nije relevantan za "'+query+'", preskačem');await agentDelay(100);continue;}
       // 1. Extract company
       var companyName=extractCompanyFromText(r.name+' '+r.desc);
       if(!companyName){
@@ -3129,6 +3135,7 @@ async function runAutoAgent(){
     }
   var summary='Gotovo! '+agentQueue.length+' leadova od '+results.length+' oglasa.';
   var reasons=[];
+  if(skipStats.noKeyword)reasons.push(skipStats.noKeyword+' nerel. oglas');
   if(skipStats.noName)reasons.push(skipStats.noName+' bez imena firme');
   if(skipStats.agency)reasons.push(skipStats.agency+' agencija');
   if(skipStats.noEmail)reasons.push(skipStats.noEmail+' bez emaila');

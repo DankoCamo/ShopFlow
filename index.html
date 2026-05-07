@@ -2547,12 +2547,16 @@ function renderDash(){
   var mon=new Date(now);mon.setDate(now.getDate()-now.getDay()+1);mon.setHours(0,0,0,0);
   var ws=S.timeLogs.filter(function(l){return new Date(l.date)>=mon;}).reduce(function(a,l){return a+l.duration;},0);
   var totalExp=S.expenses.reduce(function(a,e){return a+flt(e.amount);},0);
+  var todayStr=now.toISOString().substring(0,10);
+  var emailsToday=0,emailsTotal=0;
+  S.leads.forEach(function(l){if(l.emails)l.emails.forEach(function(e){emailsTotal++;if(e.sentAt&&e.sentAt.substring(0,10)===todayStr)emailsToday++;});});
   renderFollowups();
   el('dash-stats').innerHTML=
     '<div class="stat-card"><div class="stat-label">'+t('activeProjects')+'</div><div class="stat-val" style="color:var(--accent)">'+ap+'</div><div class="stat-sub">'+t('dashOf')+' '+S.projects.length+' '+t('dashTotal')+'</div></div>'+
     '<div class="stat-card"><div class="stat-label">'+t('dashTotalHours')+'</div><div class="stat-val">'+(ts/3600).toFixed(1)+'h</div><div class="stat-sub">'+t('dashWeek')+(ws/3600).toFixed(1)+'h</div></div>'+
     '<div class="stat-card"><div class="stat-label">'+t('dashBillable')+'</div><div class="stat-val" style="color:var(--yellow)">\u20AC'+Math.round(bil)+'</div><div class="stat-sub">'+t('dashPerRate')+'</div></div>'+
-    '<div class="stat-card"><div class="stat-label">'+t('expenses')+'</div><div class="stat-val" style="color:var(--red)">\u20AC'+totalExp.toFixed(0)+'</div><div class="stat-sub">'+t('dashProfit')+'\u20AC'+Math.round(bil-totalExp)+'</div></div>';
+    '<div class="stat-card"><div class="stat-label">'+t('expenses')+'</div><div class="stat-val" style="color:var(--red)">\u20AC'+totalExp.toFixed(0)+'</div><div class="stat-sub">'+t('dashProfit')+'\u20AC'+Math.round(bil-totalExp)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Emailovi danas</div><div class="stat-val" style="color:var(--blue)">'+emailsToday+'</div><div class="stat-sub">Ukupno: '+emailsTotal+'</div></div>';
   var active=S.projects.filter(function(p){return p.status<3;});
   el('dash-projects').innerHTML=active.length?active.map(function(p){
     var cl=gc(p.clientId);var h=S.timeLogs.filter(function(l){return l.projectId===p.id;}).reduce(function(a,l){return a+l.duration;},0)/3600;
@@ -3185,7 +3189,8 @@ async function runAutoAgent(){
           +'3. Offer remote freelance CAM programming — faster and more flexible than hiring full-time\n'
           +'4. Brief intro: Danko from CAMOutput, 10+ years experience, Mastercam/Fusion 360/HyperMill\n'
           +'5. CTA: www.camoutput.com — NO phone calls\n'
-          +'6. Max 100 words, direct and human\n7. Sign: CAMOutput | info@camoutput.com\n\n'
+          +'6. Max 100 words, direct and human\n7. Sign: CAMOutput | info@camoutput.com\n'
+          +'8. IMPORTANT: Write in first person singular (ich/I/ja), NEVER plural (wir/we/mi). Wrong: "Wir bieten...", "We offer..." — Correct: "Ich biete...", "I offer...", "Nudim..."\n\n'
           +'Format EXACTLY:\nSUBJECT:[max 8 words in '+region.emailLang+']\n[email body only]';
       }else{
         emailPrompt='You are helping a freelance CAM programmer (CAMOutput, Graz, Austria) write a cold outreach email.\n\n'
@@ -3197,7 +3202,8 @@ async function runAutoAgent(){
           +'3. Offer remote freelance CAM programming — faster and more flexible than hiring full-time\n'
           +'4. Brief intro: Danko from CAMOutput, 10+ years experience, Mastercam/Fusion 360/HyperMill\n'
           +'5. CTA: www.camoutput.com — NO phone calls\n'
-          +'6. Max 100 words, direct and human\n7. Sign: CAMOutput | info@camoutput.com\n\n'
+          +'6. Max 100 words, direct and human\n7. Sign: CAMOutput | info@camoutput.com\n'
+          +'8. IMPORTANT: Write in first person singular (ich/I/ja), NEVER plural (wir/we/mi). Wrong: "Wir bieten...", "We offer..." — Correct: "Ich biete...", "I offer...", "Nudim..."\n\n'
           +'Format EXACTLY:\nSUBJECT:[max 8 words in '+region.emailLang+']\n[email body only]';
       }
       var ar=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:emailPrompt}]})});
@@ -3246,14 +3252,15 @@ function renderAgentReview(){
       +'<input value="'+escAttr(item.companyEmail)+'" onblur="agentQueue['+idx+'].companyEmail=this.value" placeholder="email@firma.de" style="font-size:12px;color:var(--accent);flex:1;min-width:0;border-color:'+(item.companyEmail?'var(--border)':'var(--yellow)')+';">'
       +(!item.companyEmail?'<button data-find-email="'+idx+'" onclick="findEmailForCard('+idx+')" class="btn btn-sm" style="font-size:11px;color:var(--yellow);background:var(--yellow-dim);border-color:var(--yellow);padding:2px 7px;white-space:nowrap">🔍</button>':'')
       +'</div>'
+      +(item.sent?'<div style="font-size:11px;color:var(--blue);margin-top:3px">&#10003; '+item.sentAt.substring(0,16).replace('T',' ')+'</div>':'')
       +'</div>'
-      +'<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap">'
-      +'<input type="checkbox"'+(item.approved?' checked':'')+' onchange="agentQueue['+idx+'].approved=this.checked;renderAgentReview()"> Pošalji'
-      +'</label></div>'
+      +(item.sent
+        ?'<span style="font-size:11px;color:var(--blue);background:var(--blue-dim);padding:2px 8px;border-radius:4px;white-space:nowrap">&#10003; Poslano</span></div>'
+        :'<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap"><input type="checkbox"'+(item.approved?' checked':'')+' onchange="agentQueue['+idx+'].approved=this.checked;renderAgentReview()"> Pošalji</label></div>')
       +'<div style="font-size:11px;color:var(--text3);margin-bottom:6px;line-height:1.4">'+escH(item.jobTitle.substring(0,80))+'</div>'
       +'<div style="margin-bottom:8px"><a href="'+escAttr(item.jobUrl)+'" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none">'+escH(item.jobUrl.replace(/^https?:\/\//,'').split('/')[0])+' ↗</a></div>'
-      +'<input value="'+escAttr(item.subject)+'" oninput="agentQueue['+idx+'].subject=this.value" style="font-size:12px;margin-bottom:6px">'
-      +'<textarea rows="5" oninput="agentQueue['+idx+'].body=this.value" style="font-size:11px">'+escAttr(item.body)+'</textarea>'
+      +'<input value="'+escAttr(item.subject)+'" oninput="agentQueue['+idx+'].subject=this.value" style="font-size:12px;margin-bottom:6px"'+(item.sent?' readonly':'')+'>'
+      +'<textarea rows="5" oninput="agentQueue['+idx+'].body=this.value" style="font-size:11px"'+(item.sent?' readonly':'')+'>'+(escAttr(item.body))+'</textarea>'
       +'</div>';
   }).join('');
 }
@@ -3279,33 +3286,40 @@ async function findEmailForCard(idx){
 }
 
 async function sendApproved(){
-  var approved=agentQueue.filter(function(i){return i.approved&&i.subject&&i.body;});
-  if(!approved.length){alert('Nema označenih emailova za slanje.');return;}
+  var approved=agentQueue.filter(function(i){return i.approved&&i.subject&&i.body&&!i.sent;});
+  if(!approved.length){alert('Nema označenih emailova za slanje (ili su već poslani).');return;}
   var withEmail=approved.filter(function(i){return i.companyEmail;});
   var withoutEmail=approved.filter(function(i){return!i.companyEmail;});
   if(!withEmail.length){alert('Označene firme nemaju email.\nUpiši email ručno ili koristi 🔍 gumb za pretragu.');return;}
   var confirmMsg='Pošalji '+withEmail.length+' emailova?';
   if(withoutEmail.length)confirmMsg+='\n\n('+withoutEmail.length+' firme bit će preskočene jer nemaju email:\n'+withoutEmail.map(function(i){return'• '+i.companyName;}).join('\n')+')';
   if(!confirm(confirmMsg))return;
-  var toSend=withEmail;
   var sent=0;
-  for(var i=0;i<toSend.length;i++){
-    var item=toSend[i];
+  for(var i=0;i<withEmail.length;i++){
+    var item=withEmail[i];
     try{
-      var res=await fetch(EMAIL_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:item.companyEmail,from:'info@camoutput.com',fromName:'CAMOutput',subject:item.subject,body:item.body})});
+      var res=await fetch(EMAIL_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:item.companyEmail,from:'info@camoutput.com',fromName:'Danko Camo | CAMOutput',subject:item.subject,body:item.body})});
       if(res.ok){
         sent++;
-        if(!S.leads.find(function(l){return l.url===item.jobUrl;})){
-          S.leads.push({id:'lead'+S.nextId++,name:item.companyName,url:item.jobUrl,desc:item.jobTitle,status:'kontaktiran',note:'',email:item.companyEmail,emails:[{subject:item.subject,to:item.companyEmail,sentAt:tod()}],followup:'',savedAt:tod(),query:el('pros-query').value});
+        var sentAt=new Date().toISOString();
+        item.sent=true;
+        item.sentAt=sentAt;
+        var existingLead=S.leads.find(function(l){return l.url===item.jobUrl;});
+        if(existingLead){
+          if(!existingLead.emails)existingLead.emails=[];
+          existingLead.emails.push({subject:item.subject,to:item.companyEmail,sentAt:sentAt});
+          existingLead.status='kontaktiran';
+          if(!existingLead.email)existingLead.email=item.companyEmail;
+        }else{
+          S.leads.push({id:'lead'+S.nextId++,name:item.companyName,url:item.jobUrl,desc:item.jobTitle,status:'kontaktiran',note:'',email:item.companyEmail,emails:[{subject:item.subject,to:item.companyEmail,sentAt:sentAt}],followup:'',savedAt:tod(),query:el('pros-query').value});
         }
+        save();renderLeads();renderAgentReview();
       }
     }catch(e){}
     await agentDelay(500);
   }
-  save();renderLeads();
-  agentQueue=agentQueue.filter(function(i){return!i.approved;});
-  renderAgentReview();
-  alert('Poslano: '+sent+'/'+toSend.length);
+  renderDash();
+  alert('Poslano: '+sent+'/'+withEmail.length);
 }
 
 // ─── PROSPECTING
@@ -3432,7 +3446,8 @@ function renderLeads(){
   var filtered=leadFilter?S.leads.filter(function(l){return l.status===leadFilter;}):S.leads;
   if(!filtered.length){el('pros-leads-grid').innerHTML='<div class="empty" style="grid-column:1/-1">'+(S.leads.length?t('emptyLeadStatus'):t('emptyLeads'))+'</div>';return;}
   el('pros-leads-grid').innerHTML=filtered.slice().reverse().map(function(l){var displayUrl=l.url.replace(/^https?:\/\//,'').split('/')[0];
-    return '<div class="pros-card" onclick="openLeadModal(\''+l.id+'\')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="pros-card-name">'+escH(l.name)+'</div><span class="pros-lead-status '+l.status+'" onclick="event.stopPropagation();cycleLead(\''+l.id+'\')">'+getLeadStatuses()[l.status]+'</span></div><div class="pros-card-url">'+escH(displayUrl)+'</div><div class="pros-card-desc">'+escH(l.desc)+'</div>'+(l.note?'<div style="font-size:11px;color:var(--text3);font-style:italic;margin-bottom:6px">"'+escH(l.note)+'"</div>':'')+'<div class="pros-card-footer"><span style="font-size:11px;color:var(--text3)">'+l.savedAt+'</span><a href="'+l.url+'" target="_blank" class="btn btn-xs" onclick="event.stopPropagation()">Otvori &#8599;</a></div></div>';
+    var lastEmail=l.emails&&l.emails.length?l.emails[l.emails.length-1]:null;
+    return '<div class="pros-card" onclick="openLeadModal(\''+l.id+'\')"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="pros-card-name">'+escH(l.name)+'</div><span class="pros-lead-status '+l.status+'" onclick="event.stopPropagation();cycleLead(\''+l.id+'\')">'+getLeadStatuses()[l.status]+'</span></div><div class="pros-card-url">'+escH(displayUrl)+'</div><div class="pros-card-desc">'+escH(l.desc)+'</div>'+(l.note?'<div style="font-size:11px;color:var(--text3);font-style:italic;margin-bottom:6px">"'+escH(l.note)+'"</div>':'')+'<div class="pros-card-footer"><span style="font-size:11px;color:var(--text3)">'+l.savedAt+'</span>'+(lastEmail?'<span style="font-size:11px;color:var(--blue)">&#10003; Email '+lastEmail.sentAt.substring(0,10)+'</span>':'')+'<a href="'+l.url+'" target="_blank" class="btn btn-xs" onclick="event.stopPropagation()">Otvori &#8599;</a></div></div>';
   }).join('');
 }
 function cycleLead(id){var l=S.leads.find(function(l){return l.id===id;});if(!l)return;var cycle={novi:'kontaktiran',kontaktiran:'zainteresiran',zainteresiran:'nije-odgovorio','nije-odgovorio':'odbijenica',odbijenica:'novi'};l.status=cycle[l.status]||'novi';save();renderLeads();}
@@ -3673,7 +3688,8 @@ async function generateAIEmail() {
       + '4. Brief intro: Danko von CAMOutput, 10+ Jahre Erfahrung, Mastercam / Fusion 360 / HyperMill\n'
       + '5. CTA: Weitere Infos auf www.camoutput.com — NO phone calls\n'
       + '6. Max 100 words, direct and human, not corporate\n'
-      + '7. Sign as: CAMOutput | info@camoutput.com\n\n'
+      + '7. Sign as: CAMOutput | info@camoutput.com\n'
+      + '8. IMPORTANT: Write in first person singular (ich/I/ja), NEVER plural (wir/we/mi). Wrong: "Wir bieten...", "We offer..." — Correct: "Ich biete...", "I offer...", "Nudim..."\n\n'
       + 'Format EXACTLY as:\n'
       + 'COMPANY:[company name extracted, or "Unbekannt" if not found]\n'
       + 'SUBJECT:[max 8 word subject line]\n'
@@ -3692,7 +3708,8 @@ async function generateAIEmail() {
       + '5. CTA: Weitere Infos und Terminbuchung auf www.camoutput.com - NO phone calls, NO brief call suggestion\n'
       + '6. Max 120 words total\n'
       + '7. Human and direct, not corporate\n'
-      + '8. Sign as: CAMOutput | info@camoutput.com | www.camoutput.com\n\n'
+      + '8. Sign as: CAMOutput | info@camoutput.com | www.camoutput.com\n'
+      + '9. IMPORTANT: Write in first person singular (ich/I/ja), NEVER plural (wir/we/mi). Wrong: "Wir bieten...", "We offer..." — Correct: "Ich biete...", "I offer...", "Nudim..."\n\n'
       + 'Format EXACTLY as:\n'
       + 'EMAIL:[email if found on page, else none]\n'
       + 'SUBJECT:[max 8 word subject]\n'

@@ -1098,7 +1098,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
       <button class="btn btn-primary" id="pros-btn" onclick="runSearch()" data-i18n="search"></button>
       <button class="btn btn-sm" id="agent-start-btn" onclick="runAutoAgent()" style="background:var(--yellow-dim);color:var(--yellow);border-color:var(--yellow)">⚡ Auto</button>
       <select id="pros-num" class="btn btn-sm" style="cursor:pointer">
-        <option value="10">10</option><option value="20">20</option><option value="30">30</option>
+        <option value="10">10</option><option value="20">20</option><option value="30" selected>30</option><option value="40">40</option><option value="50">50</option>
       </select>
       <span id="pros-status" style="font-size:12px;color:var(--text3)"></span>
     </div>
@@ -1111,6 +1111,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
       <button class="btn btn-sm btn-danger" id="agent-stop-btn" onclick="stopAgent()">Zaustavi</button>
     </div>
     <div class="agent-bar-track"><div id="agent-bar" class="agent-bar-fill"></div></div>
+    <div id="agent-progress-text" style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:3px"></div>
     <div id="agent-step" style="font-size:12px;color:var(--text3)">Pripremam...</div>
   </div>
 
@@ -2975,7 +2976,7 @@ function extractCompanyFromText(text){
   return m?m[1].trim():'';
 }
 function agentSetStep(t){el('agent-step').textContent=t;}
-function agentSetProgress(done,total){el('agent-bar').style.width=(total>0?Math.round(done/total*100):0)+'%';}
+function agentSetProgress(done,total,foundEmails){el('agent-bar').style.width=(total>0?Math.round(done/total*100):0)+'%';var pt=el('agent-progress-text');if(pt&&total>0)pt.textContent='Pretraženo: '+done+'/'+total+(typeof foundEmails==='number'?' | Pronađeno emailova: '+foundEmails:'');}
 function agentDelay(ms){return new Promise(function(r){setTimeout(r,ms);});}
 function stopAgent(){
   agentRunning=false;
@@ -2992,7 +2993,7 @@ async function runAutoAgent(){
   var apiKey=CLAUDE_API_KEY;
   if(!apiKey){alert('CLAUDE_API_KEY nije postavljen u kodu.');return;}
   agentRunning=true;agentQueue=[];
-  var seenEmails={};
+  var seenEmails={};var foundEmailsCount=0;
   el('agent-panel').style.display='block';
   el('agent-spinner').style.display='';
   el('agent-title').textContent='Agent radi...';
@@ -3030,7 +3031,7 @@ async function runAutoAgent(){
   for(var i=0;i<results.length;i++){
     if(!agentRunning)break;
     var r=results[i];
-    agentSetProgress(i+1,results.length);
+    agentSetProgress(i+1,results.length,foundEmailsCount);
       // 0a. Category page filter — skip portal list/category pages by title and URL patterns
       var titleLow=r.name.toLowerCase();
       var urlLow=(r.url||'').toLowerCase();
@@ -3092,21 +3093,36 @@ async function runAutoAgent(){
           var fr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:companyUrl})});
           var fd=await fr.json();
           if(fd.primaryEmail)companyEmail=fd.primaryEmail;
-          // fallback: try /kontakt and /impressum subpages
+          // fallback: try /kontakt, /impressum, /contact subpages
           if(!companyEmail&&companyUrl){
             var base=companyUrl.replace(/^(https?:\/\/[^\/]+).*/,'$1');
-            for(var fb=0;fb<2&&!companyEmail;fb++){
-              var fbUrl=base+(fb===0?'/kontakt':'/impressum');
-              try{var fbr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:fbUrl})});var fbd=await fbr.json();if(fbd.primaryEmail)companyEmail=fbd.primaryEmail;}catch(e){}
+            var fbPages=['/kontakt','/impressum','/contact'];
+            for(var fb=0;fb<fbPages.length&&!companyEmail;fb++){
+              try{var fbr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:base+fbPages[fb]})});var fbd=await fbr.json();if(fbd.primaryEmail)companyEmail=fbd.primaryEmail;}catch(e){}
             }
           }
         }catch(e){}
+      }
+      // Google search fallback: if still no email, search for company contact directly
+      if(!companyEmail&&companyName){
+        agentSetStep(rlabel+' '+companyName+' — Google pretraga emaila...');
+        try{
+          var gsr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Kontakt email',country:country,num:3,lang:region.lang,type:'search'})});
+          var gsd=await gsr.json();
+          if(gsd.organic){
+            var ghits=(gsd.organic||[]).filter(function(x){return x.link&&!isJobPortal(x.link)&&x.link!==companyUrl;});
+            for(var gi=0;gi<Math.min(2,ghits.length)&&!companyEmail;gi++){
+              try{var gfr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:ghits[gi].link})});var gfd=await gfr.json();if(gfd.primaryEmail){companyEmail=gfd.primaryEmail;if(!companyUrl)companyUrl=ghits[gi].link;}}catch(e){}
+            }
+          }
+        }catch(e){}
+        await agentDelay(300);
       }
       // 4. Deduplicate
       var dedupKey=companyEmail||companyName.toLowerCase();
       if(seenEmails[dedupKey]){skipStats.dup++;agentSetStep(rlabel+' '+companyName+' — duplikat, preskačem');await agentDelay(200);continue;}
       seenEmails[dedupKey]=true;
-      if(!companyEmail){skipStats.noEmail++;}
+      if(companyEmail){foundEmailsCount++;}else{skipStats.noEmail++;}
       // 5. Generate email
       agentSetStep(rlabel+' '+companyName+(companyEmail?' ('+companyEmail+')':' ⚠️ bez emaila')+' — generiram email...');
       var emailSubject='',emailBody='';
@@ -3132,7 +3148,7 @@ async function runAutoAgent(){
         for(var j=0;j<aiLines.length;j++){if(aiLines[j].startsWith('SUBJECT:')){ps=true;continue;}if(ps)bl.push(aiLines[j]);}
         emailBody=bl.join('\n').trim();
       }catch(e){await agentDelay(400);continue;}
-      agentQueue.push({jobTitle:r.name,jobUrl:r.url,companyName:companyName,companyEmail:companyEmail,region:region.flag+' '+region.label,subject:emailSubject,body:emailBody,approved:true});
+      agentQueue.push({jobTitle:r.name,jobUrl:r.url,companyName:companyName,companyEmail:companyEmail,companyUrl:companyUrl,country:country,lang:region.lang,region:region.flag+' '+region.label,subject:emailSubject,body:emailBody,approved:true});
       renderAgentReview();
       el('agent-review').style.display='block';
       await agentDelay(700);
@@ -3146,7 +3162,7 @@ async function runAutoAgent(){
   if(skipStats.dup)reasons.push(skipStats.dup+' duplikata');
   if(reasons.length)summary+=' Preskočeno: '+reasons.join(', ')+'.';
   agentSetStep(summary);
-  agentSetProgress(results.length,results.length);
+  agentSetProgress(results.length,results.length,foundEmailsCount);
   agentRunning=false;
   el('agent-spinner').style.display='none';
   el('agent-title').textContent='Gotovo!';
@@ -3163,7 +3179,7 @@ function renderAgentReview(){
     return '<div class="agent-review-card'+(item.approved?' approved':'')+'">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
       +'<div><div class="pros-card-name">'+escH(item.companyName)+(item.region?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--bg3);color:var(--text3);margin-left:6px">'+escH(item.region)+'</span>':'')+'</div>'
-      +'<div style="font-size:12px;color:var(--accent)">'+escH(item.companyEmail)+'</div></div>'
+      +(item.companyEmail?'<div style="font-size:12px;color:var(--accent)">'+escH(item.companyEmail)+'</div>':'<button data-find-email="'+idx+'" onclick="findEmailForCard('+idx+')" class="btn btn-sm" style="font-size:11px;color:var(--yellow);background:var(--yellow-dim);border-color:var(--yellow);padding:2px 8px;margin-top:3px">Pronađi email</button>')+'</div>'
       +'<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap">'
       +'<input type="checkbox"'+(item.approved?' checked':'')+' onchange="agentQueue['+idx+'].approved=this.checked;renderAgentReview()"> Pošalji'
       +'</label></div>'
@@ -3173,6 +3189,26 @@ function renderAgentReview(){
       +'<textarea rows="5" oninput="agentQueue['+idx+'].body=this.value" style="font-size:11px">'+escAttr(item.body)+'</textarea>'
       +'</div>';
   }).join('');
+}
+
+async function findEmailForCard(idx){
+  var item=agentQueue[idx];
+  if(!item||item.companyEmail)return;
+  var btn=document.querySelector('[data-find-email="'+idx+'"]');
+  if(btn){btn.disabled=true;btn.textContent='Tražim...';}
+  var found='',foundUrl='';
+  try{
+    var gsr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+item.companyName+'" Kontakt email',country:item.country||'de',num:5,lang:item.lang||'de',type:'search'})});
+    var gsd=await gsr.json();
+    if(gsd.organic){
+      var ghits=(gsd.organic||[]).filter(function(x){return x.link&&!isJobPortal(x.link);});
+      for(var gi=0;gi<Math.min(3,ghits.length)&&!found;gi++){
+        try{var gfr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:ghits[gi].link})});var gfd=await gfr.json();if(gfd.primaryEmail){found=gfd.primaryEmail;foundUrl=ghits[gi].link;}}catch(e){}
+      }
+    }
+  }catch(e){}
+  if(found){agentQueue[idx].companyEmail=found;if(foundUrl&&!agentQueue[idx].companyUrl)agentQueue[idx].companyUrl=foundUrl;renderAgentReview();}
+  else{if(btn){btn.disabled=false;btn.textContent='Pronađi email';}}
 }
 
 async function sendApproved(){

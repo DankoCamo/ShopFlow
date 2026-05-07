@@ -1097,6 +1097,11 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" id="pros-btn" onclick="runSearch()" data-i18n="search"></button>
       <button class="btn btn-sm" id="agent-start-btn" onclick="runAutoAgent()" style="background:var(--yellow-dim);color:var(--yellow);border-color:var(--yellow)">⚡ Auto</button>
+      <select id="agent-source" class="btn btn-sm" style="cursor:pointer;font-size:11px">
+        <option value="jobs">Oglasi</option>
+        <option value="maps">Lokalne firme</option>
+        <option value="combined">Kombinirani</option>
+      </select>
       <select id="pros-num" class="btn btn-sm" style="cursor:pointer">
         <option value="10">10</option><option value="20">20</option><option value="30" selected>30</option><option value="40">40</option><option value="50">50</option>
       </select>
@@ -3002,38 +3007,75 @@ async function runAutoAgent(){
   el('agent-review-grid').innerHTML='';
   el('agent-start-btn').disabled=true;
   var num=parseInt(el('pros-num').value)||10;
+  var agentSrc=(el('agent-source')||{}).value||'jobs';
   var keyword=el('pros-keyword')?el('pros-keyword').value.trim():'';
   var industryKey=el('pros-industry')?el('pros-industry').value:'';
   var loc=el('pros-location').value;
   var region=getRegionForLocation(loc);
   var country=getCountryForLocation(loc,region);
   var rlabel='['+region.flag+' '+region.label+']';
-  var q=query;
-  if(keyword)q+=' '+keyword;
-  if(loc)q+=' '+loc;
-  q+=' ('+region.portals+')';
   var results=[];
   var skipStats={noKeyword:0,noName:0,agency:0,noEmail:0,dup:0};
-  try{
-    var pages=Math.ceil(num/10);
-    for(var p=0;p<pages;p++){
-      if(!agentRunning)break;
-      agentSetStep('Pretražujem — str.'+(p+1)+'/'+pages+'...');
-      var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,country:country,num:10,start:p*10,lang:region.lang,type:'search'})});
-      var data=await res.json();
-      var pg=(data.organic||[]).map(function(r,i){return{id:'r'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||''};});
-      results=results.concat(pg);
-      if(pg.length<10)break;
-      await agentDelay(300);
-    }
-  }catch(e){agentSetStep('Greška: '+e.message);agentRunning=false;el('agent-start-btn').disabled=false;return;}
+
+  // Fetch Maps results (lokalne firme)
+  if(agentSrc==='maps'||agentSrc==='combined'){
+    var mapsNum=agentSrc==='combined'?Math.ceil(num/2):num;
+    var mq=query;
+    var iTerms=getIndustryTerms(industryKey,region.lang);
+    if(iTerms)mq+=' '+iTerms;
+    if(loc)mq+=' '+loc;
+    agentSetStep('Google Maps — tražim lokalne firme...');
+    try{
+      var mr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:mq,country:country,num:mapsNum,lang:region.lang,type:'maps'})});
+      var md=await mr.json();
+      var mplaces=(md.places||[]).map(function(p,i){
+        return{id:'m'+Date.now()+i,name:p.title||p.name||'',url:p.website||p.link||'',
+          desc:[p.address||'',p.category||'',p.phone||''].filter(Boolean).join(' | '),
+          phone:p.phone||'',isMaps:true};
+      });
+      results=results.concat(mplaces);
+    }catch(e){agentSetStep('Maps greška: '+e.message);}
+    await agentDelay(500);
+  }
+
+  // Fetch Jobs results (oglasi)
+  if(agentSrc==='jobs'||agentSrc==='combined'){
+    var jobsNum=agentSrc==='combined'?Math.ceil(num/2):num;
+    var jq=query;
+    if(keyword)jq+=' '+keyword;
+    if(loc)jq+=' '+loc;
+    jq+=' ('+region.portals+')';
+    try{
+      var jpages=Math.ceil(jobsNum/10);
+      for(var p=0;p<jpages;p++){
+        if(!agentRunning)break;
+        agentSetStep('Oglasi — str.'+(p+1)+'/'+jpages+'...');
+        var jr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:jq,country:country,num:10,start:p*10,lang:region.lang,type:'search'})});
+        var jd=await jr.json();
+        var jpg=(jd.organic||[]).map(function(r,i){return{id:'j'+Date.now()+i,name:r.title||'',url:r.link||'',desc:r.snippet||'',isMaps:false};});
+        results=results.concat(jpg);
+        if(jpg.length<10)break;
+        await agentDelay(300);
+      }
+    }catch(e){agentSetStep('Oglasi greška: '+e.message);}
+  }
+
   if(!results.length){agentSetStep('Nema rezultata.');agentRunning=false;el('agent-start-btn').disabled=false;return;}
+
   for(var i=0;i<results.length;i++){
     if(!agentRunning)break;
     var r=results[i];
     agentSetProgress(i+1,results.length,foundEmailsCount);
-      // 0a. Category page filter — skip portal list/category pages by title and URL patterns
-      var titleLow=r.name.toLowerCase();
+
+    var companyName='',companyUrl=r.url||'';
+
+    if(r.isMaps){
+      // Maps: ime i web su direktni
+      companyName=r.name;
+      // ako URL nije s web stranice firme, resetiraj — bit će pronađen ispod
+      if(companyUrl&&isJobPortal(companyUrl))companyUrl='';
+    }else{
+      // Jobs: filter category stranica
       var urlLow=(r.url||'').toLowerCase();
       var urlPath=(r.url||'').replace(/^https?:\/\/[^\/]+/,'');
       var isCategoryPage=
@@ -3045,14 +3087,14 @@ async function runAutoAgent(){
         /jobs? overview/i.test(r.name)||
         (urlPath.length<8&&(urlLow.indexOf('karriere')>=0||urlLow.indexOf('stepstone')>=0||urlLow.indexOf('indeed')>=0||urlLow.indexOf('linkedin')>=0));
       if(isCategoryPage){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': category stranica, preskačem');await agentDelay(100);continue;}
-      // 0b. Keyword pre-filter — title must contain at least one search term
+      // Keyword pre-filter
       var titleOnly=r.name.toLowerCase();
       var queryWords=query.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;});
       if(keyword)queryWords=queryWords.concat(keyword.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;}));
       var titleMatch=queryWords.some(function(w){return titleOnly.indexOf(w)>=0;});
-      if(!titleMatch){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': naslov ne odgovara "'+query+'", preskačem');await agentDelay(100);continue;}
-      // 1. Extract company
-      var companyName=extractCompanyFromText(r.name+' '+r.desc);
+      if(!titleMatch){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': naslov ne odgovara, preskačem');await agentDelay(100);continue;}
+      // Extract company name
+      companyName=extractCompanyFromText(r.name+' '+r.desc);
       if(!companyName){
         agentSetStep(rlabel+' Oglas '+(i+1)+'/'+results.length+': pitam AI za ime firme...');
         try{
@@ -3063,101 +3105,125 @@ async function runAutoAgent(){
         }catch(e){}
       }
       if(!companyName){skipStats.noName++;agentSetStep(rlabel+' Oglas '+(i+1)+': ime firme nije pronađeno, preskačem');await agentDelay(200);continue;}
-      // 2. Relevance filter
-      agentSetStep(rlabel+' '+companyName+' — provjera relevantnosti...');
-      var isRelevant=true;
+      // Za job oglase: URL je job portal — resetiraj ga, trebamo pravu web stranicu firme
+      if(!companyUrl||isJobPortal(companyUrl))companyUrl='';
+    }
+
+    // Relevance filter
+    agentSetStep(rlabel+' '+companyName+' — provjera relevantnosti...');
+    var isRelevant=true;
+    try{
+      var rfCtx=r.isMaps?'Company info: '+r.desc:'Job: '+r.name+'\nSnippet: '+r.desc.substring(0,200);
+      var rfPrompt='A freelance CAM programmer is looking for companies that use CNC machines and CAM software (Mastercam, HyperMill, Fusion 360, etc.) as potential clients.\n\nDoes "'+companyName+'" likely use CNC machines or CAM software in their work (answer YES), or is it a company that clearly would NOT need CAM programming — e.g. health organization, government, bank, insurance, retail, HR agency, school, media (answer NO)?\n\n'+rfCtx+'\n\nAnswer only YES or NO.';
+      var rfRes=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:rfPrompt}]})});
+      var rfData=await rfRes.json();
+      var rfAnswer=(rfData.content&&rfData.content[0]?rfData.content[0].text:'YES').trim().toUpperCase();
+      if(rfAnswer.startsWith('NO'))isRelevant=false;
+    }catch(e){}
+    if(!isRelevant){skipStats.agency++;agentSetStep(rlabel+' '+companyName+' — nije relevantna, preskačem');await agentDelay(200);continue;}
+
+    // Find email — korak 1: pronađi web stranicu firme (izbjegavaj job portale)
+    agentSetStep(rlabel+' '+companyName+' — tražim web i email...');
+    var companyEmail='';
+    if(!companyUrl){
       try{
-        var rfPrompt='A freelance CAM programmer is looking for companies that use CNC machines and CAM software (Mastercam, HyperMill, Fusion 360, etc.) as potential clients.\n\nDoes "'+companyName+'" likely use CNC machines or CAM software in their work (answer YES), or is it a company that clearly would NOT need CAM programming — e.g. health organization, government, bank, insurance, retail, HR agency, school, media (answer NO)?\n\nJob: '+r.name+'\nSnippet: '+r.desc.substring(0,200)+'\n\nAnswer only YES or NO.';
-        var rfRes=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:rfPrompt}]})});
-        var rfData=await rfRes.json();
-        var rfAnswer=(rfData.content&&rfData.content[0]?rfData.content[0].text:'YES').trim().toUpperCase();
-        if(rfAnswer.startsWith('NO'))isRelevant=false;
-      }catch(e){}
-      if(!isRelevant){skipStats.agency++;agentSetStep(rlabel+' '+companyName+' — agencija/HR, preskačem');await agentDelay(200);continue;}
-      // 3. Find email
-      agentSetStep(rlabel+' '+companyName+' — tražim web i email...');
-      var companyEmail='',companyUrl='';
-      try{
-        var sr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Impressum Kontakt email',country:country,num:5,lang:region.lang,type:'search'})});
-        var sd=await sr.json();
-        if(sd.organic){
-          var hits=(sd.organic||[]).filter(function(x){return x.link&&!isJobPortal(x.link);});
-          // prefer pages with impressum/kontakt in URL
-          var preferred=hits.find(function(x){return /impressum|kontakt|contact|about/i.test(x.link);});
-          companyUrl=(preferred||hits[0]||{}).link||'';
+        var wsq='"'+companyName+'" Impressum Kontakt -site:linkedin.com -site:xing.com -site:indeed.de -site:stepstone.de -site:karriere.at';
+        var wsr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:wsq,country:country,num:5,lang:region.lang,type:'search'})});
+        var wsd=await wsr.json();
+        if(wsd.organic){
+          var whits=(wsd.organic||[]).filter(function(x){return x.link&&!isJobPortal(x.link);});
+          var wpref=whits.find(function(x){return /impressum|kontakt|contact|about|ueber/i.test(x.link);});
+          companyUrl=(wpref||whits[0]||{}).link||'';
         }
       }catch(e){}
-      if(companyUrl){
-        agentSetStep(rlabel+' '+companyName+' — čitam kontakt...');
-        try{
-          var fr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:companyUrl})});
-          var fd=await fr.json();
-          if(fd.primaryEmail)companyEmail=fd.primaryEmail;
-          // fallback: try /kontakt, /impressum, /contact subpages
-          if(!companyEmail&&companyUrl){
-            var base=companyUrl.replace(/^(https?:\/\/[^\/]+).*/,'$1');
-            var fbPages=['/kontakt','/impressum','/contact'];
-            for(var fb=0;fb<fbPages.length&&!companyEmail;fb++){
-              try{var fbr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:base+fbPages[fb]})});var fbd=await fbr.json();if(fbd.primaryEmail)companyEmail=fbd.primaryEmail;}catch(e){}
-            }
-          }
-        }catch(e){}
-      }
-      // Google search fallback: if still no email, search for company contact directly
-      if(!companyEmail&&companyName){
-        agentSetStep(rlabel+' '+companyName+' — Google pretraga emaila...');
-        try{
-          var gsr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Kontakt email',country:country,num:3,lang:region.lang,type:'search'})});
-          var gsd=await gsr.json();
-          if(gsd.organic){
-            var ghits=(gsd.organic||[]).filter(function(x){return x.link&&!isJobPortal(x.link)&&x.link!==companyUrl;});
-            for(var gi=0;gi<Math.min(2,ghits.length)&&!companyEmail;gi++){
-              try{var gfr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:ghits[gi].link})});var gfd=await gfr.json();if(gfd.primaryEmail){companyEmail=gfd.primaryEmail;if(!companyUrl)companyUrl=ghits[gi].link;}}catch(e){}
-            }
-          }
-        }catch(e){}
-        await agentDelay(300);
-      }
-      // 4. Deduplicate
-      var dedupKey=companyEmail||companyName.toLowerCase();
-      if(seenEmails[dedupKey]){skipStats.dup++;agentSetStep(rlabel+' '+companyName+' — duplikat, preskačem');await agentDelay(200);continue;}
-      seenEmails[dedupKey]=true;
-      if(companyEmail){foundEmailsCount++;}else{skipStats.noEmail++;}
-      // 5. Generate email
-      agentSetStep(rlabel+' '+companyName+(companyEmail?' ('+companyEmail+')':' ⚠️ bez emaila')+' — generiram email...');
-      var emailSubject='',emailBody='';
+    }
+    // Korak 2: fetchaj web stranicu + substranice
+    if(companyUrl){
+      agentSetStep(rlabel+' '+companyName+' — čitam kontakt...');
       try{
-        var prompt='You are helping a freelance CAM programmer (CAMOutput, Graz, Austria) write a cold outreach email.\n\n'
+        var fr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:companyUrl})});
+        var fd=await fr.json();
+        if(fd.primaryEmail)companyEmail=fd.primaryEmail;
+        if(!companyEmail){
+          var base=companyUrl.replace(/^(https?:\/\/[^\/]+).*/,'$1');
+          var fbPages=['/impressum','/kontakt','/contact','/ueber-uns','/about'];
+          for(var fb=0;fb<fbPages.length&&!companyEmail;fb++){
+            try{var fbr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:base+fbPages[fb]})});var fbd=await fbr.json();if(fbd.primaryEmail)companyEmail=fbd.primaryEmail;}catch(e){}
+          }
+        }
+      }catch(e){}
+    }
+    // Korak 3: Google search fallback
+    if(!companyEmail&&companyName){
+      agentSetStep(rlabel+' '+companyName+' — Google pretraga emaila...');
+      try{
+        var gsr=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'"'+companyName+'" Kontakt email',country:country,num:3,lang:region.lang,type:'search'})});
+        var gsd=await gsr.json();
+        if(gsd.organic){
+          var ghits=(gsd.organic||[]).filter(function(x){return x.link&&!isJobPortal(x.link)&&x.link!==companyUrl;});
+          for(var gi=0;gi<Math.min(2,ghits.length)&&!companyEmail;gi++){
+            try{var gfr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:ghits[gi].link})});var gfd=await gfr.json();if(gfd.primaryEmail){companyEmail=gfd.primaryEmail;if(!companyUrl)companyUrl=ghits[gi].link;}}catch(e){}
+          }
+        }
+      }catch(e){}
+      await agentDelay(300);
+    }
+
+    // Deduplicate
+    var dedupKey=companyEmail||companyName.toLowerCase();
+    if(seenEmails[dedupKey]){skipStats.dup++;agentSetStep(rlabel+' '+companyName+' — duplikat, preskačem');await agentDelay(200);continue;}
+    seenEmails[dedupKey]=true;
+    if(companyEmail){foundEmailsCount++;}else{skipStats.noEmail++;}
+
+    // Generate email
+    agentSetStep(rlabel+' '+companyName+(companyEmail?' ('+companyEmail+')':' — bez emaila')+' — generiram email...');
+    var emailSubject='',emailBody='';
+    try{
+      var emailPrompt;
+      if(r.isMaps){
+        emailPrompt='You are helping a freelance CAM programmer (CAMOutput, Graz, Austria) write a cold outreach email.\n\n'
+          +'Company "'+companyName+'" is a local manufacturing firm.\nCompany info: '+r.desc+'\n\n'
+          +'Write a short cold email in '+region.emailLang+'.\n\n'
+          +'Rules:\n1. Greeting in '+region.emailLang+' (e.g. "Hallo [Company]-Team,")\n'
+          +'2. Mention you found them as a local firm that works with CNC/machining\n'
+          +'3. Offer remote freelance CAM programming — faster and more flexible than hiring full-time\n'
+          +'4. Brief intro: Danko from CAMOutput, 10+ years experience, Mastercam/Fusion 360/HyperMill\n'
+          +'5. CTA: www.camoutput.com — NO phone calls\n'
+          +'6. Max 100 words, direct and human\n7. Sign: CAMOutput | info@camoutput.com\n\n'
+          +'Format EXACTLY:\nSUBJECT:[max 8 words in '+region.emailLang+']\n[email body only]';
+      }else{
+        emailPrompt='You are helping a freelance CAM programmer (CAMOutput, Graz, Austria) write a cold outreach email.\n\n'
           +'Company "'+companyName+'" is hiring a CAM programmer — they use CNC machines and CAM software.\n\n'
           +'Job listing: '+r.name+'\nSnippet: '+r.desc+'\n\n'
           +'Write a short cold email in '+region.emailLang+'.\n\n'
-          +'Rules:\n1. Greeting in '+region.emailLang+' (e.g. "Hallo [Company]-Team," or "Dear [Company] Team,")\n'
+          +'Rules:\n1. Greeting in '+region.emailLang+' (e.g. "Hallo [Company]-Team,")\n'
           +'2. Mention you saw their CAM programmer listing\n'
           +'3. Offer remote freelance CAM programming — faster and more flexible than hiring full-time\n'
           +'4. Brief intro: Danko from CAMOutput, 10+ years experience, Mastercam/Fusion 360/HyperMill\n'
           +'5. CTA: www.camoutput.com — NO phone calls\n'
           +'6. Max 100 words, direct and human\n7. Sign: CAMOutput | info@camoutput.com\n\n'
           +'Format EXACTLY:\nSUBJECT:[max 8 words in '+region.emailLang+']\n[email body only]';
-        var ar=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:prompt}]})});
-        var ad=await ar.json();
-        var aiText=ad.content&&ad.content[0]?ad.content[0].text:'';
-        var aiLines=aiText.split('\n');
-        var sl=aiLines.find(function(l){return l.startsWith('SUBJECT:');});
-        if(sl)emailSubject=sl.replace('SUBJECT:','').trim();
-        var bl=[],ps=false;
-        for(var j=0;j<aiLines.length;j++){if(aiLines[j].startsWith('SUBJECT:')){ps=true;continue;}if(ps)bl.push(aiLines[j]);}
-        emailBody=bl.join('\n').trim();
-      }catch(e){await agentDelay(400);continue;}
-      agentQueue.push({jobTitle:r.name,jobUrl:r.url,companyName:companyName,companyEmail:companyEmail,companyUrl:companyUrl,country:country,lang:region.lang,region:region.flag+' '+region.label,subject:emailSubject,body:emailBody,approved:true});
-      renderAgentReview();
-      el('agent-review').style.display='block';
-      await agentDelay(700);
-    }
-  var summary='Gotovo! '+agentQueue.length+' leadova od '+results.length+' oglasa.';
+      }
+      var ar=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:emailPrompt}]})});
+      var ad=await ar.json();
+      var aiText=ad.content&&ad.content[0]?ad.content[0].text:'';
+      var aiLines=aiText.split('\n');
+      var sl=aiLines.find(function(l){return l.startsWith('SUBJECT:');});
+      if(sl)emailSubject=sl.replace('SUBJECT:','').trim();
+      var bl=[],ps=false;
+      for(var j=0;j<aiLines.length;j++){if(aiLines[j].startsWith('SUBJECT:')){ps=true;continue;}if(ps)bl.push(aiLines[j]);}
+      emailBody=bl.join('\n').trim();
+    }catch(e){await agentDelay(400);continue;}
+    agentQueue.push({jobTitle:r.isMaps?r.name+' (lokalna firma)':r.name,jobUrl:r.isMaps?(companyUrl||r.url||''):r.url,companyName:companyName,companyEmail:companyEmail,companyUrl:companyUrl,country:country,lang:region.lang,region:region.flag+' '+region.label,subject:emailSubject,body:emailBody,approved:true,isMaps:r.isMaps});
+    renderAgentReview();
+    el('agent-review').style.display='block';
+    await agentDelay(700);
+  }
+  var summary='Gotovo! '+agentQueue.length+' leadova od '+results.length+' pretraženih.';
   var reasons=[];
   if(skipStats.noKeyword)reasons.push(skipStats.noKeyword+' nerel. oglas');
   if(skipStats.noName)reasons.push(skipStats.noName+' bez imena firme');
-  if(skipStats.agency)reasons.push(skipStats.agency+' agencija');
+  if(skipStats.agency)reasons.push(skipStats.agency+' nije relevantna');
   if(skipStats.noEmail)reasons.push(skipStats.noEmail+' bez emaila');
   if(skipStats.dup)reasons.push(skipStats.dup+' duplikata');
   if(reasons.length)summary+=' Preskočeno: '+reasons.join(', ')+'.';
@@ -3179,7 +3245,11 @@ function renderAgentReview(){
     return '<div class="agent-review-card'+(item.approved?' approved':'')+'">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
       +'<div><div class="pros-card-name">'+escH(item.companyName)+(item.region?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--bg3);color:var(--text3);margin-left:6px">'+escH(item.region)+'</span>':'')+'</div>'
-      +(item.companyEmail?'<div style="font-size:12px;color:var(--accent)">'+escH(item.companyEmail)+'</div>':'<button data-find-email="'+idx+'" onclick="findEmailForCard('+idx+')" class="btn btn-sm" style="font-size:11px;color:var(--yellow);background:var(--yellow-dim);border-color:var(--yellow);padding:2px 8px;margin-top:3px">Pronađi email</button>')+'</div>'
+      +'<div style="display:flex;gap:5px;align-items:center;margin-top:3px">'
+      +'<input value="'+escAttr(item.companyEmail)+'" onblur="agentQueue['+idx+'].companyEmail=this.value" placeholder="email@firma.de" style="font-size:12px;color:var(--accent);flex:1;min-width:0;border-color:'+(item.companyEmail?'var(--border)':'var(--yellow)')+';">'
+      +(!item.companyEmail?'<button data-find-email="'+idx+'" onclick="findEmailForCard('+idx+')" class="btn btn-sm" style="font-size:11px;color:var(--yellow);background:var(--yellow-dim);border-color:var(--yellow);padding:2px 7px;white-space:nowrap">🔍</button>':'')
+      +'</div>'
+      +'</div>'
       +'<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;white-space:nowrap">'
       +'<input type="checkbox"'+(item.approved?' checked':'')+' onchange="agentQueue['+idx+'].approved=this.checked;renderAgentReview()"> Pošalji'
       +'</label></div>'
@@ -3212,9 +3282,15 @@ async function findEmailForCard(idx){
 }
 
 async function sendApproved(){
-  var toSend=agentQueue.filter(function(i){return i.approved&&i.companyEmail&&i.subject&&i.body;});
-  if(!toSend.length){alert('Nema označenih emailova za slanje.');return;}
-  if(!confirm('Pošalji '+toSend.length+' emailova?'))return;
+  var approved=agentQueue.filter(function(i){return i.approved&&i.subject&&i.body;});
+  if(!approved.length){alert('Nema označenih emailova za slanje.');return;}
+  var withEmail=approved.filter(function(i){return i.companyEmail;});
+  var withoutEmail=approved.filter(function(i){return!i.companyEmail;});
+  if(!withEmail.length){alert('Označene firme nemaju email.\nUpiši email ručno ili koristi 🔍 gumb za pretragu.');return;}
+  var confirmMsg='Pošalji '+withEmail.length+' emailova?';
+  if(withoutEmail.length)confirmMsg+='\n\n('+withoutEmail.length+' firme bit će preskočene jer nemaju email:\n'+withoutEmail.map(function(i){return'• '+i.companyName;}).join('\n')+')';
+  if(!confirm(confirmMsg))return;
+  var toSend=withEmail;
   var sent=0;
   for(var i=0;i<toSend.length;i++){
     var item=toSend[i];
@@ -3245,7 +3321,6 @@ function setProsMode(mode){
   el('pros-mode-maps').className='btn btn-sm pros-mode-btn'+(mode==='maps'?' active':'');
   el('pros-country-row').style.display=mode==='maps'?'block':'none';
   el('pros-jobs-hint').style.display=mode==='jobs'?'block':'none';
-  el('agent-start-btn').style.display=mode==='jobs'?'':'none';
   prosResults=[];
   el('pros-results-grid').innerHTML='<div class="empty" style="grid-column:1/-1">'+t('emptySearch')+'</div>';
 }

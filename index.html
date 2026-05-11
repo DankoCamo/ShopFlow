@@ -3169,10 +3169,22 @@ async function runAutoAgent(){
       await agentDelay(300);
     }
 
-    // Deduplicate
-    var dedupKey=companyEmail||companyName.toLowerCase();
-    if(seenEmails[dedupKey]){skipStats.dup++;agentSetStep(rlabel+' '+companyName+' — duplikat, preskačem');await agentDelay(200);continue;}
-    seenEmails[dedupKey]=true;
+    // Deduplicate by normalized company name
+    var normName=companyName.toLowerCase()
+      .replace(/\b(gmbh\s*&\s*co\.?\s*kg|gmbh|ag|og|kg|e\.u\.|ug|ohg|gbr|se\b|gesmbh|s\.r\.o\.|ltd|inc|llc|plc|bv|nv)\b\.?/gi,'')
+      .replace(/\s+/g,' ').trim();
+    if(seenEmails[normName]){
+      // if this instance has an email but the existing one doesn't, update the existing card
+      var existingIdx=agentQueue.findIndex(function(q){return q._normName===normName;});
+      if(existingIdx>=0&&companyEmail&&!agentQueue[existingIdx].companyEmail){
+        agentQueue[existingIdx].companyEmail=companyEmail;
+        agentQueue[existingIdx].companyUrl=companyUrl||agentQueue[existingIdx].companyUrl;
+        foundEmailsCount++;
+        renderAgentReview();
+      }
+      skipStats.dup++;agentSetStep(rlabel+' '+companyName+' — duplikat, preskačem');await agentDelay(200);continue;
+    }
+    seenEmails[normName]=true;
     if(companyEmail){foundEmailsCount++;}else{skipStats.noEmail++;}
 
     // Generate email
@@ -3216,7 +3228,7 @@ async function runAutoAgent(){
       for(var j=0;j<aiLines.length;j++){if(aiLines[j].startsWith('SUBJECT:')){ps=true;continue;}if(ps)bl.push(aiLines[j]);}
       emailBody=bl.join('\n').trim();
     }catch(e){await agentDelay(400);continue;}
-    agentQueue.push({jobTitle:r.isMaps?r.name+' (lokalna firma)':r.name,jobUrl:r.isMaps?(companyUrl||r.url||''):r.url,companyName:companyName,companyEmail:companyEmail,companyUrl:companyUrl,country:country,lang:region.lang,region:region.flag+' '+region.label,subject:emailSubject,body:emailBody,approved:true,address:r.address||'',isMaps:r.isMaps});
+    agentQueue.push({jobTitle:r.isMaps?r.name+' (lokalna firma)':r.name,jobUrl:r.isMaps?(companyUrl||r.url||''):r.url,companyName:companyName,companyEmail:companyEmail,companyUrl:companyUrl,country:country,lang:region.lang,region:region.flag+' '+region.label,subject:emailSubject,body:emailBody,approved:true,address:r.address||'',isMaps:r.isMaps,_normName:normName});
     renderAgentReview();
     el('agent-review').style.display='block';
     await agentDelay(700);

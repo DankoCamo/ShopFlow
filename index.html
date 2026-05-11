@@ -3306,11 +3306,15 @@ async function sendApproved(){
   var confirmMsg='Pošalji '+withEmail.length+' emailova?';
   if(withoutEmail.length)confirmMsg+='\n\n('+withoutEmail.length+' firme bit će preskočene jer nemaju email:\n'+withoutEmail.map(function(i){return'• '+i.companyName;}).join('\n')+')';
   if(!confirm(confirmMsg))return;
-  var sent=0;
+  var sent=0,failed=[];
   for(var i=0;i<withEmail.length;i++){
     var item=withEmail[i];
+    var payload={to:item.companyEmail,from:'info@camoutput.com',fromName:'Danko Camo | CAMOutput',subject:item.subject,body:item.body};
+    console.log('[sendApproved] Šaljem na',EMAIL_WORKER_URL,'za',item.companyName,payload);
     try{
-      var res=await fetch(EMAIL_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:item.companyEmail,from:'info@camoutput.com',fromName:'Danko Camo | CAMOutput',subject:item.subject,body:item.body})});
+      var res=await fetch(EMAIL_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      var resBody=null;try{resBody=await res.json();}catch(je){}
+      console.log('[sendApproved] Odgovor:',res.status,res.ok,resBody);
       if(res.ok){
         sent++;
         var sentAt=new Date().toISOString();
@@ -3326,12 +3330,25 @@ async function sendApproved(){
           S.leads.push({id:'lead'+S.nextId++,name:item.companyName,url:item.jobUrl,desc:item.jobTitle,status:'kontaktiran',note:'',email:item.companyEmail,emails:[{subject:item.subject,to:item.companyEmail,sentAt:sentAt}],followup:'',savedAt:tod(),query:el('pros-query').value});
         }
         save();renderLeads();renderAgentReview();
+      }else{
+        var errMsg=resBody&&(resBody.message||resBody.error||JSON.stringify(resBody))||('HTTP '+res.status);
+        console.error('[sendApproved] Greška za',item.companyName,':',errMsg);
+        failed.push(item.companyName+': '+errMsg);
       }
-    }catch(e){}
+    }catch(e){
+      console.error('[sendApproved] Fetch greška za',item.companyName,':',e);
+      failed.push(item.companyName+': '+e.message);
+    }
     await agentDelay(500);
   }
   renderDash();
-  alert('Poslano: '+sent+'/'+withEmail.length);
+  if(failed.length){
+    agentSetStep('⚠️ Greška slanja za: '+failed.map(function(f){return f.split(':')[0];}).join(', '));
+    alert('Poslano: '+sent+'/'+withEmail.length+'\n\nGreška za:\n'+failed.map(function(f){return'• '+f;}).join('\n'));
+  }else if(sent>0){
+    agentSetStep('✓ Poslano '+sent+' emailova.');
+    alert('Poslano: '+sent+'/'+withEmail.length);
+  }
 }
 
 // ─── PROSPECTING

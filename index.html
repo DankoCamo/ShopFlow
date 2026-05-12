@@ -1755,6 +1755,15 @@ function isJobPortal(url) {
   var domain = url.replace(/^https?:\/\//, '').split('/')[0].toLowerCase();
   return JOB_PORTALS.some(function(p) { return domain === p || domain.endsWith('.' + p); });
 }
+function isPortalEmail(email) {
+  if (!email) return false;
+  var domain = (email.split('@')[1] || '').toLowerCase();
+  return JOB_PORTALS.some(function(p) { return domain === p || domain.endsWith('.' + p); });
+}
+function isPortalName(name) {
+  var n = (name || '').toLowerCase().replace(/\s+/g, '');
+  return JOB_PORTALS.some(function(p) { var pn = p.split('.')[0]; return n === pn || n === p.replace('.', ''); });
+}
 
 
 
@@ -3099,13 +3108,14 @@ async function runAutoAgent(){
       if(!titleMatch){skipStats.noKeyword++;agentSetStep(rlabel+' Oglas '+(i+1)+': naslov ne odgovara, preskačem');await agentDelay(100);continue;}
       // Extract company name
       companyName=extractCompanyFromText(r.name+' '+r.desc);
+      if(companyName&&isPortalName(companyName))companyName='';
       if(!companyName){
         agentSetStep(rlabel+' Oglas '+(i+1)+'/'+results.length+': pitam AI za ime firme...');
         try{
           var cr2=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:60,messages:[{role:'user',content:'Extract ONLY the hiring company name from this job listing. Return just the company name, nothing else. If not identifiable, return: NONE\n\nTitle: '+r.name+'\nSnippet: '+r.desc}]})});
           var cd=await cr2.json();
           var cn=(cd.content&&cd.content[0]?cd.content[0].text:'').trim();
-          if(cn&&cn!=='NONE'&&cn.length>1)companyName=cn;
+          if(cn&&cn!=='NONE'&&cn.length>1&&!isPortalName(cn))companyName=cn;
         }catch(e){}
       }
       if(!companyName){skipStats.noName++;agentSetStep(rlabel+' Oglas '+(i+1)+': ime firme nije pronađeno, preskačem');await agentDelay(200);continue;}
@@ -3147,12 +3157,12 @@ async function runAutoAgent(){
       try{
         var fr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:companyUrl})});
         var fd=await fr.json();
-        if(fd.primaryEmail)companyEmail=fd.primaryEmail;
+        if(fd.primaryEmail&&!isPortalEmail(fd.primaryEmail))companyEmail=fd.primaryEmail;
         if(!companyEmail){
           var base=companyUrl.replace(/^(https?:\/\/[^\/]+).*/,'$1');
           var fbPages=['/impressum','/kontakt','/contact','/ueber-uns','/about'];
           for(var fb=0;fb<fbPages.length&&!companyEmail;fb++){
-            try{var fbr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:base+fbPages[fb]})});var fbd=await fbr.json();if(fbd.primaryEmail)companyEmail=fbd.primaryEmail;}catch(e){}
+            try{var fbr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:base+fbPages[fb]})});var fbd=await fbr.json();if(fbd.primaryEmail&&!isPortalEmail(fbd.primaryEmail))companyEmail=fbd.primaryEmail;}catch(e){}
           }
         }
       }catch(e){}
@@ -3166,7 +3176,7 @@ async function runAutoAgent(){
         if(gsd.organic){
           var ghits=(gsd.organic||[]).filter(function(x){return x.link&&!isJobPortal(x.link)&&x.link!==companyUrl;});
           for(var gi=0;gi<Math.min(2,ghits.length)&&!companyEmail;gi++){
-            try{var gfr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:ghits[gi].link})});var gfd=await gfr.json();if(gfd.primaryEmail){companyEmail=gfd.primaryEmail;if(!companyUrl)companyUrl=ghits[gi].link;}}catch(e){}
+            try{var gfr=await fetch(FETCH_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:ghits[gi].link})});var gfd=await gfr.json();if(gfd.primaryEmail&&!isPortalEmail(gfd.primaryEmail)){companyEmail=gfd.primaryEmail;if(!companyUrl)companyUrl=ghits[gi].link;}}catch(e){}
           }
         }
       }catch(e){}

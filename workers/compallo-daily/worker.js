@@ -145,6 +145,14 @@ async function sendEmail(htmlContent, subject, env) {
 }
 
 async function run(env) {
+  // Validate required env vars / bindings
+  const missing = [];
+  if (!env.SERPER_KEY) missing.push('SERPER_KEY');
+  if (!env.BREVO_KEY) missing.push('BREVO_KEY');
+  if (!env.NOTIFY_EMAIL) missing.push('NOTIFY_EMAIL');
+  if (!env.SENT_COMPANIES) missing.push('SENT_COMPANIES (KV binding)');
+  if (missing.length) throw new Error('Missing env/bindings: ' + missing.join(', '));
+
   const countries = (env.SEARCH_COUNTRIES || 'at').split(',').map(c => c.trim()).filter(Boolean);
   const query = env.SEARCH_QUERY || 'CAM Programmierer Stellenangebote';
 
@@ -192,9 +200,27 @@ export default {
     if (new URL(request.url).pathname !== '/run') {
       return new Response('CAMOutput Daily Prospecting Worker\nGET /run to trigger manually', { status: 200 });
     }
-    const result = await run(env);
-    return new Response(JSON.stringify(result, null, 2), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    try {
+      const result = await run(env);
+      return new Response(JSON.stringify(result, null, 2), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({
+        error: e.message,
+        stack: e.stack || null,
+        env_check: {
+          SERPER_KEY: !!env.SERPER_KEY,
+          BREVO_KEY: !!env.BREVO_KEY,
+          NOTIFY_EMAIL: env.NOTIFY_EMAIL || null,
+          SEARCH_COUNTRIES: env.SEARCH_COUNTRIES || null,
+          SEARCH_QUERY: env.SEARCH_QUERY || null,
+          SENT_COMPANIES_bound: !!env.SENT_COMPANIES,
+        }
+      }, null, 2), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   },
 };

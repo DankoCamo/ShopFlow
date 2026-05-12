@@ -3000,7 +3000,7 @@ async function runAutoAgent(){
   if(!apiKey){alert('CLAUDE_API_KEY nije postavljen u kodu.');return;}
   agentRunning=true;agentQueue=[];
   var seenEmails={};var foundEmailsCount=0;
-  var normLeadN=function(n){return (n||'').toLowerCase().replace(/\b(gmbh\s*&\s*co\.?\s*kg|gmbh|ag|og|kg|e\.u\.|ug|ohg|gbr|gesmbh|s\.r\.o\.|ltd|inc|llc|plc|bv|nv)\b\.?/gi,'').replace(/\s+/g,' ').trim();};
+  var normLeadN=function(n){return (n||'').toLowerCase().replace(/\b(firma|company|unternehmen|gmbh\s*&\s*co\.?\s*kg|gmbh|ag|og|kg|e\.u\.|ug|ohg|gbr|gesmbh|s\.r\.o\.|ltd|inc|llc|plc|bv|nv)\b\.?/gi,'').replace(/[^a-z0-9]/g,'').trim();};
   var savedLeadUrls={},savedLeadNames={};
   S.leads.forEach(function(l){if(l.url)savedLeadUrls[l.url]=true;if(l.name)savedLeadNames[normLeadN(l.name)]=true;});
   el('agent-panel').style.display='block';
@@ -3453,7 +3453,7 @@ async function runSearch(){
   }finally{el('pros-btn').disabled=false;el('pros-btn').textContent=t('search');}
 }
 function renderSearchResults(){
-  var normN=function(n){return (n||'').toLowerCase().replace(/\b(gmbh\s*&\s*co\.?\s*kg|gmbh|ag|og|kg|e\.u\.|ug|ohg|gbr|gesmbh|s\.r\.o\.|ltd|inc|llc|plc|bv|nv)\b\.?/gi,'').replace(/\s+/g,' ').trim();};
+  var normN=function(n){return (n||'').toLowerCase().replace(/\b(firma|company|unternehmen|gmbh\s*&\s*co\.?\s*kg|gmbh|ag|og|kg|e\.u\.|ug|ohg|gbr|gesmbh|s\.r\.o\.|ltd|inc|llc|plc|bv|nv)\b\.?/gi,'').replace(/[^a-z0-9]/g,'').trim();};
   var savedUrls={},savedNames={};
   S.leads.forEach(function(l){if(l.url)savedUrls[l.url]=true;if(l.name)savedNames[normN(l.name)]=true;});
   var grid=el('pros-results-grid');

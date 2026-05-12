@@ -1078,6 +1078,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
       </div>
       <div class="field" style="margin:0"><label data-i18n="pozicija"></label><input id="pros-query" data-i18n-ph="prosIndustryPh"></div>
       <div class="field" style="margin:0"><label data-i18n="prosKeyword"></label><input id="pros-keyword" data-i18n-ph="prosKeywordPh2"></div>
+      <div id="keyword-hint" style="display:none;font-size:11px;color:var(--muted);margin-top:2px;margin-bottom:4px;">Ključna riječ se primjenjuje samo na pretragu oglasa, ne na lokalne firme.</div>
       <div class="field" style="margin:0"><label data-i18n="city"></label>
         <select id="pros-location"></select>
       </div>
@@ -1093,7 +1094,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" id="pros-btn" onclick="runSearch()" data-i18n="search"></button>
       <button class="btn btn-sm" id="agent-start-btn" onclick="runAutoAgent()" style="background:var(--yellow-dim);color:var(--yellow);border-color:var(--yellow)">⚡ Auto</button>
-      <select id="agent-source" class="btn btn-sm" style="cursor:pointer;font-size:11px">
+      <select id="agent-source" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="(function(v){var h=el('keyword-hint');if(h)h.style.display=(v==='maps'||v==='combined')?'block':'none';})(this.value)">
         <option value="jobs">Oglasi</option>
         <option value="maps">Lokalne firme</option>
         <option value="combined">Kombinirani</option>

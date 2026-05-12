@@ -3000,6 +3000,9 @@ async function runAutoAgent(){
   if(!apiKey){alert('CLAUDE_API_KEY nije postavljen u kodu.');return;}
   agentRunning=true;agentQueue=[];
   var seenEmails={};var foundEmailsCount=0;
+  var normLeadN=function(n){return (n||'').toLowerCase().replace(/\b(gmbh\s*&\s*co\.?\s*kg|gmbh|ag|og|kg|e\.u\.|ug|ohg|gbr|gesmbh|s\.r\.o\.|ltd|inc|llc|plc|bv|nv)\b\.?/gi,'').replace(/\s+/g,' ').trim();};
+  var savedLeadUrls={},savedLeadNames={};
+  S.leads.forEach(function(l){if(l.url)savedLeadUrls[l.url]=true;if(l.name)savedLeadNames[normLeadN(l.name)]=true;});
   el('agent-panel').style.display='block';
   el('agent-spinner').style.display='';
   el('agent-title').textContent='Agent radi...';
@@ -3168,6 +3171,11 @@ async function runAutoAgent(){
         }
       }catch(e){}
       await agentDelay(300);
+    }
+
+    // Skip if already a saved lead
+    if((companyUrl&&savedLeadUrls[companyUrl])||(companyName&&savedLeadNames[normLeadN(companyName)])){
+      skipStats.dup++;agentSetStep(rlabel+' '+companyName+' — već u leadovima, preskačem');await agentDelay(200);continue;
     }
 
     // Deduplicate by normalized company name
@@ -3445,17 +3453,23 @@ async function runSearch(){
   }finally{el('pros-btn').disabled=false;el('pros-btn').textContent=t('search');}
 }
 function renderSearchResults(){
-  var savedUrls={};
-  S.leads.forEach(function(l){savedUrls[l.url]=true;});
+  var normN=function(n){return (n||'').toLowerCase().replace(/\b(gmbh\s*&\s*co\.?\s*kg|gmbh|ag|og|kg|e\.u\.|ug|ohg|gbr|gesmbh|s\.r\.o\.|ltd|inc|llc|plc|bv|nv)\b\.?/gi,'').replace(/\s+/g,' ').trim();};
+  var savedUrls={},savedNames={};
+  S.leads.forEach(function(l){if(l.url)savedUrls[l.url]=true;if(l.name)savedNames[normN(l.name)]=true;});
   var grid=el('pros-results-grid');
   if(!prosResults.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nema rezultata.</div>';return;}
-  grid.innerHTML=prosResults.map(function(r,idx){
-    var isSaved=!!savedUrls[r.url];
+  var visible=[];
+  prosResults.forEach(function(r,idx){
+    if((r.url&&savedUrls[r.url])||(r.name&&savedNames[normN(r.name)]))return;
+    visible.push({r:r,idx:idx});
+  });
+  if(!visible.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nema rezultata.</div>';return;}
+  grid.innerHTML=visible.map(function(item){
+    var r=item.r,idx=item.idx;
     var displayUrl=r.url?r.url.replace(/^https?:\/\//,'').split('/')[0]:'';
     var btns='';
     if(r.url)btns+='<a href="'+r.url+'" target="_blank" class="btn btn-xs" onclick="event.stopPropagation()">Otvori &#8599;</a> ';
-    if(isSaved)btns+='<span style="font-size:11px;color:var(--text3)">Spremljeno</span>';
-    else btns+='<button class="btn btn-xs btn-primary" onclick="saveAsLead('+idx+')">+ Spremi</button>';
+    btns+='<button class="btn btn-xs btn-primary" onclick="saveAsLead('+idx+')">+ Spremi</button>';
     var typeBadge=r.isJob
       ?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow);margin-left:4px">'+escH(r.domain||'oglas')+'</span>'
       :(r.isMaps?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--blue-dim);color:var(--blue);margin-left:4px">Maps</span>':'');
@@ -3469,7 +3483,6 @@ function renderSearchResults(){
     return '<div class="pros-card">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
       +'<div class="pros-card-name">'+escH(r.name)+typeBadge+'</div>'
-      +(isSaved?'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--accent-dim);color:var(--accent)">Sprem.</span>':'')
       +'</div>'
       +(displayUrl&&!r.isJob?'<div class="pros-card-url">'+escH(displayUrl)+'</div>':'')
       +extraInfo

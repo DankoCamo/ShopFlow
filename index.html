@@ -3239,6 +3239,23 @@ async function runAutoAgent(){
     el('agent-review').style.display='block';
     await agentDelay(700);
   }
+  // Post-generation dedup — catches cases where different sources yield same company
+  (function(){
+    var normFn=function(name){
+      return (name||'').toLowerCase()
+        .replace(/^(firma|company|unternehmen)\s+/i,'')
+        .replace(/\b(gmbh\s*&\s*co\.?\s*kg|gmbh|ag|og|kg|e\.u\.|ug|ohg|gbr|se\b|gesmbh|s\.r\.o\.|ltd|inc|llc|plc|bv|nv)\b\.?/gi,'')
+        .replace(/\s+/g,' ').trim();
+    };
+    var seen={},keep=[];
+    agentQueue.forEach(function(item){
+      var n=normFn(item.companyName);
+      if(!seen[n]){seen[n]=item;keep.push(item);}
+      else if(item.companyEmail&&!seen[n].companyEmail){var idx=keep.indexOf(seen[n]);keep[idx]=item;seen[n]=item;}
+    });
+    agentQueue=keep;
+    renderAgentReview();
+  })();
   var summary='Gotovo! '+agentQueue.length+' leadova od '+results.length+' pretraženih.';
   var reasons=[];
   if(skipStats.noKeyword)reasons.push(skipStats.noKeyword+' nerel. oglas');

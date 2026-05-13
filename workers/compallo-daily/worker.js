@@ -272,7 +272,7 @@ async function run(env) {
 
   const countries = (env.SEARCH_COUNTRIES || 'at').split(',').map(c => c.trim()).filter(Boolean);
   const queries = [
-    env.SEARCH_QUERY || 'CAD CAM Programmierer Stelle gesucht',
+    env.SEARCH_QUERY || 'CAM Programmierer gesucht -stepstone -karriere.at -indeed -linkedin -xing -jobs.at -monster',
     env.SEARCH_QUERY_2 || 'Zerspanungstechnik Lohnfertigung Maschinenbau GmbH',
   ];
 

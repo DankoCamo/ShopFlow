@@ -158,7 +158,6 @@ function buildHtmlEmail(byCountry, total, date, env) {
     const cfg = COUNTRY_CONFIG[country] || { flag: '🌍', label: country.toUpperCase() };
     const shopflowUrl = (env && env.SHOPFLOW_URL) || null;
     const rows = leads.map(l => {
-      const mailto = buildMailtoLink(l.email, l.subject, l.body);
       const compalloLink = buildAddToCompalloLink(l, shopflowUrl);
       const bodyPreview = (l.body || '').replace(/\n/g, '<br>');
       return `

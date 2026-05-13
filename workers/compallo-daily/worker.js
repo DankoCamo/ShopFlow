@@ -6,7 +6,8 @@ const COUNTRY_CONFIG = {
   ba: { hl: 'hr', flag: '🇧🇦', label: 'BIH', lang: 'Croatian' },
 };
 
-const JOB_PORTALS = [
+const BLOCKED_DOMAINS = [
+  // Job portals
   'karriere.at','stepstone.at','stepstone.de','jobs.at','jooble.org','jooble.com',
   'metajob.at','willhaben.at','hokify.at','indeed.com','indeed.at','indeed.de',
   'linkedin.com','xing.com','monster.at','monster.de','jobboerse.arbeitsagentur.de',
@@ -15,7 +16,17 @@ const JOB_PORTALS = [
   'jobrobot.de','jobs.ch','jobscout24.ch','jobup.ch','jobagent.ch',
   'glassdoor.at','glassdoor.de','glassdoor.com','kununu.com',
   'experteer.de','experteer.at','absolventa.de','azubiyo.de',
+  // B2B directories — not real companies
+  'wlw.at','wlw.de','europages.com','europages.at','europages.de',
+  'kompass.com','herold.at','gelbeseiten.de','firmenabc.at','firmen.at',
+  'industrystock.de','eceurope.com','b2b.de','yellowpages.com',
+  'yelp.at','yelp.de','yelp.com','trustpilot.com','foursquare.com',
+  // Error tracking / system emails
+  'sentry.io','ingest.sentry.io','bugsnag.com','rollbar.com',
 ];
+
+// Keep old name as alias used in isJobPortal/isPortalEmail
+const JOB_PORTALS = BLOCKED_DOMAINS;
 
 function isJobPortal(url) {
   if (!url) return false;
@@ -36,10 +47,19 @@ function normalizeCompany(name) {
     .trim();
 }
 
+function isValidContactEmail(email) {
+  if (!email) return false;
+  if (isPortalEmail(email)) return false;
+  const local = email.split('@')[0];
+  // Reject hash-like local parts (Sentry, error tracking, etc.)
+  if (local.length > 20 && /^[a-f0-9]+$/.test(local)) return false;
+  return true;
+}
+
 function extractEmailFromText(text) {
   const m = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g);
   if (!m) return null;
-  return m.find(e => !isPortalEmail(e)) || null;
+  return m.find(e => isValidContactEmail(e)) || null;
 }
 
 async function fetchPageEmail(url) {

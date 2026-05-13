@@ -13,6 +13,8 @@ const JOB_PORTALS = [
   'jobrapido.com','kimeta.de','yourfirm.de','jobanzeiger.de','stellenanzeigen.de',
   'jobboerse.de','jobware.de','jobs.de','stellenonline.de','jobscout24.at',
   'jobrobot.de','jobs.ch','jobscout24.ch','jobup.ch','jobagent.ch',
+  'glassdoor.at','glassdoor.de','glassdoor.com','kununu.com',
+  'experteer.de','experteer.at','absolventa.de','azubiyo.de',
 ];
 
 function isJobPortal(url) {

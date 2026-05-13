@@ -3937,27 +3937,40 @@ function initApp(){
     var url=params.get('url')||'';
     var email=params.get('email')||'';
     var desc=params.get('desc')||'';
+    var subject=params.get('subject')||'';
+    var body=params.get('body')||'';
     if(!name&&!url)return;
+    // Clean URL immediately
+    window.history.replaceState({},'',window.location.pathname);
     var already=S.leads.find(function(l){return l.url&&l.url===url;});
+    var leadId;
     if(!already){
-      S.leads.push({id:'lead'+S.nextId++,name:name,url:url,desc:desc,status:'kontaktiran',note:'',email:email,emails:[],followup:'',savedAt:tod(),query:'compallo-daily'});
+      leadId='lead'+S.nextId++;
+      S.leads.push({id:leadId,name:name,url:url,desc:desc,status:'novi',note:'',email:email,emails:[],followup:'',savedAt:tod(),query:'compallo-daily'});
       save();
       el('leads-count').textContent=S.leads.length;
       renderLeads();
+    } else {
+      leadId=already.id;
     }
-    // Switch to Prospecting → Leads tab and show notification
     showPage('prospecting');
     setTimeout(function(){
-      var lt=document.querySelector('[onclick*="switchLeadsTab"]')||el('leads-tab');
-      if(lt)lt.click();
+      // Open email compose with pre-filled content
+      if(subject||body){
+        currentEmailLeadId=leadId;
+        el('email-to').value=email||'';
+        el('email-subject').value=subject;
+        el('email-body').value=body;
+        el('email-lang').value='de';
+        refreshTemplateSelect();
+        openModal('modal-email');
+      }
       var notif=document.createElement('div');
-      notif.textContent=(already?'Već postoji: ':'Dodano u leadove: ')+name;
+      notif.textContent=(already?'Već u leadovima: ':'Novi lead: ')+name;
       notif.style.cssText='position:fixed;top:20px;right:20px;background:'+(already?'var(--yellow)':'var(--accent)')+';color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3)';
       document.body.appendChild(notif);
       setTimeout(function(){notif.remove();},4000);
     },300);
-    // Clean URL without reload
-    window.history.replaceState({},'',window.location.pathname);
   })();
 }
 // Apply saved lang/theme to landing page on first load + check existing session

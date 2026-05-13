@@ -123,12 +123,6 @@ async function generateEmail(companyName, snippet, lang, claudeKey) {
   }
 }
 
-function buildMailtoLink(email, subject, body) {
-  return 'mailto:' + (email || '')
-    + '?subject=' + encodeURIComponent(subject)
-    + '&body=' + encodeURIComponent(body);
-}
-
 function buildAddToCompalloLink(lead, shopflowUrl) {
   if (!shopflowUrl) return null;
   const params = new URLSearchParams({
@@ -137,6 +131,8 @@ function buildAddToCompalloLink(lead, shopflowUrl) {
     url: lead.url,
     email: lead.email || '',
     desc: lead.desc || '',
+    subject: lead.subject || '',
+    body: lead.body || '',
   });
   return shopflowUrl.replace(/\/$/, '') + '?' + params.toString();
 }
@@ -176,8 +172,10 @@ function buildHtmlEmail(byCountry, total, date, env) {
                   <a href="${l.url}" style="font-size:11px;color:#888">${l.url.replace(/^https?:\/\//, '').split('/')[0]}</a>
                 </td>
                 <td style="text-align:right;white-space:nowrap">
-                  <a href="${mailto}" style="background:#1a6fff;color:#fff;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:bold">✉ Pošalji</a>
-                  ${compalloLink ? `&nbsp;<a href="${compalloLink}" style="background:#2a2a2a;color:#fff;padding:6px 10px;border-radius:4px;text-decoration:none;font-size:12px">+ Compallo</a>` : ''}
+                  ${compalloLink
+                    ? `<a href="${compalloLink}" style="background:#1a6fff;color:#fff;padding:8px 16px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:bold">Pregledaj i pošalji →</a>`
+                    : `<span style="color:#999;font-size:12px">Postavi SHOPFLOW_URL</span>`
+                  }
                 </td>
               </tr>
             </table>

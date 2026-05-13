@@ -3929,6 +3929,36 @@ function initApp(){
   APP_THEME=S.settings.appTheme||'dark';
   applyTheme();updateLangButtons();updateThemeButtons();applyTranslations();applyLandingTranslations();
   refreshProjSel();refreshClSel();refreshTemplateSelect();renderDash();
+  // Handle ?addLead=1 from compallo-daily email links
+  (function(){
+    var params=new URLSearchParams(window.location.search);
+    if(params.get('addLead')!=='1')return;
+    var name=params.get('name')||'';
+    var url=params.get('url')||'';
+    var email=params.get('email')||'';
+    var desc=params.get('desc')||'';
+    if(!name&&!url)return;
+    var already=S.leads.find(function(l){return l.url&&l.url===url;});
+    if(!already){
+      S.leads.push({id:'lead'+S.nextId++,name:name,url:url,desc:desc,status:'kontaktiran',note:'',email:email,emails:[],followup:'',savedAt:tod(),query:'compallo-daily'});
+      save();
+      el('leads-count').textContent=S.leads.length;
+      renderLeads();
+    }
+    // Switch to Prospecting → Leads tab and show notification
+    showPage('prospecting');
+    setTimeout(function(){
+      var lt=document.querySelector('[onclick*="switchLeadsTab"]')||el('leads-tab');
+      if(lt)lt.click();
+      var notif=document.createElement('div');
+      notif.textContent=(already?'Već postoji: ':'Dodano u leadove: ')+name;
+      notif.style.cssText='position:fixed;top:20px;right:20px;background:'+(already?'var(--yellow)':'var(--accent)')+';color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3)';
+      document.body.appendChild(notif);
+      setTimeout(function(){notif.remove();},4000);
+    },300);
+    // Clean URL without reload
+    window.history.replaceState({},'',window.location.pathname);
+  })();
 }
 // Apply saved lang/theme to landing page on first load + check existing session
 (function(){

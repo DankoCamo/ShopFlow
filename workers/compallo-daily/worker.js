@@ -124,10 +124,21 @@ async function generateEmail(companyName, snippet, lang, claudeKey) {
 }
 
 function buildMailtoLink(email, subject, body) {
-  if (!email) return null;
-  return 'mailto:' + email
+  return 'mailto:' + (email || '')
     + '?subject=' + encodeURIComponent(subject)
     + '&body=' + encodeURIComponent(body);
+}
+
+function buildAddToCompalloLink(lead, shopflowUrl) {
+  if (!shopflowUrl) return null;
+  const params = new URLSearchParams({
+    addLead: '1',
+    name: lead.name,
+    url: lead.url,
+    email: lead.email || '',
+    desc: lead.desc || '',
+  });
+  return shopflowUrl.replace(/\/$/, '') + '?' + params.toString();
 }
 
 async function getSentCompanies(kv) {
@@ -146,11 +157,13 @@ function isRecentlySent(sent, normName, days = 30) {
   return Date.now() - entry < days * 24 * 60 * 60 * 1000;
 }
 
-function buildHtmlEmail(byCountry, total, date) {
+function buildHtmlEmail(byCountry, total, date, env) {
   const sections = Object.entries(byCountry).map(([country, leads]) => {
     const cfg = COUNTRY_CONFIG[country] || { flag: '🌍', label: country.toUpperCase() };
+    const shopflowUrl = (env && env.SHOPFLOW_URL) || null;
     const rows = leads.map(l => {
       const mailto = buildMailtoLink(l.email, l.subject, l.body);
+      const compalloLink = buildAddToCompalloLink(l, shopflowUrl);
       const bodyPreview = (l.body || '').replace(/\n/g, '<br>');
       return `
         <tr>
@@ -163,16 +176,15 @@ function buildHtmlEmail(byCountry, total, date) {
                   <a href="${l.url}" style="font-size:11px;color:#888">${l.url.replace(/^https?:\/\//, '').split('/')[0]}</a>
                 </td>
                 <td style="text-align:right;white-space:nowrap">
-                  ${l.email
-                    ? `<a href="${mailto}" style="background:#1a6fff;color:#fff;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:bold">✉ Pošalji</a>`
-                    : `<span style="color:#999;font-size:12px">Email nije pronađen</span>`
-                  }
+                  <a href="${mailto}" style="background:#1a6fff;color:#fff;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:bold">✉ Pošalji</a>
+                  ${compalloLink ? `&nbsp;<a href="${compalloLink}" style="background:#2a2a2a;color:#fff;padding:6px 10px;border-radius:4px;text-decoration:none;font-size:12px">+ Compallo</a>` : ''}
                 </td>
               </tr>
             </table>
-            ${l.email ? `<div style="font-size:12px;color:#555;margin:4px 0 8px">
-              📧 <a href="mailto:${l.email}" style="color:#1a6fff">${l.email}</a>
-            </div>` : ''}
+            ${l.email
+              ? `<div style="font-size:12px;color:#555;margin:4px 0 8px">📧 <a href="mailto:${l.email}" style="color:#1a6fff">${l.email}</a></div>`
+              : `<div style="font-size:12px;color:#f90;margin:4px 0 8px">⚠ Email nije pronađen — unesi ručno u "To" polje</div>`
+            }
             <div style="background:#f5f7fa;border-left:3px solid #1a6fff;padding:10px 14px;margin-top:8px;border-radius:0 4px 4px 0">
               <div style="font-size:12px;color:#666;margin-bottom:4px">
                 <strong>Subject:</strong> ${l.subject}
@@ -267,7 +279,7 @@ async function run(env) {
 
   const date = new Date().toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const subject = `🔍 ${total} novih leadova danas - ${date}`;
-  const html = buildHtmlEmail(byCountry, total, date);
+  const html = buildHtmlEmail(byCountry, total, date, env);
 
   const ok = await sendEmail(html, subject, env);
   if (ok) await saveSentCompanies(env.SENT_COMPANIES, sent);
@@ -300,6 +312,7 @@ export default {
           NOTIFY_EMAIL: env.NOTIFY_EMAIL || null,
           SEARCH_COUNTRIES: env.SEARCH_COUNTRIES || null,
           SEARCH_QUERY: env.SEARCH_QUERY || null,
+          SHOPFLOW_URL: env.SHOPFLOW_URL || null,
           SENT_COMPANIES_bound: !!env.SENT_COMPANIES,
         }
       }, null, 2), {

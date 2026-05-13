@@ -63,17 +63,29 @@ async function findEmail(baseUrl) {
   return await fetchPageEmail(base);
 }
 
-async function searchCountry(query, country, env) {
+async function searchCountry(queries, country, env) {
   const cfg = COUNTRY_CONFIG[country] || { hl: 'de' };
   const loc = env.SEARCH_LOCATION ? ` ${env.SEARCH_LOCATION}` : '';
-  const res = await fetch('https://google.serper.dev/search', {
-    method: 'POST',
-    headers: { 'X-API-KEY': env.SERPER_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ q: query + loc, gl: country, hl: cfg.hl, num: 3 }),
-  });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data.organic || []).filter(r => r.link && !isJobPortal(r.link));
+  const seenDomains = new Set();
+  const all = [];
+
+  for (const query of queries) {
+    const res = await fetch('https://google.serper.dev/search', {
+      method: 'POST',
+      headers: { 'X-API-KEY': env.SERPER_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: query + loc, gl: country, hl: cfg.hl, num: 3 }),
+    });
+    if (!res.ok) continue;
+    const data = await res.json();
+    for (const r of (data.organic || [])) {
+      if (!r.link || isJobPortal(r.link)) continue;
+      const domain = r.link.replace(/^https?:\/\//, '').split('/')[0].toLowerCase();
+      if (seenDomains.has(domain)) continue;
+      seenDomains.add(domain);
+      all.push(r);
+    }
+  }
+  return all;
 }
 
 async function generateEmail(companyName, snippet, lang, claudeKey) {
@@ -239,7 +251,10 @@ async function run(env) {
   if (missing.length) throw new Error('Missing env/bindings: ' + missing.join(', '));
 
   const countries = (env.SEARCH_COUNTRIES || 'at').split(',').map(c => c.trim()).filter(Boolean);
-  const query = env.SEARCH_QUERY || 'CAM Programmierer Stellenangebote';
+  const queries = [
+    env.SEARCH_QUERY || 'CAD CAM Programmierer Stelle gesucht',
+    env.SEARCH_QUERY_2 || 'Zerspanungstechnik Lohnfertigung Maschinenbau GmbH',
+  ];
 
   const sent = await getSentCompanies(env.SENT_COMPANIES);
   const byCountry = {};
@@ -247,7 +262,7 @@ async function run(env) {
 
   for (const country of countries) {
     const cfg = COUNTRY_CONFIG[country] || { lang: 'German' };
-    const results = await searchCountry(query, country, env);
+    const results = await searchCountry(queries, country, env);
     const leads = [];
 
     for (const r of results) {
@@ -285,7 +300,7 @@ async function run(env) {
 }
 
 export default {
-  async scheduled(event, env, ctx) {
+  async scheduled(_event, env, ctx) {
     ctx.waitUntil(run(env));
   },
 

@@ -3632,7 +3632,24 @@ function saveClient(){var eid=el('cl-id').value;var d={name:el('cl-name').value|
 function deleteClient(){if(!confirm(t('confirmDeleteClient')))return;S.clients=S.clients.filter(function(c){return c.id!=el('cl-id').value;});save();closeModal('modal-client');renderClients();}
 
 // ─── SETTINGS
-function loadSettings(){var ss=S.settings;APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';el('s-note').value=ss.note||'';el('s-daily-url').value=ss.dailyWorkerUrl||'';}
+function loadSettings(){
+  var ss=S.settings;
+  APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();
+  el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';
+  el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';
+  el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';
+  el('s-note').value=ss.note||'';el('s-daily-url').value=ss.dailyWorkerUrl||'';
+  // Učitaj dnevne postavke iz localStoragea
+  var ds=ss.dailySearch||{};
+  el('s-daily-q1').value=ds.query1||'';
+  el('s-daily-q2').value=ds.query2||'';
+  el('s-daily-loc').value=ds.location||'';
+  var dsCntries=(ds.countries||'').split(',');
+  ['at','de','ch','hr','ba'].forEach(function(c){el('s-daily-'+c).checked=dsCntries.indexOf(c)>=0;});
+  var dsDays=ds.scheduleDays||[];
+  document.querySelectorAll('.s-daily-wd').forEach(function(cb){cb.checked=dsDays.indexOf(parseInt(cb.value))>=0;});
+  el('s-daily-hour').value=ds.scheduleHour!=null?ds.scheduleHour:8;
+}
 async function loadDailySettings(){
   var url=(el('s-daily-url').value||S.settings.dailyWorkerUrl||'').replace(/\/$/,'');
   if(!url){showToast('daily-settings-toast','Uneси Worker URL prvo.',false);return;}
@@ -3647,6 +3664,7 @@ async function loadDailySettings(){
     var days=d.scheduleDays||[];
     document.querySelectorAll('.s-daily-wd').forEach(function(cb){cb.checked=days.indexOf(parseInt(cb.value))>=0;});
     el('s-daily-hour').value=d.scheduleHour!=null?d.scheduleHour:8;
+    S.settings.dailySearch=d;save();
     showToast('daily-settings-toast','Učitano.',true);
   }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
 }
@@ -3660,8 +3678,10 @@ async function saveDailySettings(){
   try{
     var r=await fetch(url+'/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     var d=await r.json();
-    if(d.ok)showToast('daily-settings-toast','Postavke spremljene!',true);
-    else showToast('daily-settings-toast','Greška pri spremanju.',false);
+    if(d.ok){
+      S.settings.dailySearch=payload;save();
+      showToast('daily-settings-toast','Postavke spremljene!',true);
+    }else showToast('daily-settings-toast','Greška pri spremanju.',false);
   }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
 }
 async function testDailyNow(){

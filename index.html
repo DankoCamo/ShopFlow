@@ -1218,6 +1218,64 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
     <button class="btn btn-primary" onclick="saveSettings()" data-i18n="saveSettings"></button>
   </div>
   <div id="settings-toast" class="toast" style="max-width:400px;margin-left:auto"></div>
+
+  <div class="settings-section" style="margin-top:24px">
+    <h3>📅 Dnevna pretraga</h3>
+    <div class="field">
+      <label>Worker URL</label>
+      <input id="s-daily-url" placeholder="https://compallo-daily.camodanko.workers.dev">
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Ključne riječi 1 <span style="font-size:11px;color:var(--muted)">(oglasi)</span></label>
+        <input id="s-daily-q1" placeholder="CAM Programmierer gesucht -stepstone -indeed">
+      </div>
+      <div class="field">
+        <label>Ključne riječi 2 <span style="font-size:11px;color:var(--muted)">(firme)</span></label>
+        <input id="s-daily-q2" placeholder="Zerspanungstechnik Lohnfertigung GmbH">
+      </div>
+    </div>
+    <div class="field">
+      <label>Lokacija <span style="font-size:11px;color:var(--muted)">(opcionalno — npr. Graz, Österreich)</span></label>
+      <input id="s-daily-loc" placeholder="">
+    </div>
+    <div class="field">
+      <label>Države</label>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="s-daily-at"> 🇦🇹 Austrija</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="s-daily-de"> 🇩🇪 Njemačka</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="s-daily-ch"> 🇨🇭 Švicarska</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="s-daily-hr"> 🇭🇷 Hrvatska</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="s-daily-ba"> 🇧🇦 BiH</label>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Učestalost slanja</label>
+        <select id="s-daily-schedule" onchange="toggleDailyDay()">
+          <option value="daily">Svaki dan (08:00)</option>
+          <option value="weekly">Jednom tjedno</option>
+        </select>
+      </div>
+      <div class="field" id="s-daily-day-wrap" style="display:none">
+        <label>Dan u tjednu</label>
+        <select id="s-daily-day">
+          <option value="1">Ponedjeljak</option>
+          <option value="2">Utorak</option>
+          <option value="3">Srijeda</option>
+          <option value="4">Četvrtak</option>
+          <option value="5">Petak</option>
+          <option value="6">Subota</option>
+          <option value="0">Nedjelja</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+      <button class="btn" onclick="loadDailySettings()">↺ Učitaj trenutne</button>
+      <button class="btn btn-primary" onclick="saveDailySettings()">Spremi postavke pretrage</button>
+    </div>
+    <div id="daily-settings-toast" class="toast" style="max-width:400px;margin-left:auto"></div>
+  </div>
 </div>
 
 </div><!-- /main -->
@@ -3569,8 +3627,39 @@ function saveClient(){var eid=el('cl-id').value;var d={name:el('cl-name').value|
 function deleteClient(){if(!confirm(t('confirmDeleteClient')))return;S.clients=S.clients.filter(function(c){return c.id!=el('cl-id').value;});save();closeModal('modal-client');renderClients();}
 
 // ─── SETTINGS
-function loadSettings(){var ss=S.settings;APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';el('s-note').value=ss.note||'';}
-function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),note:gv('s-note'),calUsername:S.settings.calUsername||''};save();showToast('settings-toast','Postavke spremljene.',true);}
+function loadSettings(){var ss=S.settings;APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';el('s-note').value=ss.note||'';el('s-daily-url').value=ss.dailyWorkerUrl||'';}
+function toggleDailyDay(){el('s-daily-day-wrap').style.display=el('s-daily-schedule').value==='weekly'?'block':'none';}
+async function loadDailySettings(){
+  var url=(el('s-daily-url').value||S.settings.dailyWorkerUrl||'').replace(/\/$/,'');
+  if(!url){showToast('daily-settings-toast','Uneси Worker URL prvo.',false);return;}
+  try{
+    var r=await fetch(url+'/settings');
+    var d=await r.json();
+    el('s-daily-q1').value=d.query1||'';
+    el('s-daily-q2').value=d.query2||'';
+    el('s-daily-loc').value=d.location||'';
+    var countries=(d.countries||'at').split(',');
+    ['at','de','ch','hr','ba'].forEach(function(c){el('s-daily-'+c).checked=countries.indexOf(c)>=0;});
+    el('s-daily-schedule').value=d.schedule||'daily';
+    el('s-daily-day').value=d.scheduleDay||'1';
+    toggleDailyDay();
+    showToast('daily-settings-toast','Učitano.',true);
+  }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
+}
+async function saveDailySettings(){
+  var url=(el('s-daily-url').value||S.settings.dailyWorkerUrl||'').replace(/\/$/,'');
+  if(!url){showToast('daily-settings-toast','Uneси Worker URL prvo.',false);return;}
+  S.settings.dailyWorkerUrl=url;save();
+  var countries=['at','de','ch','hr','ba'].filter(function(c){return el('s-daily-'+c).checked;});
+  var payload={query1:el('s-daily-q1').value.trim(),query2:el('s-daily-q2').value.trim(),location:el('s-daily-loc').value.trim(),countries:countries.join(','),schedule:el('s-daily-schedule').value,scheduleDay:el('s-daily-day').value};
+  try{
+    var r=await fetch(url+'/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var d=await r.json();
+    if(d.ok)showToast('daily-settings-toast','Postavke spremljene!',true);
+    else showToast('daily-settings-toast','Greška pri spremanju.',false);
+  }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
+}
+function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),note:gv('s-note'),calUsername:S.settings.calUsername||'',dailyWorkerUrl:gv('s-daily-url')};save();showToast('settings-toast','Postavke spremljene.',true);}
 function saveMeetingsUsername(){var u=(el('meetings-username').value||'').trim();S.settings.calUsername=u;save();renderMeetings();}
 function renderMeetings(){
   var u=S.settings.calUsername||'';

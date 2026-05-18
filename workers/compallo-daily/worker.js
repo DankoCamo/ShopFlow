@@ -184,6 +184,16 @@ async function saveSentCompanies(kv, sent) {
   await kv.put('sent_companies', JSON.stringify(sent));
 }
 
+async function getSearchSettings(kv) {
+  const raw = await kv.get('search_settings');
+  if (!raw) return {};
+  try { return JSON.parse(raw); } catch { return {}; }
+}
+
+async function saveSearchSettings(kv, settings) {
+  await kv.put('search_settings', JSON.stringify(settings));
+}
+
 function isRecentlySent(sent, normName, days = 30) {
   const entry = sent[normName];
   if (!entry) return false;
@@ -275,10 +285,19 @@ async function run(env) {
   if (!env.SENT_COMPANIES) missing.push('SENT_COMPANIES (KV binding)');
   if (missing.length) throw new Error('Missing env/bindings: ' + missing.join(', '));
 
-  const countries = (env.SEARCH_COUNTRIES || 'at').split(',').map(c => c.trim()).filter(Boolean);
+  const settings = await getSearchSettings(env.SENT_COMPANIES);
+
+  // Schedule check — skip if not the right day
+  if (settings.schedule === 'weekly') {
+    const today = new Date().getDay();
+    const target = parseInt(settings.scheduleDay ?? '1');
+    if (today !== target) return { sent: false, total: 0, skipped: 'not scheduled today' };
+  }
+
+  const countries = (settings.countries || env.SEARCH_COUNTRIES || 'at').split(',').map(c => c.trim()).filter(Boolean);
   const queries = [
-    env.SEARCH_QUERY || 'CAM Programmierer gesucht -stepstone -karriere.at -indeed -linkedin -xing -jobs.at -monster',
-    env.SEARCH_QUERY_2 || 'Zerspanungstechnik Lohnfertigung Maschinenbau GmbH',
+    settings.query1 || env.SEARCH_QUERY || 'CAM Programmierer gesucht -stepstone -karriere.at -indeed -linkedin -xing -jobs.at -monster',
+    settings.query2 || env.SEARCH_QUERY_2 || 'Zerspanungstechnik Lohnfertigung Maschinenbau GmbH',
   ];
 
   const sent = await getSentCompanies(env.SENT_COMPANIES);
@@ -330,8 +349,25 @@ export default {
   },
 
   async fetch(request, env) {
-    if (new URL(request.url).pathname !== '/run') {
-      return new Response('CAMOutput Daily Prospecting Worker\nGET /run to trigger manually', { status: 200 });
+    const { pathname } = new URL(request.url);
+    const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
+
+    if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+    if (pathname === '/settings') {
+      if (request.method === 'GET') {
+        const s = await getSearchSettings(env.SENT_COMPANIES);
+        return new Response(JSON.stringify(s), { headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+      if (request.method === 'POST') {
+        const s = await request.json();
+        await saveSearchSettings(env.SENT_COMPANIES, s);
+        return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+    }
+
+    if (pathname !== '/run') {
+      return new Response('CAMOutput Daily Prospecting Worker\nGET /run — pokreni\nGET /settings — dohvati postavke\nPOST /settings — spremi postavke', { status: 200 });
     }
     try {
       const result = await run(env);

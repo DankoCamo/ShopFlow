@@ -1249,29 +1249,34 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
         <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="s-daily-ba"> 🇧🇦 BiH</label>
       </div>
     </div>
-    <div class="grid2">
-      <div class="field">
-        <label>Učestalost slanja</label>
-        <select id="s-daily-schedule" onchange="toggleDailyDay()">
-          <option value="daily">Svaki dan (08:00)</option>
-          <option value="weekly">Jednom tjedno</option>
-        </select>
-      </div>
-      <div class="field" id="s-daily-day-wrap" style="display:none">
-        <label>Dan u tjednu</label>
-        <select id="s-daily-day">
-          <option value="1">Ponedjeljak</option>
-          <option value="2">Utorak</option>
-          <option value="3">Srijeda</option>
-          <option value="4">Četvrtak</option>
-          <option value="5">Petak</option>
-          <option value="6">Subota</option>
-          <option value="0">Nedjelja</option>
-        </select>
+    <div class="field">
+      <label>Dani slanja <span style="font-size:11px;color:var(--muted)">(ako ništa nije označeno — šalje svaki dan)</span></label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="s-daily-wd" value="1"> Pon</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="s-daily-wd" value="2"> Uto</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="s-daily-wd" value="3"> Sri</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="s-daily-wd" value="4"> Čet</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="s-daily-wd" value="5"> Pet</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="s-daily-wd" value="6"> Sub</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="s-daily-wd" value="0"> Ned</label>
       </div>
     </div>
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+    <div class="field" style="max-width:200px">
+      <label>Sat slanja <span style="font-size:11px;color:var(--muted)">(lokalno CET)</span></label>
+      <select id="s-daily-hour">
+        <option value="0">00:00</option><option value="1">01:00</option><option value="2">02:00</option>
+        <option value="3">03:00</option><option value="4">04:00</option><option value="5">05:00</option>
+        <option value="6">06:00</option><option value="7">07:00</option><option value="8" selected>08:00</option>
+        <option value="9">09:00</option><option value="10">10:00</option><option value="11">11:00</option>
+        <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option>
+        <option value="15">15:00</option><option value="16">16:00</option><option value="17">17:00</option>
+        <option value="18">18:00</option><option value="19">19:00</option><option value="20">20:00</option>
+        <option value="21">21:00</option><option value="22">22:00</option><option value="23">23:00</option>
+      </select>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;flex-wrap:wrap">
       <button class="btn" onclick="loadDailySettings()">↺ Učitaj trenutne</button>
+      <button class="btn" onclick="testDailyNow()" style="color:var(--accent);border-color:var(--accent)">▶ Testiraj odmah</button>
       <button class="btn btn-primary" onclick="saveDailySettings()">Spremi postavke pretrage</button>
     </div>
     <div id="daily-settings-toast" class="toast" style="max-width:400px;margin-left:auto"></div>
@@ -3628,7 +3633,6 @@ function deleteClient(){if(!confirm(t('confirmDeleteClient')))return;S.clients=S
 
 // ─── SETTINGS
 function loadSettings(){var ss=S.settings;APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';el('s-note').value=ss.note||'';el('s-daily-url').value=ss.dailyWorkerUrl||'';}
-function toggleDailyDay(){el('s-daily-day-wrap').style.display=el('s-daily-schedule').value==='weekly'?'block':'none';}
 async function loadDailySettings(){
   var url=(el('s-daily-url').value||S.settings.dailyWorkerUrl||'').replace(/\/$/,'');
   if(!url){showToast('daily-settings-toast','Uneси Worker URL prvo.',false);return;}
@@ -3640,9 +3644,9 @@ async function loadDailySettings(){
     el('s-daily-loc').value=d.location||'';
     var countries=(d.countries||'at').split(',');
     ['at','de','ch','hr','ba'].forEach(function(c){el('s-daily-'+c).checked=countries.indexOf(c)>=0;});
-    el('s-daily-schedule').value=d.schedule||'daily';
-    el('s-daily-day').value=d.scheduleDay||'1';
-    toggleDailyDay();
+    var days=d.scheduleDays||[];
+    document.querySelectorAll('.s-daily-wd').forEach(function(cb){cb.checked=days.indexOf(parseInt(cb.value))>=0;});
+    el('s-daily-hour').value=d.scheduleHour!=null?d.scheduleHour:8;
     showToast('daily-settings-toast','Učitano.',true);
   }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
 }
@@ -3651,12 +3655,25 @@ async function saveDailySettings(){
   if(!url){showToast('daily-settings-toast','Uneси Worker URL prvo.',false);return;}
   S.settings.dailyWorkerUrl=url;save();
   var countries=['at','de','ch','hr','ba'].filter(function(c){return el('s-daily-'+c).checked;});
-  var payload={query1:el('s-daily-q1').value.trim(),query2:el('s-daily-q2').value.trim(),location:el('s-daily-loc').value.trim(),countries:countries.join(','),schedule:el('s-daily-schedule').value,scheduleDay:el('s-daily-day').value};
+  var days=Array.from(document.querySelectorAll('.s-daily-wd:checked')).map(function(cb){return parseInt(cb.value);});
+  var payload={query1:el('s-daily-q1').value.trim(),query2:el('s-daily-q2').value.trim(),location:el('s-daily-loc').value.trim(),countries:countries.join(','),scheduleDays:days,scheduleHour:parseInt(el('s-daily-hour').value)};
   try{
     var r=await fetch(url+'/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     var d=await r.json();
     if(d.ok)showToast('daily-settings-toast','Postavke spremljene!',true);
     else showToast('daily-settings-toast','Greška pri spremanju.',false);
+  }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
+}
+async function testDailyNow(){
+  var url=(el('s-daily-url').value||S.settings.dailyWorkerUrl||'').replace(/\/$/,'');
+  if(!url){showToast('daily-settings-toast','Uneси Worker URL prvo.',false);return;}
+  showToast('daily-settings-toast','Pokrećem pretragu, pričekaj...',true);
+  try{
+    var r=await fetch(url+'/run');
+    var d=await r.json();
+    if(d.error)showToast('daily-settings-toast','Greška: '+d.error,false);
+    else if(d.skipped)showToast('daily-settings-toast','Preskočeno (nije na rasporedu). Ručni test: klikni /run direktno.',false);
+    else showToast('daily-settings-toast','Gotovo! Pronađeno '+(d.total||0)+' leadova. '+(d.sent?'Email poslan.':'Nema novih firmi.'),d.total>0||d.sent);
   }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
 }
 function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),note:gv('s-note'),calUsername:S.settings.calUsername||'',dailyWorkerUrl:gv('s-daily-url')};save();showToast('settings-toast','Postavke spremljene.',true);}

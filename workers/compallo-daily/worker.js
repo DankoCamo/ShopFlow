@@ -287,11 +287,16 @@ async function run(env) {
 
   const settings = await getSearchSettings(env.SENT_COMPANIES);
 
-  // Schedule check — skip if not the right day
-  if (settings.schedule === 'weekly') {
-    const today = new Date().getDay();
-    const target = parseInt(settings.scheduleDay ?? '1');
-    if (today !== target) return { sent: false, total: 0, skipped: 'not scheduled today' };
+  // Schedule check — skip if not the right day/hour
+  if (settings.scheduleDays && settings.scheduleDays.length > 0) {
+    const now = new Date();
+    const todayDay = now.getUTCDay();
+    const todayHour = now.getUTCHours();
+    const targetHourCET = parseInt(settings.scheduleHour ?? '8');
+    const targetHourUTC = (targetHourCET - 1 + 24) % 24; // CET = UTC+1
+    if (!settings.scheduleDays.includes(todayDay) || todayHour !== targetHourUTC) {
+      return { sent: false, total: 0, skipped: 'not scheduled now' };
+    }
   }
 
   const countries = (settings.countries || env.SEARCH_COUNTRIES || 'at').split(',').map(c => c.trim()).filter(Boolean);

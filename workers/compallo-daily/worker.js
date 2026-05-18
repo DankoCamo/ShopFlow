@@ -108,6 +108,10 @@ async function searchCountry(queries, country, env) {
   return all;
 }
 
+function fallbackBody(companyName) {
+  return `Hallo ${companyName}-Team,\n\nich bin Danko von CAMOutput aus Graz und bringe über 10 Jahre Erfahrung mit SolidCAM, SolidWorks, Mastercam und Fusion 360 mit. Ich unterstütze CNC-Betriebe bei der CAM-Programmierung und Optimierung der Fertigungsprozesse. Schaut gerne auf www.camoutput.com vorbei.\n\nBeste Grüße,\nDanko\nCAMOutput | info@camoutput.com`;
+}
+
 async function generateEmail(companyName, snippet, lang, claudeKey) {
   const langName = lang || 'German';
   const prompt = 'You are writing a short outreach email for Danko from CAMOutput (Graz, Austria) — CAM programmer.\n\n'
@@ -136,7 +140,7 @@ async function generateEmail(companyName, snippet, lang, claudeKey) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 400,
+        max_tokens: 600,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -145,12 +149,13 @@ async function generateEmail(companyName, snippet, lang, claudeKey) {
     const lines = text.split('\n');
     const subjectLine = lines.find(l => l.startsWith('SUBJECT:'));
     const subject = subjectLine ? subjectLine.replace('SUBJECT:', '').trim() : 'CAM-Unterstützung für ' + companyName;
-    const body = lines.filter((_, i) => i > lines.indexOf(subjectLine)).join('\n').trim();
+    const bodyLines = lines.filter((_, i) => i > lines.indexOf(subjectLine));
+    const body = bodyLines.join('\n').trim() || fallbackBody(companyName);
     return { subject, body };
   } catch {
     return {
       subject: 'CAM-Unterstützung für ' + companyName,
-      body: '',
+      body: fallbackBody(companyName),
     };
   }
 }

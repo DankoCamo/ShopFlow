@@ -11,7 +11,7 @@ const PORTAL_SEARCH_SITES = {
   at: ['karriere.at', 'jobs.at', 'stepstone.at', 'hokify.at', 'metajob.at', 'willhaben.at', 'jobscout24.at'],
   de: ['stepstone.de', 'stellenanzeigen.de', 'ingenieur.de', 'yourfirm.de', 'jobware.de', 'monster.de', 'jobanzeiger.de', 'jobboerse.de', 'stellenonline.de', 'kimeta.de'],
   ch: ['jobs.ch', 'jobscout24.ch', 'topjobs.ch', 'jobagent.ch', 'jobup.ch', 'jobwinner.ch', 'swissjobs.ch'],
-  hr: ['moj-posao.net', 'njuskalo.hr', 'posao.hr', 'hzz.hr'],
+  hr: ['moj-posao.net', 'njuskalo.hr', 'posao.hr', 'hzz.hr', 'index.hr'],
   ba: ['posao.ba', 'work.ba'],
 };
 

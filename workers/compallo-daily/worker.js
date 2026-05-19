@@ -16,6 +16,9 @@ const BLOCKED_DOMAINS = [
   'jobrobot.de','jobs.ch','jobscout24.ch','jobup.ch','jobagent.ch',
   'glassdoor.at','glassdoor.de','glassdoor.com','kununu.com',
   'experteer.de','experteer.at','absolventa.de','azubiyo.de',
+  'rzjob.ch','jobwinner.ch','jobillico.com','jobteaser.com',
+  // Video / content — never companies
+  'youtube.com','youtu.be','vimeo.com','dailymotion.com',
   // B2B directories — not real companies
   'wlw.at','wlw.de','europages.com','europages.at','europages.de',
   'kompass.com','herold.at','gelbeseiten.de','firmenabc.at','firmen.at',
@@ -23,6 +26,13 @@ const BLOCKED_DOMAINS = [
   'yelp.at','yelp.de','yelp.com','trustpilot.com','foursquare.com',
   // Error tracking / system emails
   'sentry.io','ingest.sentry.io','bugsnag.com','rollbar.com',
+];
+
+// Platform/CMS domains whose emails should never be used as company contacts
+const PLATFORM_EMAIL_DOMAINS = [
+  'wordpress.org','wordpress.com','automattic.com',
+  'wix.com','squarespace.com','webflow.io','jimdo.com','weebly.com',
+  'shopify.com','godaddy.com','strikingly.com',
 ];
 
 // Keep old name as alias used in isJobPortal/isPortalEmail
@@ -50,19 +60,32 @@ function normalizeCompany(name) {
 function isValidContactEmail(email) {
   if (!email) return false;
   if (isPortalEmail(email)) return false;
+  const domain = (email.split('@')[1] || '').toLowerCase();
+  if (PLATFORM_EMAIL_DOMAINS.some(p => domain === p || domain.endsWith('.' + p))) return false;
   const local = email.split('@')[0];
   // Reject hash-like local parts (Sentry, error tracking, etc.)
   if (local.length > 20 && /^[a-f0-9]+$/.test(local)) return false;
   return true;
 }
 
-function extractEmailFromText(text) {
+function extractBestEmail(text, siteDomain) {
   const m = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g);
   if (!m) return null;
-  return m.find(e => isValidContactEmail(e)) || null;
+  const valid = m.filter(e => isValidContactEmail(e));
+  if (!valid.length) return null;
+  // Prefer email whose domain matches the company site
+  const siteRoot = (siteDomain || '').replace(/^www\./, '');
+  if (siteRoot) {
+    const onDomain = valid.find(e => {
+      const d = (e.split('@')[1] || '').toLowerCase().replace(/^www\./, '');
+      return d === siteRoot || d.endsWith('.' + siteRoot);
+    });
+    if (onDomain) return onDomain;
+  }
+  return valid[0];
 }
 
-async function fetchPageEmail(url) {
+async function fetchPageEmail(url, siteDomain) {
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CAMOutputBot/1.0)' },
@@ -71,7 +94,7 @@ async function fetchPageEmail(url) {
     });
     if (!res.ok) return null;
     const text = await res.text();
-    return extractEmailFromText(text);
+    return extractBestEmail(text, siteDomain);
   } catch {
     return null;
   }
@@ -79,8 +102,8 @@ async function fetchPageEmail(url) {
 
 async function findEmail(baseUrl) {
   const base = baseUrl.replace(/^(https?:\/\/[^/]+).*/, '$1');
-  // Homepage only — saves subrequests for Claude API calls
-  return await fetchPageEmail(base);
+  const siteDomain = base.replace(/^https?:\/\//, '').split('/')[0].toLowerCase();
+  return await fetchPageEmail(base, siteDomain);
 }
 
 async function searchCountry(queries, country, env) {
@@ -112,23 +135,29 @@ function fallbackBody(companyName) {
   return `Hallo ${companyName}-Team,\n\nich bin Danko von CAMOutput aus Graz und bringe über 10 Jahre Erfahrung mit SolidCAM, SolidWorks, Mastercam und Fusion 360 mit. Ich unterstütze CNC-Betriebe bei der CAM-Programmierung und Optimierung der Fertigungsprozesse. Schaut gerne auf www.camoutput.com vorbei.\n\nBeste Grüße,\nDanko\nCAMOutput | info@camoutput.com`;
 }
 
-async function generateEmail(companyName, snippet, lang, claudeKey) {
+async function generateEmail(rawTitle, snippet, lang, claudeKey) {
   const langName = lang || 'German';
   const prompt = 'You are writing a short outreach email for Danko from CAMOutput (Graz, Austria) — CAM programmer.\n\n'
-    + 'Company: ' + companyName + '\n'
-    + 'Context: ' + snippet + '\n\n'
-    + 'Write a short cold email in ' + langName + '.\n\n'
+    + 'Page title (may be a full page/job title, NOT necessarily the company name): ' + rawTitle + '\n'
+    + 'Context/snippet: ' + snippet + '\n\n'
+    + 'TASK: First extract the SHORT company name (the employer/business), then write a cold email in ' + langName + '.\n\n'
+    + 'CRITICAL — company name extraction:\n'
+    + '- "CNC-Programmierer Job | Baier GmbH Bruck an der Mur" → company is "Baier GmbH"\n'
+    + '- "Lohnfertigung Mustermann GmbH - Wien" → company is "Mustermann GmbH"\n'
+    + '- If the title is a job position (contains Programmierer, Engineer, Manager, etc.) look after "|" or "-" for the real company name\n'
+    + '- NEVER use job title words (Programmierer, Engineer, Techniker, Manager, Job, Stelle) as the company name\n'
+    + '- If company name truly unknown: use "Unbekannt"\n\n'
     + 'Rules:\n'
-    + '1. Subject: ALWAYS "CAM-Unterstützung für ' + companyName + '" (German) or "CAM Support for ' + companyName + '" (English) — NEVER "Kurze Frage"\n'
-    + '2. Greeting: "Hallo ' + companyName + '-Team,"\n'
-    + '3. First sentence: about the company — what they do or their industry\n'
-    + '4. Introduce Danko: name, 10+ Jahre Erfahrung mit SolidCAM/SolidWorks, Mastercam und Fusion 360\n'
-    + '5. One sentence what you offer — colleague tone. NO words: Remote, Freelance, flexibel, schneller, Angebot\n'
+    + '1. Subject: "CAM-Unterstützung für [ShortCompanyName]" (German) or "CAM Support for [ShortCompanyName]" (English) — short name only, NEVER full page title\n'
+    + '2. Greeting: "Hallo [ShortCompanyName]-Team," — if unknown: "Hallo,"\n'
+    + '3. First sentence: about the company — what they do or their industry. NOT about yourself\n'
+    + '4. Introduce Danko: name, 10+ Jahre Erfahrung mit SolidCAM/SolidWorks, Mastercam und Fusion 360 — DO NOT mention HyperMill\n'
+    + '5. One sentence what you offer — colleague tone. FORBIDDEN: Remote, Freelance, flexibel, schneller, günstiger, Angebot, Lösung\n'
     + '6. CTA: www.camoutput.com — NO phone calls\n'
     + '7. Sign: CAMOutput | info@camoutput.com\n'
     + '8. Max 4-5 sentences total\n'
-    + '9. First person singular ONLY (ich)\n\n'
-    + 'Format EXACTLY:\nSUBJECT:[subject line]\n[email body only]';
+    + '9. First person singular ONLY (ich), NEVER wir\n\n'
+    + 'Format EXACTLY:\nCOMPANY:[short company name]\nSUBJECT:[subject line]\n[email body only]';
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -147,15 +176,18 @@ async function generateEmail(companyName, snippet, lang, claudeKey) {
     const data = await res.json();
     const text = (data.content && data.content[0] ? data.content[0].text : '').trim();
     const lines = text.split('\n');
+    const companyLine = lines.find(l => l.startsWith('COMPANY:'));
+    const extractedCompany = companyLine ? companyLine.replace('COMPANY:', '').trim() : '';
     const subjectLine = lines.find(l => l.startsWith('SUBJECT:'));
-    const subject = subjectLine ? subjectLine.replace('SUBJECT:', '').trim() : 'CAM-Unterstützung für ' + companyName;
-    const bodyLines = lines.filter((_, i) => i > lines.indexOf(subjectLine));
-    const body = bodyLines.join('\n').trim() || fallbackBody(companyName);
+    const subject = subjectLine ? subjectLine.replace('SUBJECT:', '').trim() : 'CAM-Unterstützung für ' + (extractedCompany || rawTitle);
+    const headerPrefixes = ['COMPANY:', 'SUBJECT:'];
+    const bodyLines = lines.filter(l => !headerPrefixes.some(p => l.startsWith(p)));
+    const body = bodyLines.join('\n').trim() || fallbackBody(extractedCompany || rawTitle);
     return { subject, body };
   } catch {
     return {
-      subject: 'CAM-Unterstützung für ' + companyName,
-      body: fallbackBody(companyName),
+      subject: 'CAM-Unterstützung für ' + rawTitle,
+      body: fallbackBody(rawTitle),
     };
   }
 }

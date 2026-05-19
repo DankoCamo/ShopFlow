@@ -3878,14 +3878,15 @@ async function generateAIEmail() {
   var prompt;
   if (isPortal) {
     prompt = 'You are writing a short outreach email for Danko from CAMOutput (Graz, Austria) — CAM programmer.\n\n'
-      + 'A company posted a CAM programmer job listing — they use CNC machines and CAM software.\n\n'
-      + 'Job listing title: ' + lead.name + '\n'
+      + 'A company posted a job listing for a CAM programmer position. They use CNC machines and CAM software.\n\n'
+      + 'Job position (this is the role, NOT the company name): ' + lead.name + '\n'
       + 'Portal: ' + displayUrl + '\n'
       + 'Google snippet: ' + lead.desc + '\n\n'
-      + 'TASK: Extract company name from the title/snippet, then write a short cold email in ' + langName + '.\n\n'
+      + 'CRITICAL: "' + lead.name + '" is the JOB TITLE, not the company name. The company name is the EMPLOYER (e.g., Wagner, Siemens, BMW). NEVER use a job title or position name as the company name.\n\n'
+      + 'TASK: Find the EMPLOYER company name from the Google snippet, then write a short cold email in ' + langName + '.\n\n'
       + 'Rules:\n'
-      + '1. Subject: ALWAYS use "CAM-Unterstützung für [CompanyName]" (German), "CAM Support for [CompanyName]" (English), or "CAM podrška za [CompanyName]" (Croatian) — NEVER "Kurze Frage", NEVER: Freelance, Remote, Programmierer, Angebot, flexibel, schneller\n'
-      + '2. Greeting: "Hallo [CompanyName]-Team," — if name unknown: "Hallo,"\n'
+      + '1. Subject: ALWAYS use "CAM-Unterstützung für [CompanyName]" (German), "CAM Support for [CompanyName]" (English), or "CAM podrška za [CompanyName]" (Croatian) — use real company name only. NEVER use job title words (Programmierer, Engineer, Manager, etc.) in subject\n'
+      + '2. Greeting: "Hallo [CompanyName]-Team," — ONLY if you found a real employer name. If uncertain or not found: just "Hallo,". FORBIDDEN: using job titles (Programmierer, CAD, CAM, Engineer, etc.) as company name\n'
       + '3. First sentence: about the company — mention their listing or what they do. NOT about yourself\n'
       + '4. Introduce Danko: name, 10+ Jahre Erfahrung mit SolidCAM/SolidWorks, Mastercam und Fusion 360 — DO NOT mention HyperMill or any other software\n'
       + '5. One sentence what you can offer — write like a colleague, not a salesperson. FORBIDDEN words: Remote, Freelance, flexibel, schneller, günstiger, kostengünstig, Angebot, Lösung, Dienstleistung\n'
@@ -3894,7 +3895,7 @@ async function generateAIEmail() {
       + '8. Max 4-5 sentences total in the body\n'
       + '9. First person singular ONLY (ich), NEVER plural (wir). Wrong: "Wir bieten..." — Correct: "Ich biete..."\n\n'
       + 'Format EXACTLY as:\n'
-      + 'COMPANY:[company name extracted, or "Unbekannt" if not found]\n'
+      + 'COMPANY:[real employer company name extracted from snippet, or "Unbekannt" if not found]\n'
       + 'SUBJECT:[subject line]\n'
       + '[email body only, nothing else]';
   } else {

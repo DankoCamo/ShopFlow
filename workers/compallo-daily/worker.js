@@ -377,7 +377,7 @@ export default {
     try {
       const result = await run(env);
       return new Response(JSON.stringify(result, null, 2), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...cors, 'Content-Type': 'application/json' },
       });
     } catch (e) {
       return new Response(JSON.stringify({
@@ -395,7 +395,7 @@ export default {
         }
       }, null, 2), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...cors, 'Content-Type': 'application/json' },
       });
     }
   },

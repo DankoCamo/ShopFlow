@@ -276,7 +276,7 @@ async function sendEmail(htmlContent, subject, env) {
   return res.ok;
 }
 
-async function run(env) {
+async function run(env, force = false) {
   const missing = [];
   if (!env.SERPER_KEY) missing.push('SERPER_KEY');
   if (!env.BREVO_KEY) missing.push('BREVO_KEY');
@@ -287,8 +287,8 @@ async function run(env) {
 
   const settings = await getSearchSettings(env.SENT_COMPANIES);
 
-  // Schedule check — skip if not the right day/hour
-  if (settings.scheduleDays && settings.scheduleDays.length > 0) {
+  // Schedule check — skip if not the right day/hour (bypass with force=true)
+  if (!force && settings.scheduleDays && settings.scheduleDays.length > 0) {
     const now = new Date();
     const todayDay = now.getUTCDay();
     const todayHour = now.getUTCHours();
@@ -372,10 +372,11 @@ export default {
     }
 
     if (pathname !== '/run') {
-      return new Response('CAMOutput Daily Prospecting Worker\nGET /run — pokreni\nGET /settings — dohvati postavke\nPOST /settings — spremi postavke', { status: 200 });
+      return new Response('CAMOutput Daily Prospecting Worker\nGET /run — pokreni\nGET /run?force=1 — pokreni bez provjere rasporeda\nGET /settings — dohvati postavke\nPOST /settings — spremi postavke', { status: 200 });
     }
+    const force = new URL(request.url).searchParams.get('force') === '1';
     try {
-      const result = await run(env);
+      const result = await run(env, force);
       return new Response(JSON.stringify(result, null, 2), {
         headers: { ...cors, 'Content-Type': 'application/json' },
       });

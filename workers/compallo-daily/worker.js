@@ -6,6 +6,21 @@ const COUNTRY_CONFIG = {
   ba: { hl: 'hr', flag: '🇧🇦', label: 'BIH', lang: 'Croatian' },
 };
 
+// Job portals to search for CAM/CNC programmer listings, by country
+const PORTAL_SEARCH_SITES = {
+  at: ['karriere.at', 'jobs.at', 'stepstone.at', 'hokify.at', 'metajob.at', 'willhaben.at', 'jobscout24.at'],
+  de: ['stepstone.de', 'stellenanzeigen.de', 'ingenieur.de', 'yourfirm.de', 'jobware.de', 'monster.de', 'jobanzeiger.de', 'jobboerse.de', 'stellenonline.de', 'kimeta.de'],
+  ch: ['jobs.ch', 'jobscout24.ch', 'topjobs.ch', 'jobagent.ch', 'jobup.ch', 'jobwinner.ch', 'swissjobs.ch'],
+  hr: ['moj-posao.net', 'njuskalo.hr', 'posao.hr', 'hzz.hr'],
+  ba: ['posao.ba', 'work.ba'],
+};
+
+// Search keywords per language
+const PORTAL_KEYWORDS = {
+  German: '"CAM Programmierer" OR "CNC Programmierer" OR "CAM-Programmierer"',
+  Croatian: '"CNC programer" OR "CAM programer" OR "CNC operater" OR "programer obradnih centara"',
+};
+
 const BLOCKED_DOMAINS = [
   // Job portals
   'karriere.at','stepstone.at','stepstone.de','jobs.at','jooble.org','jooble.com',
@@ -106,6 +121,43 @@ async function findEmail(baseUrl) {
   return await fetchPageEmail(base, siteDomain);
 }
 
+async function searchPortalListings(country, env) {
+  const portals = PORTAL_SEARCH_SITES[country] || [];
+  const cfg = COUNTRY_CONFIG[country] || { hl: 'de', lang: 'German' };
+  const keyword = PORTAL_KEYWORDS[cfg.lang] || PORTAL_KEYWORDS['German'];
+  const seenUrls = new Set();
+  const all = [];
+
+  for (const portal of portals) {
+    const res = await fetch('https://google.serper.dev/search', {
+      method: 'POST',
+      headers: { 'X-API-KEY': env.SERPER_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: `site:${portal} ${keyword}`, gl: country, hl: cfg.hl, num: 3 }),
+    });
+    if (!res.ok) continue;
+    const data = await res.json();
+    for (const r of (data.organic || [])) {
+      if (!r.link || seenUrls.has(r.link)) continue;
+      seenUrls.add(r.link);
+      all.push(r);
+    }
+  }
+  return all;
+}
+
+async function findCompanyWebsite(companyName, country, env) {
+  if (!companyName || companyName === 'Unbekannt') return null;
+  const res = await fetch('https://google.serper.dev/search', {
+    method: 'POST',
+    headers: { 'X-API-KEY': env.SERPER_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q: `"${companyName}" Impressum Kontakt`, gl: country, num: 3 }),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const result = (data.organic || []).find(r => r.link && !isJobPortal(r.link));
+  return result ? result.link : null;
+}
+
 async function searchCountry(queries, country, env) {
   const cfg = COUNTRY_CONFIG[country] || { hl: 'de' };
   const loc = env.SEARCH_LOCATION ? ` ${env.SEARCH_LOCATION}` : '';
@@ -183,11 +235,12 @@ async function generateEmail(rawTitle, snippet, lang, claudeKey) {
     const headerPrefixes = ['COMPANY:', 'SUBJECT:'];
     const bodyLines = lines.filter(l => !headerPrefixes.some(p => l.startsWith(p)));
     const body = bodyLines.join('\n').trim() || fallbackBody(extractedCompany || rawTitle);
-    return { subject, body };
+    return { subject, body, company: extractedCompany };
   } catch {
     return {
       subject: 'CAM-Unterstützung für ' + rawTitle,
       body: fallbackBody(rawTitle),
+      company: '',
     };
   }
 }
@@ -332,10 +385,6 @@ async function run(env, force = false) {
   }
 
   const countries = (settings.countries || env.SEARCH_COUNTRIES || 'at').split(',').map(c => c.trim()).filter(Boolean);
-  const queries = [
-    settings.query1 || env.SEARCH_QUERY || 'CAM Programmierer gesucht -stepstone -karriere.at -indeed -linkedin -xing -jobs.at -monster',
-    settings.query2 || env.SEARCH_QUERY_2 || 'Zerspanungstechnik Lohnfertigung Maschinenbau GmbH',
-  ];
 
   const sent = await getSentCompanies(env.SENT_COMPANIES);
   const byCountry = {};
@@ -343,19 +392,26 @@ async function run(env, force = false) {
 
   for (const country of countries) {
     const cfg = COUNTRY_CONFIG[country] || { lang: 'German' };
-    const results = await searchCountry(queries, country, env);
+    const portalResults = await searchPortalListings(country, env);
     const leads = [];
 
-    for (const r of results) {
-      const normName = normalizeCompany(r.title || '');
+    for (const r of portalResults) {
+      // Extract company name + generate email via Claude
+      const { subject, body, company } = await generateEmail(r.title, r.snippet || '', cfg.lang, env.CLAUDE_KEY);
+
+      // Skip if company name could not be extracted
+      if (!company || company === 'Unbekannt') continue;
+
+      const normName = normalizeCompany(company);
       if (!normName || isRecentlySent(sent, normName)) continue;
 
-      const email = await findEmail(r.link);
-      const { subject, body } = await generateEmail(r.title, r.snippet || '', cfg.lang, env.CLAUDE_KEY);
+      // Find real company website, then get their email
+      const companyUrl = await findCompanyWebsite(company, country, env);
+      const email = companyUrl ? await findEmail(companyUrl) : null;
 
       leads.push({
-        name: r.title || r.link,
-        url: r.link,
+        name: company,
+        url: companyUrl || r.link,
         email,
         subject,
         body,

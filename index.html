@@ -459,6 +459,33 @@ body.light #landing-page .nav-cta:hover{background:#5c4500}
 body.light #landing-page .btn-yellow{background:#7a5c00}
 body.light #landing-page .btn-yellow:hover{background:#5c4500}
 body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
+
+/* --- HERO ALWAYS DARK in light mode --- */
+body.light #landing-page section.hero{background:#080808}
+body.light #landing-page section.hero .line-white{color:#f0f4f8}
+body.light #landing-page section.hero .hero-eyebrow{color:#f5c800}
+body.light #landing-page section.hero .hero-eyebrow::before{background:#f5c800}
+body.light #landing-page section.hero .stat-num{color:#f5c800}
+body.light #landing-page section.hero .stat-label{color:#555}
+body.light #landing-page section.hero .hero-sub{color:#888}
+body.light #landing-page section.hero .hero-note{color:#555}
+body.light #landing-page section.hero .hero-stats{border-top-color:#222}
+body.light #landing-page section.hero .btn-ghost{color:#aaa;border-color:#2a2a2a}
+body.light #landing-page section.hero .btn-ghost:hover{color:#f5c800;border-color:#f5c800}
+body.light #landing-page section.hero .hero-bg-grid{background-image:linear-gradient(#ffffff04 1px,transparent 1px),linear-gradient(90deg,#ffffff04 1px,transparent 1px)}
+
+/* --- DARK BOXES FIX in light mode --- */
+body.light #landing-page{--card-bg:#ffffff;--border-color:#e1e4e8}
+body.light #landing-page .feat{background:var(--card-bg)}
+body.light #landing-page .feat:hover{background:#f6f8fa}
+body.light #landing-page .price-info{background:var(--card-bg)}
+body.light #landing-page .price-box{background:#f0f4f8}
+body.light #landing-page .tool-pill{background:var(--card-bg);border-color:var(--border-color)}
+body.light #landing-page .tool-pill-price{background:#f0f4f8;color:#555}
+body.light #landing-page .pricing-grid{background:var(--border-color)}
+body.light #landing-page .features-grid{background:var(--border-color)}
+body.light #landing-page .final-dim{color:#1f2328}
+#landing-page .final-dim{color:#f0f4f8}
 </style>
 </head>
 <body>
@@ -659,7 +686,7 @@ body.light #landing-page .price-cta{background:#7a5c00;border-color:#7a5c00}
 <!-- FINAL CTA -->
 <section class="final-cta fade-up">
   <div class="final-cta-bg"></div>
-  <h2 class="final-title" data-lp="cta-h">Stop switching<br><span class="y">tabs.</span> Start<br><span style="color:#f0f4f8">working.</span></h2>
+  <h2 class="final-title" data-lp="cta-h">Stop switching<br><span class="y">tabs.</span> Start<br><span class="final-dim">working.</span></h2>
   <p class="final-sub" data-lp="cta-sub">Everything your business needs, finally in one place.</p>
   <a href="#" class="btn-yellow" data-lp="cta-btn" onclick="openApp();return false;" style="font-size:16px;padding:18px 40px">Get started free →</a>
 </section>

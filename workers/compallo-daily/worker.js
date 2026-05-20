@@ -74,6 +74,14 @@ function normalizeCompany(name) {
     .trim();
 }
 
+function isPortalName(name) {
+  const n = (name || '').toLowerCase().replace(/\s+/g, '');
+  return BLOCKED_DOMAINS.some(p => {
+    const pn = p.split('.')[0];
+    return n === pn || n === p.replace('.', '');
+  });
+}
+
 function isValidContactEmail(email) {
   if (!email) return false;
   if (isPortalEmail(email)) return false;
@@ -402,19 +410,21 @@ async function run(env, force = false) {
       // Extract company name + generate email via Claude
       const { subject, body, company } = await generateEmail(r.title, r.snippet || '', cfg.lang, env.CLAUDE_KEY);
 
-      // Skip if company name could not be extracted
-      if (!company || company === 'Unbekannt') continue;
+      // Skip if company name could not be extracted or is a portal name
+      if (!company || company === 'Unbekannt' || isPortalName(company)) continue;
 
       const normName = normalizeCompany(company);
       if (!normName || isRecentlySent(sent, normName)) continue;
 
-      // Find real company website, then get their email
+      // Find real company website — skip if not found or resolves to a portal
       const companyUrl = await findCompanyWebsite(company, country, env);
-      const email = companyUrl ? await findEmail(companyUrl) : null;
+      if (!companyUrl || isJobPortal(companyUrl)) continue;
+
+      const email = await findEmail(companyUrl);
 
       leads.push({
         name: company,
-        url: companyUrl || r.link,
+        url: companyUrl,
         email,
         subject,
         body,

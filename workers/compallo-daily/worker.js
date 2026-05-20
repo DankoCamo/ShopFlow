@@ -6,14 +6,16 @@ const COUNTRY_CONFIG = {
   ba: { hl: 'hr', flag: '🇧🇦', label: 'BIH', lang: 'Croatian' },
 };
 
-// Job portals to search for CAM/CNC programmer listings, by country
+// Top job portals per country — kept short to stay within Cloudflare's 50 subrequest limit
 const PORTAL_SEARCH_SITES = {
-  at: ['karriere.at', 'jobs.at', 'stepstone.at', 'hokify.at', 'metajob.at', 'willhaben.at', 'jobscout24.at'],
-  de: ['stepstone.de', 'stellenanzeigen.de', 'ingenieur.de', 'yourfirm.de', 'jobware.de', 'monster.de', 'jobanzeiger.de', 'jobboerse.de', 'stellenonline.de', 'kimeta.de'],
-  ch: ['jobs.ch', 'jobscout24.ch', 'topjobs.ch', 'jobagent.ch', 'jobup.ch', 'jobwinner.ch', 'swissjobs.ch'],
-  hr: ['moj-posao.net', 'njuskalo.hr', 'posao.hr', 'hzz.hr', 'index.hr'],
-  ba: ['posao.ba', 'work.ba'],
+  at: ['karriere.at', 'jobs.at', 'stepstone.at'],
+  de: ['stepstone.de', 'stellenanzeigen.de', 'ingenieur.de', 'yourfirm.de'],
+  ch: ['jobs.ch', 'jobscout24.ch', 'topjobs.ch'],
+  hr: ['moj-posao.net', 'njuskalo.hr', 'index.hr'],
+  ba: ['posao.ba'],
 };
+
+const MAX_LEADS_PER_COUNTRY = 4;
 
 // Search keywords per language
 const PORTAL_KEYWORDS = {
@@ -132,7 +134,7 @@ async function searchPortalListings(country, env) {
     const res = await fetch('https://google.serper.dev/search', {
       method: 'POST',
       headers: { 'X-API-KEY': env.SERPER_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: `site:${portal} ${keyword}`, gl: country, hl: cfg.hl, num: 3 }),
+      body: JSON.stringify({ q: `site:${portal} ${keyword}`, gl: country, hl: cfg.hl, num: 2 }),
     });
     if (!res.ok) continue;
     const data = await res.json();
@@ -396,6 +398,7 @@ async function run(env, force = false) {
     const leads = [];
 
     for (const r of portalResults) {
+      if (leads.length >= MAX_LEADS_PER_COUNTRY) break;
       // Extract company name + generate email via Claude
       const { subject, body, company } = await generateEmail(r.title, r.snippet || '', cfg.lang, env.CLAUDE_KEY);
 

@@ -439,7 +439,7 @@ body.light #landing-page .line-white{color:#0d0d0d}
 body.light #landing-page .line-dim{color:#333}
 body.light #landing-page .line-yellow{color:#d4a900}
 body.light #landing-page .hero-eyebrow{color:#d4a900}
-body.light #landing-page .hero-eyebrow::before{background:#d4a900}
+body.light #landing-page .hero-eyebrow::before{background:none}
 body.light #landing-page .stat-num{color:#d4a900}
 body.light #landing-page .section-tag.yellow{color:#d4a900}
 body.light #landing-page .section-tag.yellow::before{background:#d4a900}
@@ -4116,15 +4116,6 @@ function initApp(){
 (function(){
   try{var d=localStorage.getItem('shopflow_v1');if(d){var p=JSON.parse(d);if(p.settings){APP_LANG=p.settings.appLang||'hr';APP_THEME=p.settings.appTheme||'dark';}}}catch(e){}
   applyTheme();updateLangButtons();updateThemeButtons();applyLandingTranslations();
-  // Ako postoji aktivna Supabase sesija, otvori app odmah (preskoči landing)
-  if(supabaseClient){
-    supabaseClient.auth.getSession().then(function(r){
-      if(r.data && r.data.session){
-        currentUser = r.data.session.user;
-        openApp();
-      }
-    }).catch(function(){});
-  }
 })();
 </script>
 </body>

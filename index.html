@@ -1239,6 +1239,7 @@ body.light #landing-page .final-dim{color:#1f2328}
       <div class="field"><label data-i18n="currencyDefault"></label>
         <select id="s-currency"><option value="EUR">EUR &#8364;</option><option value="CHF">CHF Fr.</option><option value="USD">USD $</option></select>
       </div>
+      <div class="field"><label data-i18n="paymentDaysDef"></label><input id="s-payment-days" type="number" value="14" min="1" max="365"></div>
     </div>
     <div class="field"><label data-i18n="bizTypeLabel"></label>
       <select id="s-biz-type">
@@ -1981,7 +1982,7 @@ var TRANSLATIONS = {
     templateMsg:'Poruka', emailFrom:'Od', emailTo:'Prima (email adresa)',
     selectTpl:'-- odaberi predložak --', companyName:'Naziv tvrtke',
     contactPerson:'Kontakt osoba', taxId:'UID / Steuernummer', paymentDue:'Rok plaćanja',
-    hourlyRateDef:'Default hourly rate (€/h)', vatDefault:'Default PDV %',
+    hourlyRateDef:'Default hourly rate (€/h)', vatDefault:'Default PDV %', paymentDaysDef:'Rok plaćanja (dani)',
     currency:'Valuta', currencyDefault:'Default valuta', invNoteDefault:'Default napomena na invoiceu',
     clientUid:'UID klijenta', defaultRate:'Default rate (€/h)',
     aiGenBtn:'✨ AI email — personalizirani email',
@@ -2196,7 +2197,7 @@ var TRANSLATIONS = {
     templateMsg:'Nachricht', emailFrom:'Von', emailTo:'Empfänger (E-Mail-Adresse)',
     selectTpl:'-- Vorlage auswählen --', companyName:'Firmenname',
     contactPerson:'Ansprechpartner', taxId:'UID / Steuernummer', paymentDue:'Zahlungsziel',
-    hourlyRateDef:'Standard-Stundensatz (€/h)', vatDefault:'Standard-MwSt. %',
+    hourlyRateDef:'Standard-Stundensatz (€/h)', vatDefault:'Standard-MwSt. %', paymentDaysDef:'Zahlungsfrist (Tage)',
     currency:'Währung', currencyDefault:'Standard-Währung', invNoteDefault:'Standard-Rechnungsanmerkung',
     clientUid:'UID des Kunden', defaultRate:'Standard-Stundensatz (€/h)',
     aiGenBtn:'✨ KI-E-Mail — personalisierten E-Mail generieren',
@@ -2343,7 +2344,7 @@ var TRANSLATIONS = {
     templateMsg:'Message', emailFrom:'From', emailTo:'Recipient (email address)',
     selectTpl:'-- select template --', companyName:'Company name',
     contactPerson:'Contact person', taxId:'VAT ID / Tax number', paymentDue:'Payment due',
-    hourlyRateDef:'Default hourly rate (€/h)', vatDefault:'Default VAT %',
+    hourlyRateDef:'Default hourly rate (€/h)', vatDefault:'Default VAT %', paymentDaysDef:'Payment term (days)',
     currency:'Currency', currencyDefault:'Default currency', invNoteDefault:'Default invoice note',
     clientUid:'Client VAT ID', defaultRate:'Default rate (€/h)',
     aiGenBtn:'✨ AI email — generate personalised email',
@@ -3125,7 +3126,7 @@ function openInvDetail(id){var inv=S.invoiceHistory.find(function(i){return i.id
   el('invh-detail').innerHTML='<div style="padding:4px 0 16px"><div style="display:flex;justify-content:space-between;margin-bottom:14px"><div><div style="font-size:18px;font-weight:600">'+escH(inv.num)+'</div><div style="font-size:12px;color:var(--text3);margin-top:3px">'+fmtDate(inv.date)+' \u00b7 '+escH(inv.client)+'</div></div><span class="inv-status '+inv.status+'" onclick="cycleInvStatus(\''+inv.id+'\')">'+getInvStatuses()[inv.status]+'</span></div><table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px"><thead><tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:6px 0;color:var(--text3)">'+t('thDesc')+'</th><th style="text-align:right;padding:6px;color:var(--text3)">'+t('hours')+'</th><th style="text-align:right;padding:6px;color:var(--text3)">\u20AC/h</th><th style="text-align:right;padding:6px 0;color:var(--text3)">'+t('thAmount')+'</th></tr></thead><tbody>'+inv.items.map(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;return '<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 0;color:var(--text)">'+escH(i.desc)+'</td><td style="text-align:right;padding:8px 6px;font-family:var(--mono);color:var(--text2)">'+flt(i.qty)+'</td><td style="text-align:right;padding:8px 6px;font-family:var(--mono);color:var(--text2)">\u20AC'+flt(i.price).toFixed(2)+'</td><td style="text-align:right;padding:8px 0;font-family:var(--mono);font-weight:500;color:var(--text)">\u20AC'+(n+v).toFixed(2)+'</td></tr>';}).join('')+'</tbody></table><div style="text-align:right;font-size:14px;font-weight:600;color:var(--accent)">'+t('thAmount')+': \u20AC'+flt(inv.total).toFixed(2)+'</div></div>';
   openModal('modal-invh');
 }
-function recurringFromSaved(){if(!currentHistoryInv)return;var inv=currentHistoryInv;S.invItems=JSON.parse(JSON.stringify(inv.items));S.invItemId=inv.items.length;var parts=inv.num.split('-');var last=parseInt(parts[parts.length-1])||0;parts[parts.length-1]=String(last+1).padStart(parts[parts.length-1].length,'0');closeModal('modal-invh');showPage('invoice');setTimeout(function(){el('inum').value=parts.join('-');el('itn').value=inv.to&&inv.to.name?inv.to.name:'';el('ita').value=inv.to&&inv.to.addr?inv.to.addr:'';el('ite').value=inv.to&&inv.to.email?inv.to.email:'';el('itu').value=inv.to&&inv.to.uid?inv.to.uid:'';el('idate').value=tod();var d=new Date();d.setDate(d.getDate()+30);el('idue').value=d.toISOString().split('T')[0];el('icur').value=inv.currency||'EUR';el('inv-lang').value=inv.lang||'de';el('inote').value=inv.note||'';renderInvItems();renderInvTotals();showToast('inv-toast','Novi racun kreiran iz '+inv.num+'.',true);},100);}
+function recurringFromSaved(){if(!currentHistoryInv)return;var inv=currentHistoryInv;S.invItems=JSON.parse(JSON.stringify(inv.items));S.invItemId=inv.items.length;var parts=inv.num.split('-');var last=parseInt(parts[parts.length-1])||0;parts[parts.length-1]=String(last+1).padStart(parts[parts.length-1].length,'0');closeModal('modal-invh');showPage('invoice');setTimeout(function(){el('inum').value=parts.join('-');el('itn').value=inv.to&&inv.to.name?inv.to.name:'';el('ita').value=inv.to&&inv.to.addr?inv.to.addr:'';el('ite').value=inv.to&&inv.to.email?inv.to.email:'';el('itu').value=inv.to&&inv.to.uid?inv.to.uid:'';el('idate').value=tod();var d=new Date();d.setDate(d.getDate()+(S.settings.paymentDays||14));el('idue').value=d.toISOString().split('T')[0];el('icur').value=inv.currency||'EUR';el('inv-lang').value=inv.lang||'de';el('inote').value=inv.note||'';renderInvItems();renderInvTotals();showToast('inv-toast','Novi racun kreiran iz '+inv.num+'.',true);},100);}
 function regenPDF(){if(currentHistoryInv){var inv=currentHistoryInv;S.invItems=JSON.parse(JSON.stringify(inv.items));S.invItemId=inv.items.length;el('inum').value=inv.num;el('idate').value=inv.date;el('idue').value=inv.due||'';el('icur').value=inv.currency||'EUR';el('inv-lang').value=inv.lang||'de';el('ifn').value=inv.from&&inv.from.name?inv.from.name:'';el('ifa').value=inv.from&&inv.from.addr?inv.from.addr:'';el('ife').value=inv.from&&inv.from.email?inv.from.email:'';el('ifu').value=inv.from&&inv.from.uid?inv.from.uid:'';el('ifib').value=inv.from&&inv.from.iban?inv.from.iban:'';el('ifbic').value=inv.from&&inv.from.bic?inv.from.bic:'';el('itn').value=inv.to&&inv.to.name?inv.to.name:'';el('ita').value=inv.to&&inv.to.addr?inv.to.addr:'';el('ite').value=inv.to&&inv.to.email?inv.to.email:'';el('itu').value=inv.to&&inv.to.uid?inv.to.uid:'';el('inote').value=inv.note||'';closeModal('modal-invh');setTimeout(generatePDF,100);}}
 
 
@@ -3881,7 +3882,7 @@ function loadSettings(){
   APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();
   el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';
   el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-paypal').value=ss.paypal||'';el('s-biz-type').value=ss.bizType||'';
-  el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';
+  el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';el('s-payment-days').value=ss.paymentDays||14;
   el('s-note').value=ss.note||'';el('s-daily-url').value=ss.dailyWorkerUrl||'';
   // Učitaj dnevne postavke iz localStoragea
   var ds=ss.dailySearch||{};
@@ -3940,7 +3941,7 @@ async function testDailyNow(){
     else showToast('daily-settings-toast','Gotovo! Pronađeno '+(d.total||0)+' leadova. '+(d.sent?'Email poslan.':'Nema novih firmi.'),d.total>0||d.sent);
   }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
 }
-function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),paypal:gv('s-paypal'),bizType:gv('s-biz-type'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),note:gv('s-note'),calUsername:S.settings.calUsername||'',dailyWorkerUrl:gv('s-daily-url')};save();showToast('settings-toast','Postavke spremljene.',true);}
+function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),paypal:gv('s-paypal'),bizType:gv('s-biz-type'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),paymentDays:parseInt(el('s-payment-days').value)||14,note:gv('s-note'),calUsername:S.settings.calUsername||'',dailyWorkerUrl:gv('s-daily-url')};save();showToast('settings-toast','Postavke spremljene.',true);}
 function saveMeetingsUsername(){var u=(el('meetings-username').value||'').trim();S.settings.calUsername=u;save();renderMeetings();}
 function renderMeetings(){
   var u=S.settings.calUsername||'';
@@ -4273,7 +4274,7 @@ async function generateAIEmail() {
 
 // ─── INIT
 load();
-var now=new Date();var due=new Date(now);due.setDate(due.getDate()+30);
+var now=new Date();var due=new Date(now);due.setDate(due.getDate()+(S.settings.paymentDays||14));
 el('idate').value=now.toISOString().split('T')[0];
 el('idue').value=due.toISOString().split('T')[0];
 /* init in initApp() */
@@ -4293,7 +4294,7 @@ function initApp(){
   var pickedTheme = window._userPickedTheme || sessionStorage.getItem('compallo_theme');
   if(pickedLang){ S.settings.appLang=pickedLang; sessionStorage.removeItem('compallo_lang'); window._userPickedLang=null; }
   if(pickedTheme){ S.settings.appTheme=pickedTheme; sessionStorage.removeItem('compallo_theme'); window._userPickedTheme=null; }
-  var now=new Date(),due=new Date(now);due.setDate(due.getDate()+30);
+  var now=new Date(),due=new Date(now);due.setDate(due.getDate()+(S.settings.paymentDays||14));
   el('idate').value=now.toISOString().split('T')[0];
   el('idue').value=due.toISOString().split('T')[0];
   APP_LANG=S.settings.appLang||'hr';

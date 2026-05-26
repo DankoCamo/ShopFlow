@@ -2938,7 +2938,8 @@ function addInvRow(desc,qty,price,vat,type){
   else if(type==='expense'){qty=qty!=null?qty:1;price=price!=null?price:0;vat=vat!=null?vat:0;}
   else{qty=qty!=null?qty:1;price=price!=null?price:r;vat=vat!=null?vat:dv;}
   if(isKlein())vat=0;
-  S.invItems.push({id:S.invItemId++,desc:desc,qty:qty,price:price,vat:vat,type:type});
+  var _udef={hourly:'Std.',km:'km',expense:'Tag',fixed:'Stk.',material:'Stk.'};
+  S.invItems.push({id:S.invItemId++,desc:desc,qty:qty,price:price,vat:vat,type:type,unit:_udef[type]||'Stk.'});
   renderInvItems();renderInvTotals();
 }
 function remInv(id){S.invItems=S.invItems.filter(function(i){return i.id!==id;});renderInvItems();renderInvTotals();}
@@ -2950,6 +2951,8 @@ function updInvType(id,type){
   if(type==='km'){if(!i.price||i.price===r)i.price=0.42;i.vat=i.vat||0;}
   else if(type==='expense'){i.vat=0;}
   else if(type==='hourly'){if(i.price===0.42)i.price=r;}
+  var _udef={hourly:'Std.',km:'km',expense:'Tag',fixed:'Stk.',material:'Stk.'};
+  i.unit=_udef[type]||'Stk.';
   renderInvItems();renderInvTotals();
 }
 function renderInvItems(){
@@ -2965,10 +2968,15 @@ function renderInvItems(){
     else if(tp==='km'){c2l=t('colKm');c3l=t('colRateKm');c2s='1';c3s='0.001';}
     else if(tp==='expense'){c2l=t('colQty');c3l=t('colDirectAmt');c2s='1';c3s='0.01';}
     else{c2l=t('colQty');c3l=t('colUnitPrice');c2s='1';c3s='0.01';}
+    var udef={hourly:'Std.',km:'km',expense:'Tag',fixed:'Stk.',material:'Stk.'};
+    var unit=i.unit!=null?i.unit:(udef[tp]||'Stk.');
+    var unitCtrl=tp==='expense'
+      ?'<select style="font-size:10px;padding:1px 3px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg3);color:var(--text);cursor:pointer;flex-shrink:0" onchange="updInv('+i.id+',\'unit\',this.value)">'+['Tag','Nacht','Stk.','pauschal'].map(function(u){return '<option value="'+u+'"'+(unit===u?' selected':'')+'>'+u+'</option>';}).join('')+'</select>'
+      :'<span style="font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0">'+escH(unit)+'</span>';
     return '<tr>'+
       '<td style="padding:3px 4px"><select style="font-size:11px;width:100%;padding:2px 3px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg3);color:var(--text);cursor:pointer" onchange="updInvType('+i.id+',this.value)">'+typeOpts+'</select></td>'+
       '<td><input value="'+escH(i.desc)+'" placeholder="'+escH(t('descPh'))+'" oninput="updInv('+i.id+',\'desc\',this.value)"></td>'+
-      '<td>'+lbl+escH(c2l)+'</div><input type="number" value="'+i.qty+'" step="'+c2s+'" oninput="updInv('+i.id+',\'qty\',this.value)" style="text-align:center"></td>'+
+      '<td>'+lbl+escH(c2l)+'</div><div style="display:flex;align-items:center;gap:3px"><input type="number" value="'+i.qty+'" step="'+c2s+'" oninput="updInv('+i.id+',\'qty\',this.value)" style="text-align:center;flex:1;min-width:0;width:1px">'+unitCtrl+'</div></td>'+
       '<td>'+lbl+escH(c3l)+'</div><input type="number" value="'+i.price+'" step="'+c3s+'" oninput="updInv('+i.id+',\'price\',this.value)" style="text-align:right"></td>'+
       '<td><input type="number" value="'+i.vat+'" step="1" min="0" max="100" oninput="updInv('+i.id+',\'vat\',this.value)" style="text-align:center"></td>'+
       '<td style="text-align:right;font-family:var(--mono);font-size:13px;padding:6px 8px" id="ia'+i.id+'">0.00</td>'+
@@ -3045,7 +3053,8 @@ function generatePDF(){
     doc.setDrawColor(210,230,220);doc.setLineWidth(.3);doc.line(ML,y-3+rowH,MR,y-3+rowH);
     doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(25,30,35);doc.text(lines,ML+4,y+.5);
     doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(55,65,75);
-    doc.text(String(flt(item.qty)),ML+103,y+.5,{align:'right'});doc.text(c+' '+flt(item.price).toFixed(2),ML+127,y+.5,{align:'right'});doc.text(flt(item.vat)+'%',ML+144,y+.5,{align:'right'});
+    var _udef2={hourly:'Std.',km:'km',expense:'Tag',fixed:'Stk.',material:'Stk.'};var _u=item.unit!=null?item.unit:(_udef2[item.type||'hourly']||'');
+    doc.text(String(flt(item.qty))+(_u?' '+_u:''),ML+103,y+.5,{align:'right'});doc.text(c+' '+flt(item.price).toFixed(2),ML+127,y+.5,{align:'right'});doc.text(flt(item.vat)+'%',ML+144,y+.5,{align:'right'});
     doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(15,80,55);doc.text(c+' '+(net+vat).toFixed(2),MR-4,y+.5,{align:'right'});
     y+=rowH;
   });

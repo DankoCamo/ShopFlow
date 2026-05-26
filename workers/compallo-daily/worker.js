@@ -394,7 +394,8 @@ async function run(env, force = false) {
     }
   }
 
-  const countries = (settings.countries || env.SEARCH_COUNTRIES || 'at').split(',').map(c => c.trim()).filter(Boolean);
+  const countries = (settings.countries || env.SEARCH_COUNTRIES || '').split(',').map(c => c.trim()).filter(Boolean);
+  if (!countries.length) return { sent: false, total: 0, skipped: 'no countries selected — search paused' };
 
   const sent = await getSentCompanies(env.SENT_COMPANIES);
   const byCountry = {};

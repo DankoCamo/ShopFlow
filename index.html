@@ -135,6 +135,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .inv-table th{text-align:left;font-size:11px;color:var(--text3);padding:0 8px 10px;border-bottom:1px solid var(--border);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
 .inv-table td{padding:6px 4px;vertical-align:middle;border-bottom:1px solid var(--border)}
 .inv-table tr:last-child td{border-bottom:none}
+.inv-table.no-vat th:nth-child(5),.inv-table.no-vat td:nth-child(5){display:none}
 .inv-table td input{font-size:13px;padding:7px 9px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);width:100%;font-family:var(--font);outline:none}
 .inv-table td input:focus{border-color:var(--accent)}
 .totals-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:16px}
@@ -1239,6 +1240,25 @@ body.light #landing-page .final-dim{color:#1f2328}
         <select id="s-currency"><option value="EUR">EUR &#8364;</option><option value="CHF">CHF Fr.</option><option value="USD">USD $</option></select>
       </div>
     </div>
+    <div class="field"><label data-i18n="bizTypeLabel"></label>
+      <select id="s-biz-type">
+        <option value="" data-i18n="bizTypeNone"></option>
+        <option value="klein_at" data-i18n="bizKleinAT"></option>
+        <option value="klein_de" data-i18n="bizKleinDE"></option>
+        <option value="einzel" data-i18n="bizEinzel"></option>
+        <option value="gmbh" data-i18n="bizGmbh"></option>
+        <option value="gmbh_kg" data-i18n="bizGmbhKg"></option>
+        <option value="ag" data-i18n="bizAg"></option>
+        <option value="freelancer" data-i18n="bizFreelancer"></option>
+        <optgroup data-i18n-label="bizGroupHR" label="— HR —">
+          <option value="pausalist" data-i18n="bizPausalist"></option>
+          <option value="obrtnik" data-i18n="bizObrtnik"></option>
+          <option value="jdoo" data-i18n="bizJdoo"></option>
+          <option value="doo" data-i18n="bizDoo"></option>
+          <option value="dd" data-i18n="bizDd"></option>
+        </optgroup>
+      </select>
+    </div>
     <div class="field"><label data-i18n="invNoteDefault"></label><textarea id="s-note" rows="2"></textarea></div>
   </div>
   <div style="display:flex;justify-content:flex-end;margin-top:4px">
@@ -1994,6 +2014,14 @@ var TRANSLATIONS = {
     saveSettings:'Spremi postavke', exportJson:'Izvezi JSON',
     importJson:'Uvezi JSON', deleteAll:'Obriši sve podatke',
     myData:'Moji podaci', defaults:'Zadane vrijednosti', backup:'Sigurnosna kopija',
+    bizTypeLabel:'Vrsta poduzeća', bizTypeNone:'-- Odaberi vrstu --',
+    bizKleinAT:'Kleinunternehmer (AT) – § 6 Abs. 1 Z 27 UStG',
+    bizKleinDE:'Kleinunternehmer (DE) – § 19 UStG',
+    bizEinzel:'Einzelunternehmer / Gewerbetreibender',
+    bizGmbh:'GmbH / UG', bizGmbhKg:'GmbH & Co. KG', bizAg:'AG',
+    bizFreelancer:'Freelancer / Sonstige', bizGroupHR:'Hrvatska',
+    bizPausalist:'Paušalist (HR)', bizObrtnik:'Obrtnik (HR)',
+    bizJdoo:'j.d.o.o. (HR)', bizDoo:'d.o.o. (HR)', bizDd:'d.d. (HR)',
     navMain:'Glavni', navTools:'Alati', navOther:'Ostalo', navLogout:'Odjava',
     language:'Jezik', theme:'Tema',
     dark:'Tamna', light:'Svijetla',
@@ -2062,6 +2090,14 @@ var TRANSLATIONS = {
     saveSettings:'Einstellungen speichern', exportJson:'JSON exportieren',
     importJson:'JSON importieren', deleteAll:'Alle Daten loschen',
     myData:'Meine Daten', defaults:'Standardwerte', backup:'Datensicherung',
+    bizTypeLabel:'Unternehmenstyp', bizTypeNone:'-- Typ auswählen --',
+    bizKleinAT:'Kleinunternehmer (AT) – § 6 Abs. 1 Z 27 UStG',
+    bizKleinDE:'Kleinunternehmer (DE) – § 19 UStG',
+    bizEinzel:'Einzelunternehmer / Gewerbetreibender',
+    bizGmbh:'GmbH / UG', bizGmbhKg:'GmbH & Co. KG', bizAg:'AG',
+    bizFreelancer:'Freelancer / Sonstige', bizGroupHR:'Kroatien',
+    bizPausalist:'Paušalist (HR)', bizObrtnik:'Obrtnik (HR)',
+    bizJdoo:'j.d.o.o. (HR)', bizDoo:'d.o.o. (HR)', bizDd:'d.d. (HR)',
     navMain:'Haupt', navTools:'Werkzeuge', navOther:'Sonstiges', navLogout:'Abmelden',
     language:'Sprache', theme:'Design',
     dark:'Dunkel', light:'Hell',
@@ -2201,6 +2237,14 @@ var TRANSLATIONS = {
     saveSettings:'Save settings', exportJson:'Export JSON',
     importJson:'Import JSON', deleteAll:'Delete all data',
     myData:'My data', defaults:'Defaults', backup:'Data backup',
+    bizTypeLabel:'Business type', bizTypeNone:'-- Select type --',
+    bizKleinAT:'Kleinunternehmer (AT) – § 6 Abs. 1 Z 27 UStG',
+    bizKleinDE:'Kleinunternehmer (DE) – § 19 UStG',
+    bizEinzel:'Einzelunternehmer / Gewerbetreibender',
+    bizGmbh:'GmbH / UG', bizGmbhKg:'GmbH & Co. KG', bizAg:'AG',
+    bizFreelancer:'Freelancer / Sonstige', bizGroupHR:'Croatia',
+    bizPausalist:'Paušalist (HR)', bizObrtnik:'Obrtnik (HR)',
+    bizJdoo:'j.d.o.o. (HR)', bizDoo:'d.o.o. (HR)', bizDd:'d.d. (HR)',
     navMain:'Main', navTools:'Tools', navOther:'Other', navLogout:'Sign out',
     language:'Language', theme:'Theme',
     dark:'Dark', light:'Light',
@@ -2562,6 +2606,10 @@ function applyTranslations(){
     var key=e.getAttribute('data-i18n-ph');
     if(key)e.placeholder=t(key);
   });
+  document.querySelectorAll('[data-i18n-label]').forEach(function(e){
+    var key=e.getAttribute('data-i18n-label');
+    if(key)e.label=t(key);
+  });
   document.querySelectorAll('[data-i18n-title]').forEach(function(e){
     var key=e.getAttribute('data-i18n-title');
     if(key)e.title=t(key);
@@ -2801,7 +2849,55 @@ function saveGanttTask(){S.ganttTasks.push({id:S.nextId++,title:el('gt-title').v
 function delGantt(id){S.ganttTasks=S.ganttTasks.filter(function(t){return t.id!==id;});save();renderGantt();}
 
 // ─── INVOICE
-function applySettings(){var ss=S.settings;el('ifn').value=ss.name||'';el('ifa').value=ss.addr||'';el('ife').value=ss.email||'';el('ifu').value=ss.uid||'';el('ifib').value=ss.iban||'';el('ifbic').value=ss.bic||'';if(!el('inote').value)el('inote').value=ss.note||'';if(ss.paypal){el('pay-paypal-val').value=ss.paypal;el('pay-paypal').checked=true;el('pay-paypal-row').style.display='block';updatePayEmpty();}}
+function applySettings(){var ss=S.settings;el('ifn').value=ss.name||'';el('ifa').value=ss.addr||'';el('ife').value=ss.email||'';el('ifu').value=ss.uid||'';el('ifib').value=ss.iban||'';el('ifbic').value=ss.bic||'';if(!el('inote').value)el('inote').value=ss.note||'';if(ss.paypal){el('pay-paypal-val').value=ss.paypal;el('pay-paypal').checked=true;el('pay-paypal-row').style.display='block';updatePayEmpty();}applyBizTypeUI();updateAutoNote();}
+var AUTO_NOTES=[
+  'Kleinunternehmer gem. § 6 Abs. 1 Z 27 UStG – keine Umsatzsteuer',
+  'Small business owner under § 6 para. 1 no. 27 Austrian VAT Act – no VAT charged',
+  'Kein Ausweis von Umsatzsteuer gem. § 19 UStG',
+  'VAT not charged in accordance with § 19 German VAT Act',
+  'Paušalni obrtnik – nije u sustavu PDV-a prema čl. 90. Zakona o PDV-u',
+  'Pauschalbesteuerter Gewerbetreibender – nicht umsatzsteuerpflichtig gem. Art. 90 kroat. UStG',
+  'Lump-sum taxpayer – not subject to VAT pursuant to Art. 90 Croatian VAT Act'
+];
+function isKlein(){var bt=S.settings.bizType||'';return bt==='klein_at'||bt==='klein_de'||bt==='pausalist';}
+function getDefaultVat(){
+  var bt=S.settings.bizType||'';
+  if(isKlein())return 0;
+  if(bt==='obrtnik'||bt==='jdoo'||bt==='doo'||bt==='dd')return 25;
+  return S.settings.vat||20;
+}
+function getBizNote(lang){
+  var bt=S.settings.bizType||'';
+  if(bt==='klein_at'){
+    if(lang==='en')return 'Small business owner under § 6 para. 1 no. 27 Austrian VAT Act – no VAT charged';
+    return 'Kleinunternehmer gem. § 6 Abs. 1 Z 27 UStG – keine Umsatzsteuer';
+  }
+  if(bt==='klein_de'){
+    if(lang==='en')return 'VAT not charged in accordance with § 19 German VAT Act';
+    return 'Kein Ausweis von Umsatzsteuer gem. § 19 UStG';
+  }
+  if(bt==='pausalist'){
+    if(lang==='de')return 'Pauschalbesteuerter Gewerbetreibender – nicht umsatzsteuerpflichtig gem. Art. 90 kroat. UStG';
+    if(lang==='en')return 'Lump-sum taxpayer – not subject to VAT pursuant to Art. 90 Croatian VAT Act';
+    return 'Paušalni obrtnik – nije u sustavu PDV-a prema čl. 90. Zakona o PDV-u';
+  }
+  return '';
+}
+function updateAutoNote(){
+  if(!el('inote'))return;
+  var lang=el('inv-lang')?el('inv-lang').value:'de';
+  var auto=getBizNote(lang);
+  if(!auto)return;
+  var cur=(el('inote').value||'').trim();
+  if(!cur||AUTO_NOTES.indexOf(cur)>=0)el('inote').value=auto;
+}
+function applyBizTypeUI(){
+  var hide=isKlein();
+  var tbl=document.querySelector('.inv-table');
+  if(tbl)tbl.classList.toggle('no-vat',hide);
+  if(hide){S.invItems.forEach(function(i){i.vat=0;});renderInvItems();}
+  renderInvTotals();
+}
 function refreshInvClientSel(){var o='<option value="">'+t('clientFrom')+'</option>'+S.clients.map(function(c){return '<option value="'+c.id+'">'+escH(c.name)+'</option>';}).join('');el('inv-client-sel').innerHTML=o;}
 function fillClientFromSel(){var c=gc(el('inv-client-sel').value);if(!c)return;el('itn').value=c.name;el('ita').value=c.addr||'';el('ite').value=c.email||'';el('itu').value=c.uid||'';el('inv-client-sel').value='';}
 function addQuickItem(sel){
@@ -2837,10 +2933,11 @@ function buildEPCString(amount){
 }
 function addInvRow(desc,qty,price,vat,type){
   desc=desc||'';type=type||'hourly';
-  var r=S.settings.rate||75;var dv=S.settings.vat||20;
+  var r=S.settings.rate||75;var dv=getDefaultVat();
   if(type==='km'){qty=qty!=null?qty:100;price=price!=null?price:0.42;vat=vat!=null?vat:0;}
   else if(type==='expense'){qty=qty!=null?qty:1;price=price!=null?price:0;vat=vat!=null?vat:0;}
   else{qty=qty!=null?qty:1;price=price!=null?price:r;vat=vat!=null?vat:dv;}
+  if(isKlein())vat=0;
   S.invItems.push({id:S.invItemId++,desc:desc,qty:qty,price:price,vat:vat,type:type});
   renderInvItems();renderInvTotals();
 }
@@ -2879,7 +2976,7 @@ function renderInvItems(){
       '</tr>';
   }).join('');
 }
-function renderInvTotals(){var c=curSym();var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;var e=el('ia'+i.id);if(e)e.textContent=(n+v).toFixed(2);});var IL=L10N[el('inv-lang')?el('inv-lang').value:'de']||L10N.en;el('inv-totals').innerHTML='<div class="trow"><span class="tl">'+IL.sub+':</span><span class="ta">'+c+' '+sub.toFixed(2)+'</span></div><div class="trow"><span class="tl">'+IL.vatl+':</span><span class="ta">'+c+' '+tv.toFixed(2)+'</span></div><div class="tdiv"></div><div class="trow grand"><span class="tl">'+IL.total+':</span><span class="ta" style="color:var(--accent)">'+c+' '+(sub+tv).toFixed(2)+'</span></div>';}
+function renderInvTotals(){var c=curSym();var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;var e=el('ia'+i.id);if(e)e.textContent=(n+v).toFixed(2);});var IL=L10N[el('inv-lang')?el('inv-lang').value:'de']||L10N.en;var vatRow=isKlein()?'':'<div class="trow"><span class="tl">'+IL.vatl+':</span><span class="ta">'+c+' '+tv.toFixed(2)+'</span></div>';el('inv-totals').innerHTML='<div class="trow"><span class="tl">'+IL.sub+':</span><span class="ta">'+c+' '+sub.toFixed(2)+'</span></div>'+vatRow+'<div class="tdiv"></div><div class="trow grand"><span class="tl">'+IL.total+':</span><span class="ta" style="color:var(--accent)">'+c+' '+(sub+tv).toFixed(2)+'</span></div>';}
 function getInvTotals(){var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;});return{sub:sub,tv:tv,grand:sub+tv};}
 function importHours(){var bp={};S.timeLogs.forEach(function(l){if(!l.projectId)return;bp[l.projectId]=(bp[l.projectId]||0)+l.duration;});var e=Object.keys(bp);if(!e.length){showToast('inv-toast','Nema pracenih sati za uvoz.',false);return;}e.forEach(function(pid){var p=gp(pid);if(!p)return;var cl=gc(p.clientId);addInvRow(p.title+(cl?' - '+cl.name:''),parseFloat((bp[pid]/3600).toFixed(2)),p.rate||S.settings.rate||75,S.settings.vat||20);});showToast('inv-toast','Uvezeno '+e.length+' projekt(a).',true);}
 
@@ -2888,6 +2985,7 @@ document.addEventListener('DOMContentLoaded',function(){
   el('pay-paypal').addEventListener('change',function(){el('pay-paypal-row').style.display=this.checked?'block':'none';updatePayEmpty();});
   el('pay-revolut').addEventListener('change',function(){el('pay-revolut-row').style.display=this.checked?'block':'none';updatePayEmpty();});
   el('pay-sepa').addEventListener('change',function(){updatePayEmpty();});
+  el('inv-lang').addEventListener('change',function(){updateAutoNote();renderInvTotals();});
 });
 function updatePayEmpty(){var any=el('pay-sepa').checked||el('pay-paypal').checked||el('pay-revolut').checked;el('pay-empty').style.display=any?'none':'block';}
 function getPayOpts(){return{sepa:el('pay-sepa').checked&&!!gv('ifib'),paypal:el('pay-paypal').checked?gv('pay-paypal-val'):'',revolut:el('pay-revolut').checked?gv('pay-revolut-val'):''};}
@@ -3768,7 +3866,7 @@ function loadSettings(){
   var ss=S.settings;
   APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();
   el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';
-  el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-paypal').value=ss.paypal||'';
+  el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-paypal').value=ss.paypal||'';el('s-biz-type').value=ss.bizType||'';
   el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';
   el('s-note').value=ss.note||'';el('s-daily-url').value=ss.dailyWorkerUrl||'';
   // Učitaj dnevne postavke iz localStoragea
@@ -3828,7 +3926,7 @@ async function testDailyNow(){
     else showToast('daily-settings-toast','Gotovo! Pronađeno '+(d.total||0)+' leadova. '+(d.sent?'Email poslan.':'Nema novih firmi.'),d.total>0||d.sent);
   }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
 }
-function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),paypal:gv('s-paypal'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),note:gv('s-note'),calUsername:S.settings.calUsername||'',dailyWorkerUrl:gv('s-daily-url')};save();showToast('settings-toast','Postavke spremljene.',true);}
+function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),paypal:gv('s-paypal'),bizType:gv('s-biz-type'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),note:gv('s-note'),calUsername:S.settings.calUsername||'',dailyWorkerUrl:gv('s-daily-url')};save();showToast('settings-toast','Postavke spremljene.',true);}
 function saveMeetingsUsername(){var u=(el('meetings-username').value||'').trim();S.settings.calUsername=u;save();renderMeetings();}
 function renderMeetings(){
   var u=S.settings.calUsername||'';

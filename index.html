@@ -1006,12 +1006,12 @@ body.light #landing-page .final-dim{color:#1f2328}
       <span data-i18n="lineItems"></span>
       <div style="display:flex;gap:6px;align-items:center">
         <select id="inv-quick-item" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="addQuickItem(this)">
-          <option value="">+ Brza stavka</option>
-          <option value="gorivo">⛽ Gorivo / putni troškovi</option>
-          <option value="hotel">🏨 Smještaj u hotelu</option>
-          <option value="cam">💻 CAM programiranje na licu mjesta</option>
-          <option value="postproc">⚙️ Postavljanje post-procesora</option>
-          <option value="konzult">📋 Konzultacije</option>
+          <option value="" data-i18n="quickItemPh"></option>
+          <option value="gorivo" data-i18n="quickFuel"></option>
+          <option value="hotel" data-i18n="quickHotel"></option>
+          <option value="cam" data-i18n="quickCam"></option>
+          <option value="postproc" data-i18n="quickPostproc"></option>
+          <option value="konzult" data-i18n="quickConsult"></option>
         </select>
         <button class="btn btn-sm" onclick="addInvRow()" data-i18n="add"></button>
       </div>
@@ -1904,6 +1904,12 @@ var TRANSLATIONS = {
     importHours:'Uvezi sate', downloadPDF:'↓ PDF',
     clientFrom:'Popuni iz klijenta...', noPayOption:'Odaberi opcije plaćanja.',
     addRow:'+ Dodaj',
+    quickItemPh:'+ Brza stavka',
+    quickFuel:'⛽ Gorivo / putni troškovi', quickFuelDesc:'Gorivo / putni troškovi',
+    quickHotel:'🏨 Smještaj u hotelu', quickHotelDesc:'Smještaj u hotelu',
+    quickCam:'💻 CAM programiranje na licu mjesta', quickCamDesc:'CAM programiranje na licu mjesta',
+    quickPostproc:'⚙️ Postavljanje post-procesora', quickPostprocDesc:'Postavljanje post-procesora',
+    quickConsult:'📋 Konzultacije', quickConsultDesc:'Konzultacije',
     // Expense categories
     catFuel:'Gorivo', catMaterial:'Materijal', catSoftware:'Softver',
     catTravel:'Putovanje', catOther:'Ostalo',
@@ -2132,6 +2138,12 @@ var TRANSLATIONS = {
     thTimeline:'Timeline', thInvNum:'Rech.-Nr.',
     clearAll:'Alle löschen', trackerLogs:'Arbeitsprotokoll', hours:'Stunden', minutes:'Minuten',
     allProjects:'Alle Projekte', allCats:'Alle Kategorien', allExpenses:'Alle Ausgaben',
+    quickItemPh:'+ Schnelleingabe',
+    quickFuel:'⛽ Kraftstoff / Reisekosten', quickFuelDesc:'Kraftstoff / Reisekosten',
+    quickHotel:'🏨 Hotelunterkunft', quickHotelDesc:'Hotelunterkunft',
+    quickCam:'💻 CAM-Programmierung vor Ort', quickCamDesc:'CAM-Programmierung vor Ort',
+    quickPostproc:'⚙️ Post-Prozessor einrichten', quickPostprocDesc:'Post-Prozessor einrichten',
+    quickConsult:'📋 Beratung', quickConsultDesc:'Beratung',
     importHours:'Stunden importieren', issuer:'Aussteller', lineItems:'Positionen',
     paymentOpts:'Zahlungsoptionen', invNote:'Anmerkung', allInvoices:'Alle Rechnungen',
     allStatuses:'Alle Status', saveCurrentInv:'+ Aktuelle Rechnung speichern', clientFrom:'Aus Kunde befüllen...',
@@ -2262,6 +2274,12 @@ var TRANSLATIONS = {
     thTimeline:'Timeline', thInvNum:'Inv. No.',
     clearAll:'Clear all', trackerLogs:'Work log', hours:'Hours', minutes:'Minutes',
     allProjects:'All projects', allCats:'All categories', allExpenses:'All expenses',
+    quickItemPh:'+ Quick item',
+    quickFuel:'⛽ Fuel / travel expenses', quickFuelDesc:'Fuel / travel expenses',
+    quickHotel:'🏨 Hotel accommodation', quickHotelDesc:'Hotel accommodation',
+    quickCam:'💻 On-site CAM programming', quickCamDesc:'On-site CAM programming',
+    quickPostproc:'⚙️ Post-processor setup', quickPostprocDesc:'Post-processor setup',
+    quickConsult:'📋 Consulting', quickConsultDesc:'Consulting',
     importHours:'Import hours', issuer:'Issuer', lineItems:'Line items',
     paymentOpts:'Payment options', invNote:'Note', allInvoices:'All invoices',
     allStatuses:'All statuses', saveCurrentInv:'+ Save current invoice', clientFrom:'Fill from client...',
@@ -2781,11 +2799,11 @@ function addQuickItem(sel){
   var v=sel.value;if(!v)return;sel.value='';
   var r=S.settings.rate||75;var vat=S.settings.vat||20;
   var items={
-    gorivo:{desc:'Gorivo / putni troškovi',qty:1,price:0,vat:0},
-    hotel:{desc:'Smještaj u hotelu',qty:1,price:0,vat:vat},
-    cam:{desc:'CAM programiranje na licu mjesta',qty:8,price:r,vat:vat},
-    postproc:{desc:'Postavljanje post-procesora',qty:4,price:r,vat:vat},
-    konzult:{desc:'Konzultacije',qty:1,price:r,vat:vat}
+    gorivo:{desc:t('quickFuelDesc'),qty:1,price:0,vat:0},
+    hotel:{desc:t('quickHotelDesc'),qty:1,price:0,vat:vat},
+    cam:{desc:t('quickCamDesc'),qty:8,price:r,vat:vat},
+    postproc:{desc:t('quickPostprocDesc'),qty:4,price:r,vat:vat},
+    konzult:{desc:t('quickConsultDesc'),qty:1,price:r,vat:vat}
   };
   var d=items[v];if(d)addInvRow(d.desc,d.qty,d.price,d.vat);
 }

@@ -1017,7 +1017,7 @@ body.light #landing-page .final-dim{color:#1f2328}
       </div>
     </div>
     <table class="inv-table">
-      <thead><tr><th style="width:38%" data-i18n="thDesc"></th><th style="width:10%" data-i18n="hours"></th><th style="width:17%">€/h</th><th style="width:10%">PDV%</th><th style="width:17%" data-i18n="thAmount"></th><th style="width:8%"></th></tr></thead>
+      <thead><tr><th style="width:14%" data-i18n="thType"></th><th style="width:26%" data-i18n="thDesc"></th><th style="width:12%" data-i18n="colQty"></th><th style="width:14%" data-i18n="colUnitPrice"></th><th style="width:8%">VAT%</th><th style="width:14%" data-i18n="thAmount"></th><th style="width:12%"></th></tr></thead>
       <tbody id="inv-body"></tbody>
     </table>
     <div class="totals-wrap" id="inv-totals"></div>
@@ -1819,9 +1819,9 @@ var LEAD_STATUSES = {novi:'Novi',kontaktiran:'Kontaktiran',zainteresiran:'Zainte
 function getInvStatuses(){return {draft:t('invFilterDraft'),sent:t('invFilterSent'),paid:t('invFilterPaid'),overdue:t('invFilterOverdue')};}
 var INV_STATUSES = {draft:'Nacrt',sent:'Poslano',paid:'Placeno',overdue:'Kasni'};
 var L10N = {
-  de:{invoice:'RECHNUNG',to:'RECHNUNGSEMPFANGER',num:'Rechnungs-Nr.',date:'Datum',due:'Falligkeitsdatum',desc:'Beschreibung',qty:'Std.',price:'Preis/Std.',vat:'MwSt.%',amount:'Betrag',sub:'Nettobetrag',vatl:'MwSt.',total:'Gesamtbetrag',iban:'IBAN',bic:'BIC',pay:'Zahlungsdetails'},
-  en:{invoice:'INVOICE',to:'BILL TO',num:'Invoice No.',date:'Date',due:'Due Date',desc:'Description',qty:'Qty (h)',price:'Rate/h',vat:'VAT%',amount:'Amount',sub:'Subtotal',vatl:'VAT',total:'Total',iban:'IBAN',bic:'BIC',pay:'Payment details'},
-  hr:{invoice:'RACUN',to:'PRIMATELJ',num:'Broj racuna',date:'Datum',due:'Rok placanja',desc:'Opis',qty:'Sati',price:'Cijena/h',vat:'PDV%',amount:'Iznos',sub:'Neto',vatl:'PDV',total:'Ukupno',iban:'IBAN',bic:'BIC',pay:'Podaci za placanje'}
+  de:{invoice:'RECHNUNG',to:'RECHNUNGSEMPFANGER',num:'Rechnungs-Nr.',date:'Datum',due:'Falligkeitsdatum',desc:'Beschreibung',qty:'Menge',price:'Einzelpreis',vat:'MwSt.%',amount:'Betrag',sub:'Nettobetrag',vatl:'MwSt.',total:'Gesamtbetrag',iban:'IBAN',bic:'BIC',pay:'Zahlungsdetails'},
+  en:{invoice:'INVOICE',to:'BILL TO',num:'Invoice No.',date:'Date',due:'Due Date',desc:'Description',qty:'Qty',price:'Price/Unit',vat:'VAT%',amount:'Amount',sub:'Subtotal',vatl:'VAT',total:'Total',iban:'IBAN',bic:'BIC',pay:'Payment details'},
+  hr:{invoice:'RACUN',to:'PRIMATELJ',num:'Broj racuna',date:'Datum',due:'Rok placanja',desc:'Opis',qty:'Kol.',price:'Jed. cijena',vat:'PDV%',amount:'Iznos',sub:'Neto',vatl:'PDV',total:'Ukupno',iban:'IBAN',bic:'BIC',pay:'Podaci za placanje'}
 };
 
 var prosTab = 'results';
@@ -1910,6 +1910,9 @@ var TRANSLATIONS = {
     quickCam:'💻 CAM programiranje na licu mjesta', quickCamDesc:'CAM programiranje na licu mjesta',
     quickPostproc:'⚙️ Postavljanje post-procesora', quickPostprocDesc:'Postavljanje post-procesora',
     quickConsult:'📋 Konzultacije', quickConsultDesc:'Konzultacije',
+    thType:'Tip',
+    typeHourly:'⏱ Usluga / sat', typeKm:'🚗 Putovanje / km', typeFixed:'📦 Fiksna cijena', typeMaterial:'🔩 Materijal', typeExpense:'🧾 Trošak',
+    colHours:'Sati', colRateH:'€/sat', colKm:'km', colRateKm:'€/km', colQty:'Kol.', colUnitPrice:'Jed. cijena', colDirectAmt:'Iznos',
     // Expense categories
     catFuel:'Gorivo', catMaterial:'Materijal', catSoftware:'Softver',
     catTravel:'Putovanje', catOther:'Ostalo',
@@ -2144,6 +2147,9 @@ var TRANSLATIONS = {
     quickCam:'💻 CAM-Programmierung vor Ort', quickCamDesc:'CAM-Programmierung vor Ort',
     quickPostproc:'⚙️ Post-Prozessor einrichten', quickPostprocDesc:'Post-Prozessor einrichten',
     quickConsult:'📋 Beratung', quickConsultDesc:'Beratung',
+    thType:'Typ',
+    typeHourly:'⏱ Dienst / Std.', typeKm:'🚗 Reise / km', typeFixed:'📦 Festpreis', typeMaterial:'🔩 Material', typeExpense:'🧾 Auslagen',
+    colHours:'Std.', colRateH:'€/Std.', colKm:'km', colRateKm:'€/km', colQty:'Menge', colUnitPrice:'Einzelpreis', colDirectAmt:'Betrag',
     importHours:'Stunden importieren', issuer:'Aussteller', lineItems:'Positionen',
     paymentOpts:'Zahlungsoptionen', invNote:'Anmerkung', allInvoices:'Alle Rechnungen',
     allStatuses:'Alle Status', saveCurrentInv:'+ Aktuelle Rechnung speichern', clientFrom:'Aus Kunde befüllen...',
@@ -2280,6 +2286,9 @@ var TRANSLATIONS = {
     quickCam:'💻 On-site CAM programming', quickCamDesc:'On-site CAM programming',
     quickPostproc:'⚙️ Post-processor setup', quickPostprocDesc:'Post-processor setup',
     quickConsult:'📋 Consulting', quickConsultDesc:'Consulting',
+    thType:'Type',
+    typeHourly:'⏱ Service / hr', typeKm:'🚗 Travel / km', typeFixed:'📦 Fixed price', typeMaterial:'🔩 Material', typeExpense:'🧾 Expense',
+    colHours:'Hours', colRateH:'€/h', colKm:'km', colRateKm:'€/km', colQty:'Qty', colUnitPrice:'Unit price', colDirectAmt:'Amount',
     importHours:'Import hours', issuer:'Issuer', lineItems:'Line items',
     paymentOpts:'Payment options', invNote:'Note', allInvoices:'All invoices',
     allStatuses:'All statuses', saveCurrentInv:'+ Save current invoice', clientFrom:'Fill from client...',
@@ -2799,13 +2808,13 @@ function addQuickItem(sel){
   var v=sel.value;if(!v)return;sel.value='';
   var r=S.settings.rate||75;var vat=S.settings.vat||20;
   var items={
-    gorivo:{desc:t('quickFuelDesc'),qty:1,price:0,vat:0},
-    hotel:{desc:t('quickHotelDesc'),qty:1,price:0,vat:vat},
-    cam:{desc:t('quickCamDesc'),qty:8,price:r,vat:vat},
-    postproc:{desc:t('quickPostprocDesc'),qty:4,price:r,vat:vat},
-    konzult:{desc:t('quickConsultDesc'),qty:1,price:r,vat:vat}
+    gorivo:{desc:t('quickFuelDesc'),qty:100,price:0.42,vat:0,type:'km'},
+    hotel:{desc:t('quickHotelDesc'),qty:1,price:0,vat:0,type:'expense'},
+    cam:{desc:t('quickCamDesc'),qty:8,price:r,vat:vat,type:'hourly'},
+    postproc:{desc:t('quickPostprocDesc'),qty:4,price:r,vat:vat,type:'hourly'},
+    konzult:{desc:t('quickConsultDesc'),qty:1,price:r,vat:vat,type:'hourly'}
   };
-  var d=items[v];if(d)addInvRow(d.desc,d.qty,d.price,d.vat);
+  var d=items[v];if(d)addInvRow(d.desc,d.qty,d.price,d.vat,d.type);
 }
 function makeQRDataURL(text){
   if(typeof qrcode==='undefined')return null;
@@ -2826,10 +2835,50 @@ function buildEPCString(amount){
   var amt=amount>0?'EUR'+amount.toFixed(2):'EUR';
   return['BCD','002','1','SCT',bic,name,iban,amt,'','',''].join('\n');
 }
-function addInvRow(desc,qty,price,vat){desc=desc||'';qty=qty||1;price=price!=null?price:(S.settings.rate||75);vat=vat!=null?vat:(S.settings.vat||20);S.invItems.push({id:S.invItemId++,desc:desc,qty:qty,price:price,vat:vat});renderInvItems();renderInvTotals();}
+function addInvRow(desc,qty,price,vat,type){
+  desc=desc||'';type=type||'hourly';
+  var r=S.settings.rate||75;var dv=S.settings.vat||20;
+  if(type==='km'){qty=qty!=null?qty:100;price=price!=null?price:0.42;vat=vat!=null?vat:0;}
+  else if(type==='expense'){qty=qty!=null?qty:1;price=price!=null?price:0;vat=vat!=null?vat:0;}
+  else{qty=qty!=null?qty:1;price=price!=null?price:r;vat=vat!=null?vat:dv;}
+  S.invItems.push({id:S.invItemId++,desc:desc,qty:qty,price:price,vat:vat,type:type});
+  renderInvItems();renderInvTotals();
+}
 function remInv(id){S.invItems=S.invItems.filter(function(i){return i.id!==id;});renderInvItems();renderInvTotals();}
 function updInv(id,f,v){var i=S.invItems.find(function(i){return i.id===id;});if(i){i[f]=v;renderInvTotals();}}
-function renderInvItems(){el('inv-body').innerHTML=S.invItems.map(function(i){return '<tr><td><input value="'+escH(i.desc)+'" placeholder="Opis rada" oninput="updInv('+i.id+',\'desc\',this.value)"></td><td><input type="number" value="'+i.qty+'" step="0.5" oninput="updInv('+i.id+',\'qty\',this.value)" style="text-align:center"></td><td><input type="number" value="'+i.price+'" step="0.5" oninput="updInv('+i.id+',\'price\',this.value)" style="text-align:right"></td><td><input type="number" value="'+i.vat+'" step="1" min="0" max="100" oninput="updInv('+i.id+',\'vat\',this.value)" style="text-align:center"></td><td style="text-align:right;font-family:var(--mono);font-size:13px;padding:6px 8px" id="ia'+i.id+'">0.00</td><td><button class="btn btn-xs btn-danger" onclick="remInv('+i.id+')">x</button></td></tr>';}).join('');}
+function updInvType(id,type){
+  var i=S.invItems.find(function(x){return x.id===id;});if(!i)return;
+  var r=S.settings.rate||75;
+  i.type=type;
+  if(type==='km'){if(!i.price||i.price===r)i.price=0.42;i.vat=i.vat||0;}
+  else if(type==='expense'){i.vat=0;}
+  else if(type==='hourly'){if(i.price===0.42)i.price=r;}
+  renderInvItems();renderInvTotals();
+}
+function renderInvItems(){
+  var lbl='<div style="font-size:9px;color:var(--text3);margin-bottom:1px;line-height:1.2">';
+  el('inv-body').innerHTML=S.invItems.map(function(i){
+    var tp=i.type||'hourly';
+    var typeOpts=['hourly','km','fixed','material','expense'].map(function(v){
+      var cap=v.charAt(0).toUpperCase()+v.slice(1);
+      return '<option value="'+v+'"'+(tp===v?' selected':'')+'>'+escH(t('type'+cap))+'</option>';
+    }).join('');
+    var c2l,c3l,c2s,c3s;
+    if(tp==='hourly'){c2l=t('colHours');c3l=t('colRateH');c2s='0.5';c3s='0.5';}
+    else if(tp==='km'){c2l=t('colKm');c3l=t('colRateKm');c2s='1';c3s='0.001';}
+    else if(tp==='expense'){c2l=t('colQty');c3l=t('colDirectAmt');c2s='1';c3s='0.01';}
+    else{c2l=t('colQty');c3l=t('colUnitPrice');c2s='1';c3s='0.01';}
+    return '<tr>'+
+      '<td style="padding:3px 4px"><select style="font-size:11px;width:100%;padding:2px 3px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg3);color:var(--text);cursor:pointer" onchange="updInvType('+i.id+',this.value)">'+typeOpts+'</select></td>'+
+      '<td><input value="'+escH(i.desc)+'" placeholder="'+escH(t('descPh'))+'" oninput="updInv('+i.id+',\'desc\',this.value)"></td>'+
+      '<td>'+lbl+escH(c2l)+'</div><input type="number" value="'+i.qty+'" step="'+c2s+'" oninput="updInv('+i.id+',\'qty\',this.value)" style="text-align:center"></td>'+
+      '<td>'+lbl+escH(c3l)+'</div><input type="number" value="'+i.price+'" step="'+c3s+'" oninput="updInv('+i.id+',\'price\',this.value)" style="text-align:right"></td>'+
+      '<td><input type="number" value="'+i.vat+'" step="1" min="0" max="100" oninput="updInv('+i.id+',\'vat\',this.value)" style="text-align:center"></td>'+
+      '<td style="text-align:right;font-family:var(--mono);font-size:13px;padding:6px 8px" id="ia'+i.id+'">0.00</td>'+
+      '<td><button class="btn btn-xs btn-danger" onclick="remInv('+i.id+')">x</button></td>'+
+      '</tr>';
+  }).join('');
+}
 function renderInvTotals(){var c=curSym();var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;var e=el('ia'+i.id);if(e)e.textContent=(n+v).toFixed(2);});var IL=L10N[el('inv-lang')?el('inv-lang').value:'de']||L10N.en;el('inv-totals').innerHTML='<div class="trow"><span class="tl">'+IL.sub+':</span><span class="ta">'+c+' '+sub.toFixed(2)+'</span></div><div class="trow"><span class="tl">'+IL.vatl+':</span><span class="ta">'+c+' '+tv.toFixed(2)+'</span></div><div class="tdiv"></div><div class="trow grand"><span class="tl">'+IL.total+':</span><span class="ta" style="color:var(--accent)">'+c+' '+(sub+tv).toFixed(2)+'</span></div>';}
 function getInvTotals(){var sub=0,tv=0;S.invItems.forEach(function(i){var n=flt(i.qty)*flt(i.price);var v=n*flt(i.vat)/100;sub+=n;tv+=v;});return{sub:sub,tv:tv,grand:sub+tv};}
 function importHours(){var bp={};S.timeLogs.forEach(function(l){if(!l.projectId)return;bp[l.projectId]=(bp[l.projectId]||0)+l.duration;});var e=Object.keys(bp);if(!e.length){showToast('inv-toast','Nema pracenih sati za uvoz.',false);return;}e.forEach(function(pid){var p=gp(pid);if(!p)return;var cl=gc(p.clientId);addInvRow(p.title+(cl?' - '+cl.name:''),parseFloat((bp[pid]/3600).toFixed(2)),p.rate||S.settings.rate||75,S.settings.vat||20);});showToast('inv-toast','Uvezeno '+e.length+' projekt(a).',true);}

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Compallo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qr_UTF8.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1003,7 +1004,17 @@ body.light #landing-page .final-dim{color:#1f2328}
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
       <span data-i18n="lineItems"></span>
-      <button class="btn btn-sm" onclick="addInvRow()" data-i18n="add"></button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select id="inv-quick-item" class="btn btn-sm" style="cursor:pointer;font-size:11px" onchange="addQuickItem(this)">
+          <option value="">+ Brza stavka</option>
+          <option value="gorivo">⛽ Gorivo / putni troškovi</option>
+          <option value="hotel">🏨 Smještaj u hotelu</option>
+          <option value="cam">💻 CAM programiranje na licu mjesta</option>
+          <option value="postproc">⚙️ Postavljanje post-procesora</option>
+          <option value="konzult">📋 Konzultacije</option>
+        </select>
+        <button class="btn btn-sm" onclick="addInvRow()" data-i18n="add"></button>
+      </div>
     </div>
     <table class="inv-table">
       <thead><tr><th style="width:38%" data-i18n="thDesc"></th><th style="width:10%" data-i18n="hours"></th><th style="width:17%">€/h</th><th style="width:10%">PDV%</th><th style="width:17%" data-i18n="thAmount"></th><th style="width:8%"></th></tr></thead>
@@ -1216,6 +1227,7 @@ body.light #landing-page .final-dim{color:#1f2328}
       <div class="field"><label data-i18n="taxId"></label><input id="s-uid"></div>
       <div class="field"><label>IBAN</label><input id="s-iban"></div>
       <div class="field"><label>BIC / SWIFT</label><input id="s-bic"></div>
+      <div class="field"><label>PayPal link / email</label><input id="s-paypal" placeholder="https://paypal.me/yourname"></div>
     </div>
   </div>
   <div class="settings-section">
@@ -2762,9 +2774,40 @@ function saveGanttTask(){S.ganttTasks.push({id:S.nextId++,title:el('gt-title').v
 function delGantt(id){S.ganttTasks=S.ganttTasks.filter(function(t){return t.id!==id;});save();renderGantt();}
 
 // ─── INVOICE
-function applySettings(){var ss=S.settings;el('ifn').value=ss.name||'';el('ifa').value=ss.addr||'';el('ife').value=ss.email||'';el('ifu').value=ss.uid||'';el('ifib').value=ss.iban||'';el('ifbic').value=ss.bic||'';if(!el('inote').value)el('inote').value=ss.note||'';}
+function applySettings(){var ss=S.settings;el('ifn').value=ss.name||'';el('ifa').value=ss.addr||'';el('ife').value=ss.email||'';el('ifu').value=ss.uid||'';el('ifib').value=ss.iban||'';el('ifbic').value=ss.bic||'';if(!el('inote').value)el('inote').value=ss.note||'';if(ss.paypal){el('pay-paypal-val').value=ss.paypal;el('pay-paypal').checked=true;el('pay-paypal-row').style.display='block';updatePayEmpty();}}
 function refreshInvClientSel(){var o='<option value="">'+t('clientFrom')+'</option>'+S.clients.map(function(c){return '<option value="'+c.id+'">'+escH(c.name)+'</option>';}).join('');el('inv-client-sel').innerHTML=o;}
 function fillClientFromSel(){var c=gc(el('inv-client-sel').value);if(!c)return;el('itn').value=c.name;el('ita').value=c.addr||'';el('ite').value=c.email||'';el('itu').value=c.uid||'';el('inv-client-sel').value='';}
+function addQuickItem(sel){
+  var v=sel.value;if(!v)return;sel.value='';
+  var r=S.settings.rate||75;var vat=S.settings.vat||20;
+  var items={
+    gorivo:{desc:'Gorivo / putni troškovi',qty:1,price:0,vat:0},
+    hotel:{desc:'Smještaj u hotelu',qty:1,price:0,vat:vat},
+    cam:{desc:'CAM programiranje na licu mjesta',qty:8,price:r,vat:vat},
+    postproc:{desc:'Postavljanje post-procesora',qty:4,price:r,vat:vat},
+    konzult:{desc:'Konzultacije',qty:1,price:r,vat:vat}
+  };
+  var d=items[v];if(d)addInvRow(d.desc,d.qty,d.price,d.vat);
+}
+function makeQRDataURL(text){
+  if(typeof qrcode==='undefined')return null;
+  try{
+    var qr=qrcode(0,'M');qr.addData(text,'Byte');qr.make();
+    var sz=qr.getModuleCount();var sc=4;
+    var cv=document.createElement('canvas');cv.width=sz*sc;cv.height=sz*sc;
+    var cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);
+    cx.fillStyle='#000';
+    for(var r=0;r<sz;r++)for(var c=0;c<sz;c++)if(qr.isDark(r,c))cx.fillRect(c*sc,r*sc,sc,sc);
+    return cv.toDataURL('image/png');
+  }catch(e){return null;}
+}
+function buildEPCString(amount){
+  var iban=(gv('ifib')||'').replace(/\s/g,'');
+  var bic=(gv('ifbic')||'').replace(/\s/g,'');
+  var name=(gv('ifn')||'').substring(0,70);
+  var amt=amount>0?'EUR'+amount.toFixed(2):'EUR';
+  return['BCD','002','1','SCT',bic,name,iban,amt,'','',''].join('\n');
+}
 function addInvRow(desc,qty,price,vat){desc=desc||'';qty=qty||1;price=price!=null?price:(S.settings.rate||75);vat=vat!=null?vat:(S.settings.vat||20);S.invItems.push({id:S.invItemId++,desc:desc,qty:qty,price:price,vat:vat});renderInvItems();renderInvTotals();}
 function remInv(id){S.invItems=S.invItems.filter(function(i){return i.id!==id;});renderInvItems();renderInvTotals();}
 function updInv(id,f,v){var i=S.invItems.find(function(i){return i.id===id;});if(i){i[f]=v;renderInvTotals();}}
@@ -2790,12 +2833,16 @@ function previewInvoice(){
   }).join('');
   var pay=getPayOpts();var payHtml='';
   if(gv('ifib')||pay.paypal||pay.revolut){
+    var qrUrl=pay.sepa?makeQRDataURL(buildEPCString(t.grand)):null;
     payHtml='<div style="background:#f0faf5;border:1px solid #c6e9d8;border-radius:8px;padding:20px 24px;margin-bottom:20px"><div style="font-size:10px;font-weight:700;color:#0F6E56;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">'+L.pay+'</div>';
+    payHtml+='<div style="display:flex;align-items:flex-start;gap:16px"><div style="flex:1">';
     if(gv('ifib'))payHtml+='<div style="font-size:12px;color:#555;margin-bottom:3px;font-weight:600">'+L.iban+'</div><div style="font-size:13px;color:#111;font-weight:700;margin-bottom:8px">'+escH(gv('ifib'))+'</div>';
     if(gv('ifbic'))payHtml+='<div style="font-size:12px;color:#555;margin-bottom:3px;font-weight:600">'+L.bic+'</div><div style="font-size:13px;color:#111;margin-bottom:8px">'+escH(gv('ifbic'))+'</div>';
     if(pay.paypal)payHtml+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="background:#003087;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px">PayPal</div><div style="font-size:12px;color:#333">'+escH(pay.paypal)+'</div></div>';
     if(pay.revolut)payHtml+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="background:#191c1f;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px">Revolut</div><div style="font-size:12px;color:#333">'+escH(pay.revolut)+'</div></div>';
     payHtml+='</div>';
+    if(qrUrl)payHtml+='<div style="text-align:center;flex-shrink:0"><img src="'+qrUrl+'" width="80" height="80" style="display:block;border:1px solid #c6e9d8;border-radius:4px"><div style="font-size:9px;color:#888;margin-top:4px">SEPA QR</div></div>';
+    payHtml+='</div></div>';
   }
   el('inv-preview-content').innerHTML='<div style="padding:40px 48px;font-family:Arial,sans-serif;background:#fff;color:#111"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px"><div><div style="font-size:38px;font-weight:900;color:#111;letter-spacing:-1.5px;margin-bottom:14px">'+L.invoice+'</div><div style="font-size:13px;color:#555;line-height:1.9">'+L.num+': <strong style="color:#111">'+escH(gv('inum'))+'</strong><br>'+L.date+': '+gv('idate')+(gv('idue')?'<br>'+L.due+': '+gv('idue'):'')+'</div></div><div style="text-align:right"><div style="font-size:17px;font-weight:700;color:#1D9E75;margin-bottom:6px">'+escH(gv('ifn'))+'</div><div style="font-size:12px;color:#666;line-height:1.9">'+escH(gv('ifa'))+'<br>'+escH(gv('ife'))+(gv('ifu')?'<br>UID: '+escH(gv('ifu')):'')+'</div></div></div><div style="background:#f8f9fa;border-left:4px solid #1D9E75;padding:18px 22px;margin-bottom:28px;border-radius:0 6px 6px 0"><div style="font-size:10px;font-weight:700;color:#aaa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">'+L.to+'</div><div style="font-size:17px;font-weight:700;color:#111;margin-bottom:5px">'+(gv('itn')||'&mdash;')+'</div><div style="font-size:13px;color:#444;line-height:1.8">'+escH(gv('ita'))+(gv('ite')?'<br>'+escH(gv('ite')):'')+(gv('itu')?'<br>UID: '+escH(gv('itu')):'')+'</div></div><table style="width:100%;border-collapse:collapse;border:1px solid #ddeedd;border-radius:6px;overflow:hidden"><thead><tr style="background:#1D9E75"><th style="padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase">'+L.desc+'</th><th style="padding:11px 8px;text-align:center;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;width:8%">'+L.qty+'</th><th style="padding:11px 8px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;width:14%">'+L.price+'</th><th style="padding:11px 8px;text-align:center;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;width:8%">'+L.vat+'</th><th style="padding:11px 14px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;width:14%">'+L.amount+'</th></tr>'+rows+'</table><div style="display:flex;justify-content:flex-end;margin:16px 0 24px"><div style="min-width:240px;background:#f8f9fa;border:1px solid #ddeedd;border-radius:6px;padding:14px 18px"><div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:#555"><span>'+L.sub+':</span><span>'+c+' '+t.sub.toFixed(2)+'</span></div><div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:#555"><span>'+L.vatl+':</span><span>'+c+' '+t.tv.toFixed(2)+'</span></div><div style="border-top:2px solid #1D9E75;margin:8px 0"></div><div style="display:flex;justify-content:space-between;padding:5px 0;font-size:17px;font-weight:700"><span>'+L.total+':</span><span style="color:#1D9E75">'+c+' '+t.grand.toFixed(2)+'</span></div></div></div>'+payHtml+(gv('inote')?'<div style="font-size:11px;color:#888;font-style:italic;padding-top:12px;border-top:1px solid #eee;margin-bottom:8px">'+escH(gv('inote'))+'</div>':'')+'<div style="text-align:center;font-size:10px;color:#ccc;margin-top:28px;padding-top:14px;border-top:1px solid #f0f0f0">'+escH(gv('ifn'))+' &middot; '+escH(gv('ifa'))+'</div></div>';
   openModal('modal-preview');
@@ -2845,14 +2892,20 @@ function generatePDF(){
   doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(29,158,117);
   doc.text(L.total+':',MR-60,y);doc.text(c+' '+t.grand.toFixed(2),MR-4,y,{align:'right'});
   if(gv('ifib')||pay.paypal||pay.revolut){
-    y+=14;var payH=pay.paypal||pay.revolut?22:14;
+    y+=14;
+    var hasExtra=pay.paypal||pay.revolut;
+    var qrPdfUrl=pay.sepa?makeQRDataURL(buildEPCString(t.grand)):null;
+    var payH=(qrPdfUrl?30:0)+(hasExtra?22:14);if(qrPdfUrl&&payH<36)payH=36;
+    var textW=qrPdfUrl?PW-36:PW;
     doc.setFillColor(240,250,245);doc.roundedRect(ML,y,PW,payH,2,2,'F');doc.setDrawColor(180,220,200);doc.setLineWidth(.5);doc.roundedRect(ML,y,PW,payH,2,2,'S');
     doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(15,110,86);doc.text(L.pay.toUpperCase(),ML+4,y+5);
     doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,35,40);
     if(gv('ifib')){doc.setFont('helvetica','bold');doc.text(L.iban+': ',ML+4,y+11,{continued:true});doc.setFont('helvetica','normal');doc.text(gv('ifib'),{});}
-    var py=y+18;
+    if(gv('ifbic')){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(80,90,100);doc.text('BIC: '+gv('ifbic'),ML+4,y+17);}
+    var py=y+(qrPdfUrl?28:18);
     if(pay.paypal){doc.setFillColor(0,48,135);doc.roundedRect(ML+4,py-4,18,5,1,1,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(255,255,255);doc.text('PayPal',ML+5.5,py-.5);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(40,45,55);doc.text(pay.paypal,ML+25,py-.5);}
     if(pay.revolut){doc.setFillColor(25,28,31);doc.roundedRect(ML+(pay.paypal?85:4),py-4,18,5,1,1,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(255,255,255);doc.text('Revolut',ML+(pay.paypal?86.5:5.5),py-.5);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(40,45,55);doc.text(pay.revolut,ML+(pay.paypal?106:25),py-.5);}
+    if(qrPdfUrl){try{doc.addImage(qrPdfUrl,'PNG',MR-32,y+3,30,30);}catch(e){}}
     y+=payH+4;
   }
   if(gv('inote')){y+=5;doc.setFont('helvetica','italic');doc.setFontSize(8);doc.setTextColor(130,135,145);doc.text(doc.splitTextToSize(gv('inote'),PW),ML,y);}
@@ -3648,7 +3701,7 @@ function loadSettings(){
   var ss=S.settings;
   APP_LANG=ss.appLang||'hr';APP_THEME=ss.appTheme||'dark';applyTheme();updateLangButtons();updateThemeButtons();
   el('s-name').value=ss.name||'';el('s-email').value=ss.email||'';el('s-addr').value=ss.addr||'';
-  el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';
+  el('s-uid').value=ss.uid||'';el('s-iban').value=ss.iban||'';el('s-bic').value=ss.bic||'';el('s-paypal').value=ss.paypal||'';
   el('s-rate').value=ss.rate||75;el('s-vat').value=ss.vat||20;el('s-currency').value=ss.currency||'EUR';
   el('s-note').value=ss.note||'';el('s-daily-url').value=ss.dailyWorkerUrl||'';
   // Učitaj dnevne postavke iz localStoragea
@@ -3708,7 +3761,7 @@ async function testDailyNow(){
     else showToast('daily-settings-toast','Gotovo! Pronađeno '+(d.total||0)+' leadova. '+(d.sent?'Email poslan.':'Nema novih firmi.'),d.total>0||d.sent);
   }catch(e){showToast('daily-settings-toast','Greška: '+e.message,false);}
 }
-function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),note:gv('s-note'),calUsername:S.settings.calUsername||'',dailyWorkerUrl:gv('s-daily-url')};save();showToast('settings-toast','Postavke spremljene.',true);}
+function saveSettings(){S.settings={appLang:S.settings.appLang||'hr',appTheme:S.settings.appTheme||'dark',name:gv('s-name'),email:gv('s-email'),addr:gv('s-addr'),uid:gv('s-uid'),iban:gv('s-iban'),bic:gv('s-bic'),paypal:gv('s-paypal'),rate:flt(el('s-rate').value),vat:flt(el('s-vat').value),currency:gv('s-currency'),note:gv('s-note'),calUsername:S.settings.calUsername||'',dailyWorkerUrl:gv('s-daily-url')};save();showToast('settings-toast','Postavke spremljene.',true);}
 function saveMeetingsUsername(){var u=(el('meetings-username').value||'').trim();S.settings.calUsername=u;save();renderMeetings();}
 function renderMeetings(){
   var u=S.settings.calUsername||'';

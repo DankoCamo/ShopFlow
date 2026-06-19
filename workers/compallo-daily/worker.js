@@ -450,6 +450,12 @@ async function run(env, force = false) {
   return { sent: ok, total };
 }
 
+function isAuthorized(request, env) {
+  const auth = request.headers.get('Authorization') || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  return !!env.ADMIN_TOKEN && token === env.ADMIN_TOKEN;
+}
+
 export default {
   async scheduled(_event, env, ctx) {
     ctx.waitUntil(run(env));
@@ -457,9 +463,18 @@ export default {
 
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
-    const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
+    const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
 
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+    if (pathname === '/run' || pathname === '/settings') {
+      if (!isAuthorized(request, env)) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...cors, 'Content-Type': 'application/json' },
+        });
+      }
+    }
 
     if (pathname === '/settings') {
       if (request.method === 'GET') {

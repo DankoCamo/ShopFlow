@@ -1564,7 +1564,7 @@ body.light #landing-page .final-dim{color:#1f2328}
 
 <script>
 // ─── CONFIG
-var CLAUDE_API_KEY = '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';
+var AI_WORKER_URL = 'https://shopflow-ai.camodanko.workers.dev';
 // ─── SUPABASE CONFIG
 var SUPABASE_URL = 'https://orjetlbyrunceopyhyal.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yamV0bGJ5cnVuY2VvcHloeWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDM4NjMsImV4cCI6MjA5MzQ3OTg2M30.vRzJEDmrjA8f8gKs3f-ZDpGpePW2mSTIuh4zpxpicyo';
@@ -1835,6 +1835,21 @@ var KB_CLR = ['#8b949e','#1D9E75','#388bfd','#d29922','#3fb950'];
 var WORKER_URL = 'https://shopflow-search.camodanko.workers.dev';
 var EMAIL_WORKER_URL = 'https://shopflow-email.camodanko.workers.dev';
 var FETCH_WORKER_URL = 'https://shopflow-fetch.camodanko.workers.dev';
+
+// Auth token za pozive prema shopflow-ai / shopflow-email Workerima — Workeri provjeravaju
+// ovaj token kod Supabase-a pa nikad ne treba pravi Anthropic/Brevo kljuc u browseru.
+async function getAuthToken(){
+  if(!supabaseClient) return null;
+  try{ var r=await supabaseClient.auth.getSession(); return r.data&&r.data.session?r.data.session.access_token:null; }catch(e){ return null; }
+}
+async function aiMessages(maxTokens,messages){
+  var token=await getAuthToken();
+  if(!token) throw new Error('Prijava potrebna za AI funkcije.');
+  var res=await fetch(AI_WORKER_URL+'/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({max_tokens:maxTokens,messages:messages})});
+  var data=await res.json();
+  if(!res.ok) throw new Error(data.error||'AI greska');
+  return data;
+}
 function getLeadStatuses(){return {novi:t('leadNew'),kontaktiran:t('leadContacted'),zainteresiran:t('leadInterested'),'nije-odgovorio':t('leadNotContacted'),odbijenica:t('leadRejected')};}
 var LEAD_STATUSES = {novi:'Novi',kontaktiran:'Kontaktiran',zainteresiran:'Zainteresiran','nije-odgovorio':'Nije odgovorio',odbijenica:'Odbio'};
 function getInvStatuses(){return {draft:t('invFilterDraft'),sent:t('invFilterSent'),paid:t('invFilterPaid'),overdue:t('invFilterOverdue')};}
@@ -3313,8 +3328,6 @@ function agentSelectAll(val){agentQueue.forEach(function(i){i.approved=val;});re
 async function runAutoAgent(){
   var query=el('pros-query').value.trim();
   if(!query){el('pros-status').textContent='Upiši djelatnost.';return;}
-  var apiKey=CLAUDE_API_KEY;
-  if(!apiKey){alert('CLAUDE_API_KEY nije postavljen u kodu.');return;}
   agentRunning=true;agentQueue=[];
   var seenEmails={};var foundEmailsCount=0;
   var normLeadN=function(n){return (n||'').toLowerCase().replace(/\b(firma|company|unternehmen|gmbh\s*&\s*co\.?\s*kg|gmbh|ag|og|kg|e\.u\.|ug|ohg|gbr|gesmbh|s\.r\.o\.|ltd|inc|llc|plc|bv|nv)\b\.?/gi,'').replace(/[^a-z0-9]/g,'').trim();};
@@ -3420,8 +3433,7 @@ async function runAutoAgent(){
       if(!companyName){
         agentSetStep(rlabel+' Oglas '+(i+1)+'/'+results.length+': pitam AI za ime firme...');
         try{
-          var cr2=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:60,messages:[{role:'user',content:'Extract ONLY the hiring company name from this job listing. Return just the company name, nothing else. If not identifiable, return: NONE\n\nTitle: '+r.name+'\nSnippet: '+r.desc}]})});
-          var cd=await cr2.json();
+          var cd=await aiMessages(60,[{role:'user',content:'Extract ONLY the hiring company name from this job listing. Return just the company name, nothing else. If not identifiable, return: NONE\n\nTitle: '+r.name+'\nSnippet: '+r.desc}]);
           var cn=(cd.content&&cd.content[0]?cd.content[0].text:'').trim();
           if(cn&&cn!=='NONE'&&cn.length>1&&!isPortalName(cn))companyName=cn;
         }catch(e){}
@@ -3437,8 +3449,7 @@ async function runAutoAgent(){
     try{
       var rfCtx=r.isMaps?'Company info: '+r.desc:'Job: '+r.name+'\nSnippet: '+r.desc.substring(0,200);
       var rfPrompt='A freelance CAM programmer is looking for companies that use CNC machines and CAM software (Mastercam, HyperMill, Fusion 360, etc.) as potential clients.\n\nDoes "'+companyName+'" likely use CNC machines or CAM software in their work (answer YES), or is it a company that clearly would NOT need CAM programming — e.g. health organization, government, bank, insurance, retail, HR agency, school, media (answer NO)?\n\n'+rfCtx+'\n\nAnswer only YES or NO.';
-      var rfRes=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:rfPrompt}]})});
-      var rfData=await rfRes.json();
+      var rfData=await aiMessages(10,[{role:'user',content:rfPrompt}]);
       var rfAnswer=(rfData.content&&rfData.content[0]?rfData.content[0].text:'YES').trim().toUpperCase();
       if(rfAnswer.startsWith('NO'))isRelevant=false;
     }catch(e){}
@@ -3551,8 +3562,7 @@ async function runAutoAgent(){
           +'9. First person singular ONLY (ich), NEVER plural (wir). Wrong: "Wir bieten..." — Correct: "Ich biete..."\n\n'
           +'Format EXACTLY:\nSUBJECT:[subject line in '+region.emailLang+']\n[email body only]';
       }
-      var ar=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:emailPrompt}]})});
-      var ad=await ar.json();
+      var ad=await aiMessages(400,[{role:'user',content:emailPrompt}]);
       var aiText=ad.content&&ad.content[0]?ad.content[0].text:'';
       var aiLines=aiText.split('\n');
       var sl=aiLines.find(function(l){return l.startsWith('SUBJECT:');});
@@ -3662,7 +3672,8 @@ async function sendApproved(){
     var payload={to:item.companyEmail,from:'info@camoutput.com',fromName:'Danko Camo | CAMOutput',subject:item.subject,body:item.body};
     console.log('[sendApproved] Šaljem na',EMAIL_WORKER_URL,'za',item.companyName,payload);
     try{
-      var res=await fetch(EMAIL_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      var _tok=await getAuthToken();
+      var res=await fetch(EMAIL_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(_tok||'')},body:JSON.stringify(payload)});
       var resBody=null;try{resBody=await res.json();}catch(je){}
       console.log('[sendApproved] Odgovor:',res.status,res.ok,resBody);
       if(res.ok){
@@ -4029,9 +4040,10 @@ async function sendEmail() {
   showToast('email-toast', '', false);
 
   try {
+    var _tok2 = await getAuthToken();
     var res = await fetch(EMAIL_WORKER_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (_tok2 || '') },
       body: JSON.stringify({ to: to, subject: subject, body: body })
     });
 
@@ -4068,15 +4080,6 @@ async function generateAIEmail() {
   var id = currentEmailLeadId;
   var lead = S.leads.find(function(l) { return l.id === id; });
   if (!lead) return;
-
-  var apiKey = CLAUDE_API_KEY;
-  if (!apiKey) {
-    el('ai-status').style.display = 'block';
-    el('ai-status').textContent = 'CLAUDE_API_KEY nije postavljen u kodu.';
-    el('ai-status').style.color = 'var(--red)';
-    el('ai-status').style.background = 'var(--red-dim)';
-    return;
-  }
 
   var lang = APP_LANG || el('email-lang').value || 'hr';
   var langName = lang === 'de' ? 'German' : lang === 'hr' ? 'Croatian' : 'English';
@@ -4166,23 +4169,7 @@ async function generateAIEmail() {
   }
 
   try {
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 600,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error ? data.error.message : 'API greska');
+    var data = await aiMessages(600, [{ role: 'user', content: prompt }]);
 
     var text = data.content && data.content[0] ? data.content[0].text : '';
     var lines = text.split('\n');

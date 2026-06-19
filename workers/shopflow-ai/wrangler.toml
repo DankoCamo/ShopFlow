@@ -1,10 +1,17 @@
-name = "shopflow-email"
+name = "shopflow-ai"
 main = "worker.js"
 compatibility_date = "2024-01-01"
 
 [vars]
 SUPABASE_URL = "https://orjetlbyrunceopyhyal.supabase.co"
 SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yamV0bGJ5cnVuY2VvcHloeWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDM4NjMsImV4cCI6MjA5MzQ3OTg2M30.vRzJEDmrjA8f8gKs3f-ZDpGpePW2mSTIuh4zpxpicyo"
+DAILY_LIMIT = "500"
 
-# Secret — already set separately, do not put the real value here:
-#   wrangler secret put BREVO_API_KEY
+# Created via: wrangler kv:namespace create AI_RATE_LIMIT
+# Replace "id" below with the id wrangler prints out.
+[[kv_namespaces]]
+binding = "AI_RATE_LIMIT"
+id = "b7fa0919cb9747df85c59fe3fe6b7ee5"
+
+# Secret — never put the real key in this file. Set it with:
+#   wrangler secret put CLAUDE_KEY

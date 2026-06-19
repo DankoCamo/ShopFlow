@@ -1,3 +1,33 @@
+const ALLOWED_ORIGINS = [
+  'https://shop-flow-black.vercel.app',
+];
+
+function corsHeaders(origin) {
+  const allowed = ALLOWED_ORIGINS.includes(origin);
+  return {
+    'Access-Control-Allow-Origin': allowed ? origin : 'null',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Vary': 'Origin',
+  };
+}
+
+async function getUserId(request, env) {
+  const auth = request.headers.get('Authorization') || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  if (!token) return null;
+  try {
+    const res = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+      headers: { Authorization: `Bearer ${token}`, apikey: env.SUPABASE_ANON_KEY },
+    });
+    if (!res.ok) return null;
+    const user = await res.json();
+    return user && user.id ? user.id : null;
+  } catch {
+    return null;
+  }
+}
+
 function formatEmailAsHtml(body) {
   function linkify(text) {
     return text
@@ -31,18 +61,23 @@ function formatEmailAsHtml(body) {
 
 export default {
   async fetch(request, env) {
+    const origin = request.headers.get('Origin') || '';
+    const cors = corsHeaders(origin);
+
     if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        }
-      });
+      return new Response(null, { headers: cors });
     }
 
     if (request.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405 });
+      return new Response('Method not allowed', { status: 405, headers: cors });
+    }
+
+    const userId = await getUserId(request, env);
+    if (!userId) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...cors, 'Content-Type': 'application/json' },
+      });
     }
 
     try {
@@ -68,18 +103,12 @@ export default {
       const result = await resp.json();
 
       return new Response(JSON.stringify({ success: resp.ok, ...result }), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        },
+        headers: { ...cors, 'Content-Type': 'application/json' },
         status: resp.ok ? 200 : 500
       });
     } catch (e) {
       return new Response(JSON.stringify({ success: false, error: e.message }), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        },
+        headers: { ...cors, 'Content-Type': 'application/json' },
         status: 500
       });
     }

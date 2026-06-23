@@ -2796,6 +2796,20 @@ function toggleTimer(){
     if(dur>5){S.timeLogs.push({id:S.nextId++,projectId:parseInt(el('timer-project').value)||null,note:el('timer-note').value,duration:dur,date:tod(),manual:false});el('timer-note').value='';save();renderTracker();}
   }
 }
+// ─── DELMIA AUTO-TRACKER (cita stanje iz lokalnog watcher skripta na PC-u, vidi scripts/delmia-tracker-watcher.ps1)
+var DELMIA_WATCHER_URL='http://localhost:5005/status';
+var DELMIA_PROJECT_TITLE='CAM Delmia - Kres';
+function pollDelmiaWatcher(){
+  fetch(DELMIA_WATCHER_URL,{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+    var p=S.projects.find(function(pr){return (pr.title||'').trim().toLowerCase()===DELMIA_PROJECT_TITLE.toLowerCase();});
+    if(d.running){
+      if(p){var sel=el('timer-project');if(sel)sel.value=p.id;}
+      if(!S.timer.running)toggleTimer();
+    }else if(S.timer.running){
+      toggleTimer();
+    }
+  }).catch(function(){});
+}
 function openManualEntry(){el('manual-id').value='';el('manual-note').value='';el('manual-h').value=0;el('manual-m').value=0;el('manual-date').value=tod();el('manual-title').textContent=t('manualTimeTitle');el('manual-del').style.display='none';refreshProjSel();updateManualPreview();openModal('modal-manual');setTimeout(function(){el('manual-note').focus();},100);}
 function editManualLog(id){var l=S.timeLogs.find(function(l){return l.id===id;});if(!l)return;el('manual-id').value=id;el('manual-note').value=l.note||'';el('manual-h').value=Math.floor(l.duration/3600);el('manual-m').value=Math.floor((l.duration%3600)/60);el('manual-date').value=l.date;el('manual-title').textContent=t('editTaskTitle');el('manual-del').style.display='inline-flex';refreshProjSel();el('manual-project').value=l.projectId||'';updateManualPreview();openModal('modal-manual');}
 function updateManualPreview(){var s=flt(el('manual-h').value)*3600+flt(el('manual-m').value)*60;el('manual-preview').textContent=fmtD(s);}
@@ -4288,6 +4302,7 @@ function initApp(){
   APP_THEME=S.settings.appTheme||'dark';
   applyTheme();updateLangButtons();updateThemeButtons();applyTranslations();applyLandingTranslations();
   refreshProjSel();refreshClSel();refreshTemplateSelect();renderDash();
+  setInterval(pollDelmiaWatcher,4000);
   // Handle ?addLead=1 from compallo-daily email links
   (function(){
     var params=new URLSearchParams(window.location.search);

@@ -1,41 +1,38 @@
 # ShopFlow Delmia auto-tracker watcher.
-# Provjerava je li 3DEXPERIENCE/Delmia pokrenut na ovom racunalu i preko
-# lokalnog HTTP endpointa javlja ShopFlow web appu (otvorenom u browseru)
-# da sam upali/ugasi timer u Trackeru.
+# Prati je li 3DEXPERIENCE pokrenut i salje status u Supabase.
+# ShopFlow app cita status iz Supabase i sam pali/gasi timer.
 #
-# PRIJE PRVOG POKRETANJA PROVJERI/PODESI:
-#   - $ProcessName: tocan naziv .exe procesa (Task Manager -> tab Details ->
-#     desni klik na kolonu -> "Image name", pronadji 3DEXPERIENCE/Delmia proces)
-#   - $Port: mora se poklapati s DELMIA_WATCHER_URL u index.html (default 5005)
-#
-# U ShopFlow appu mora postojati projekt s tocnim nazivom "CAM Delmia - Kres"
-# (Kanban -> Novi projekt) da bi se vrijeme automatski pripisalo tom projektu.
+# PODESI: $ProcessName = tocan naziv exe-a bez ekstenzije (provjeri Task Manager)
 
-$ProcessName = "3DEXPERIENCE"   # bez .exe ekstenzije, provjeri u Task Manageru
-$Port        = 5005
+$ProcessName  = "3DEXPERIENCE"
+$SupabaseUrl  = "https://orjetlbyrunceopyhyal.supabase.co"
+$SupabaseKey  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yamV0bGJ5cnVuY2VvcHloeWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDM4NjMsImV4cCI6MjA5MzQ3OTg2M30.vRzJEDmrjA8f8gKs3f-ZDpGpePW2mSTIuh4zpxpicyo"
 
-$listener = New-Object System.Net.HttpListener
-$listener.Prefixes.Add("http://localhost:$Port/")
-$listener.Start()
-Write-Host "Delmia tracker watcher slusa na http://localhost:$Port/status (proces: $ProcessName)"
+$headers = @{
+    "apikey"       = $SupabaseKey
+    "Authorization"= "Bearer $SupabaseKey"
+    "Content-Type" = "application/json"
+    "Prefer"       = "return=minimal"
+}
 
-try {
-    while ($true) {
-        $running = $null -ne (Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
+$lastRunning = $null
+Write-Host "Delmia tracker pokrenut. Gledam: $ProcessName"
 
-        $task = $listener.GetContextAsync()
-        if ($task.Wait(1000)) {
-            $context = $task.Result
-            $response = $context.Response
-            $response.Headers.Add("Access-Control-Allow-Origin", "*")
-            $response.ContentType = "application/json"
-            $body = '{"running":' + ($running.ToString().ToLower()) + '}'
-            $buffer = [System.Text.Encoding]::UTF8.GetBytes($body)
-            $response.ContentLength64 = $buffer.Length
-            $response.OutputStream.Write($buffer, 0, $buffer.Length)
-            $response.OutputStream.Close()
+while ($true) {
+    $running = $null -ne (Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
+
+    if ($running -ne $lastRunning) {
+        $body = "{`"running`":$($running.ToString().ToLower())}"
+        try {
+            Invoke-RestMethod -Method PATCH `
+                -Uri "$SupabaseUrl/rest/v1/tracker_status?id=eq.1" `
+                -Headers $headers -Body $body | Out-Null
+            Write-Host "$(Get-Date -Format 'HH:mm:ss')  running = $running"
+        } catch {
+            Write-Host "$(Get-Date -Format 'HH:mm:ss')  Greska: $_"
         }
+        $lastRunning = $running
     }
-} finally {
-    $listener.Stop()
+
+    Start-Sleep -Seconds 3
 }

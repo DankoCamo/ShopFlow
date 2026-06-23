@@ -2796,11 +2796,14 @@ function toggleTimer(){
     if(dur>5){S.timeLogs.push({id:S.nextId++,projectId:parseInt(el('timer-project').value)||null,note:el('timer-note').value,duration:dur,date:tod(),manual:false});el('timer-note').value='';save();renderTracker();}
   }
 }
-// ─── DELMIA AUTO-TRACKER (cita stanje iz lokalnog watcher skripta na PC-u, vidi scripts/delmia-tracker-watcher.ps1)
-var DELMIA_WATCHER_URL='http://localhost:5005/status';
+// ─── DELMIA AUTO-TRACKER (status ide preko Supabase, vidi scripts/delmia-tracker-watcher.ps1)
 var DELMIA_PROJECT_TITLE='CAM Delmia - Kres';
 function pollDelmiaWatcher(){
-  fetch(DELMIA_WATCHER_URL,{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+  fetch(SUPABASE_URL+'/rest/v1/tracker_status?id=eq.1&select=running',{
+    cache:'no-store',
+    headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
+  }).then(function(r){return r.json();}).then(function(rows){
+    var d=rows[0];if(!d)return;
     var p=S.projects.find(function(pr){return (pr.title||'').trim().toLowerCase()===DELMIA_PROJECT_TITLE.toLowerCase();});
     if(d.running){
       if(p){var sel=el('timer-project');if(sel)sel.value=p.id;}

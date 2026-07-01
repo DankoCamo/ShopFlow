@@ -2798,22 +2798,34 @@ function toggleTimer(){
 }
 // ─── DELMIA AUTO-TRACKER (status ide preko Supabase, vidi scripts/delmia-tracker-watcher.ps1)
 var DELMIA_PROJECT_TITLE='CAM Delmia - Kres';
+var _delmiaPauseStart=null;
+function _delmiaResumeDisplay(){
+  if(_delmiaPauseStart){S.timer.start+=Date.now()-_delmiaPauseStart;_delmiaPauseStart=null;save();}
+  if(!S.timer.interval){
+    S.timer.interval=setInterval(function(){el('timer-display').textContent=fmtD(Math.floor((Date.now()-S.timer.start)/1000));},1000);
+    el('timer-display').classList.add('running');el('timer-btn').className='btn btn-timer running';el('timer-btn').innerHTML='&#9632;';
+  }
+}
 function pollDelmiaWatcher(){
-  fetch(SUPABASE_URL+'/rest/v1/tracker_status?id=eq.1&select=running',{
+  fetch(SUPABASE_URL+'/rest/v1/tracker_status?id=eq.1&select=running,paused',{
     cache:'no-store',
     headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
   }).then(function(r){return r.json();}).then(function(rows){
     var d=rows[0];if(!d)return;
     var p=S.projects.find(function(pr){return (pr.title||'').trim().toLowerCase()===DELMIA_PROJECT_TITLE.toLowerCase();});
-    if(d.running){
+    if(d.running&&!d.paused){
       if(p){var sel=el('timer-project');if(sel)sel.value=p.id;}
       if(!S.timer.running){toggleTimer();}
-      else if(S.timer.start&&!S.timer.interval){
-        S.timer.interval=setInterval(function(){el('timer-display').textContent=fmtD(Math.floor((Date.now()-S.timer.start)/1000));},1000);
-        el('timer-display').classList.add('running');el('timer-btn').className='btn btn-timer running';el('timer-btn').innerHTML='&#9632;';
+      else{_delmiaResumeDisplay();}
+    }else if(d.running&&d.paused){
+      if(S.timer.running&&S.timer.interval){
+        clearInterval(S.timer.interval);S.timer.interval=null;
+        if(!_delmiaPauseStart)_delmiaPauseStart=Date.now();
+        el('timer-display').classList.remove('running');
       }
-    }else if(S.timer.running){
-      toggleTimer();
+    }else if(!d.running){
+      if(_delmiaPauseStart){S.timer.start+=Date.now()-_delmiaPauseStart;_delmiaPauseStart=null;}
+      if(S.timer.running)toggleTimer();
     }
   }).catch(function(){});
 }

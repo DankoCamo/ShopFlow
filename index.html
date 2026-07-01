@@ -2793,7 +2793,7 @@ function toggleTimer(){
   }else{
     var dur=Math.floor((Date.now()-t.start)/1000);clearInterval(t.interval);t.running=false;
     el('timer-display').classList.remove('running');el('timer-btn').className='btn btn-timer stopped';el('timer-btn').innerHTML='&#9654;';el('timer-display').textContent='00:00:00';
-    if(dur>5){S.timeLogs.push({id:S.nextId++,projectId:parseInt(el('timer-project').value)||null,note:el('timer-note').value,duration:dur,date:tod(),manual:false});el('timer-note').value='';save();renderTracker();}
+    if(dur>5){var _pid=parseInt(el('timer-project').value)||null;var _today=tod();var _ex=S.timeLogs.find(function(l){return !l.manual&&l.date===_today&&l.projectId===_pid;});if(_ex){_ex.duration+=dur;}else{S.timeLogs.push({id:S.nextId++,projectId:_pid,note:el('timer-note').value,duration:dur,date:_today,manual:false});}el('timer-note').value='';save();renderTracker();}
   }
 }
 // ─── DELMIA AUTO-TRACKER (status ide preko Supabase, vidi scripts/delmia-tracker-watcher.ps1)

@@ -107,7 +107,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 /* TRACKER */
 .timer-hero{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .timer-display{font-size:42px;font-weight:400;font-family:var(--mono);letter-spacing:2px;min-width:140px}
-.timer-display.running{color:var(--accent)}
+.timer-display.running{color:var(--accent)}.timer-display.paused{color:var(--muted);opacity:0.6}
 .timer-right{display:flex;gap:10px;align-items:center;flex:1;flex-wrap:wrap}
 .timer-right select,.timer-right input{flex:1;min-width:140px;font-size:13px;padding:9px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);outline:none}
 .timer-right select:focus,.timer-right input:focus{border-color:var(--accent)}
@@ -2801,6 +2801,7 @@ var DELMIA_PROJECT_TITLE='CAM Delmia - Kres';
 var _delmiaPauseStart=null;
 function _delmiaResumeDisplay(){
   if(_delmiaPauseStart){S.timer.start+=Date.now()-_delmiaPauseStart;_delmiaPauseStart=null;save();}
+  el('timer-display').classList.remove('paused');
   if(!S.timer.interval){
     S.timer.interval=setInterval(function(){el('timer-display').textContent=fmtD(Math.floor((Date.now()-S.timer.start)/1000));},1000);
     el('timer-display').classList.add('running');el('timer-btn').className='btn btn-timer running';el('timer-btn').innerHTML='&#9632;';
@@ -2818,10 +2819,11 @@ function pollDelmiaWatcher(){
       if(!S.timer.running){toggleTimer();}
       else{_delmiaResumeDisplay();}
     }else if(d.running&&d.paused){
-      if(S.timer.running&&S.timer.interval){
-        clearInterval(S.timer.interval);S.timer.interval=null;
+      if(S.timer.running){
+        if(S.timer.interval){clearInterval(S.timer.interval);S.timer.interval=null;}
         if(!_delmiaPauseStart)_delmiaPauseStart=Date.now();
-        el('timer-display').classList.remove('running');
+        el('timer-display').classList.remove('running');el('timer-display').classList.add('paused');
+        el('timer-btn').className='btn btn-timer running';
       }
     }else if(!d.running){
       if(_delmiaPauseStart){S.timer.start+=Date.now()-_delmiaPauseStart;_delmiaPauseStart=null;}

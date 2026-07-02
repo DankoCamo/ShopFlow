@@ -66,7 +66,7 @@ while ($true) {
                 -Uri "$SupabaseUrl/rest/v1/tracker_status?id=eq.1" `
                 -Headers $headers -Body $body | Out-Null
             if ($paused) {
-                $reason = if ($idleSeconds -ge $IdleThreshold) { "mis idle ${([int]$idleSeconds)}s" } else { "fokus drugdje ${([int]$focusSeconds)}s" }
+                $reason = if ($idleSeconds -ge $IdleThreshold) { "mis idle $([int]$idleSeconds)s" } else { "fokus drugdje $([int]$focusSeconds)s" }
                 Write-Host "$(Get-Date -Format 'HH:mm:ss')  PAUZA ($reason)"
             } elseif ($running) {
                 Write-Host "$(Get-Date -Format 'HH:mm:ss')  running"

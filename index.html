@@ -4325,6 +4325,7 @@ function initApp(){
   applyTheme();updateLangButtons();updateThemeButtons();applyTranslations();applyLandingTranslations();
   refreshProjSel();refreshClSel();refreshTemplateSelect();renderDash();
   setInterval(pollDelmiaWatcher,4000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)pollDelmiaWatcher();});
   // Handle ?addLead=1 from compallo-daily email links
   (function(){
     var params=new URLSearchParams(window.location.search);

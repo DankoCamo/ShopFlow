@@ -7,6 +7,13 @@ $FocusDebounce    = 3    # 3DEXPERIENCE mora biti u fokusu barem 3s da se pauza 
 $SupabaseUrl      = "https://orjetlbyrunceopyhyal.supabase.co"
 $SupabaseKey      = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yamV0bGJ5cnVuY2VvcHloeWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDM4NjMsImV4cCI6MjA5MzQ3OTg2M30.vRzJEDmrjA8f8gKs3f-ZDpGpePW2mSTIuh4zpxpicyo"
 
+# Jednokratna instanca: ubij staru instancu ako postoji
+$lockFile = "$env:TEMP\shopflow-delmia.pid"
+if (Test-Path $lockFile) {
+    try { Stop-Process -Id ([int](Get-Content $lockFile)) -Force -ErrorAction SilentlyContinue } catch {}
+}
+$PID | Out-File $lockFile -Force
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type @"
 using System;

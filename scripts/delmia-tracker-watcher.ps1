@@ -1,13 +1,28 @@
 # ShopFlow Delmia auto-tracker watcher.
-# Prati je li 3DEXPERIENCE pokrenut i ima li pomaka misa.
-# Ako nema pomaka misa $IdleThreshold sekundi, salje paused=true u Supabase.
+# Pauza ako: mis idle >= $IdleThreshold sekundi ILI 3DEXPERIENCE prozor nije u fokusu >= $IdleThreshold sekundi.
 
 $ProcessName   = "3DEXPERIENCE"
-$IdleThreshold = 30   # sekundi bez pomaka misa -> pauza
+$IdleThreshold = 30   # sekundi
 $SupabaseUrl   = "https://orjetlbyrunceopyhyal.supabase.co"
 $SupabaseKey   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yamV0bGJ5cnVuY2VvcHloeWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MDM4NjMsImV4cCI6MjA5MzQ3OTg2M30.vRzJEDmrjA8f8gKs3f-ZDpGpePW2mSTIuh4zpxpicyo"
 
 Add-Type -AssemblyName System.Windows.Forms
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public class Win32 {
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
+}
+"@
+
+function Get-ForegroundProcessName {
+    $hwnd = [Win32]::GetForegroundWindow()
+    $pid  = 0
+    [Win32]::GetWindowThreadProcessId($hwnd, [ref]$pid) | Out-Null
+    $proc = Get-Process -Id $pid -ErrorAction SilentlyContinue
+    return $proc.Name
+}
 
 $headers = @{
     "apikey"        = $SupabaseKey
@@ -16,23 +31,33 @@ $headers = @{
     "Prefer"        = "return=minimal"
 }
 
-$lastRunning      = $null
-$lastPaused       = $null
-$lastMousePos     = [System.Windows.Forms.Cursor]::Position
-$lastMouseMoveTime = [DateTime]::Now
+$lastRunning        = $null
+$lastPaused         = $null
+$lastMousePos       = [System.Windows.Forms.Cursor]::Position
+$lastMouseMoveTime  = [DateTime]::Now
+$lastDelmiaFocusTime = [DateTime]::Now
 
-Write-Host "Delmia tracker pokrenut. Gledam: $ProcessName (idle pauza: ${IdleThreshold}s)"
+Write-Host "Delmia tracker pokrenut. Gledam: $ProcessName (idle/focus pauza: ${IdleThreshold}s)"
 
 while ($true) {
     $running = $null -ne (Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
 
+    # Mis idle
     $currentPos = [System.Windows.Forms.Cursor]::Position
     if ($currentPos.X -ne $lastMousePos.X -or $currentPos.Y -ne $lastMousePos.Y) {
-        $lastMousePos = $currentPos
+        $lastMousePos      = $currentPos
         $lastMouseMoveTime = [DateTime]::Now
     }
     $idleSeconds = ([DateTime]::Now - $lastMouseMoveTime).TotalSeconds
-    $paused = $running -and ($idleSeconds -ge $IdleThreshold)
+
+    # Fokus prozora
+    $focusedProc = Get-ForegroundProcessName
+    if ($focusedProc -eq $ProcessName) {
+        $lastDelmiaFocusTime = [DateTime]::Now
+    }
+    $focusSeconds = ([DateTime]::Now - $lastDelmiaFocusTime).TotalSeconds
+
+    $paused = $running -and (($idleSeconds -ge $IdleThreshold) -or ($focusSeconds -ge $IdleThreshold))
 
     if ($running -ne $lastRunning -or $paused -ne $lastPaused) {
         $body = "{`"running`":$($running.ToString().ToLower()),`"paused`":$($paused.ToString().ToLower())}"
@@ -40,8 +65,14 @@ while ($true) {
             Invoke-RestMethod -Method PATCH `
                 -Uri "$SupabaseUrl/rest/v1/tracker_status?id=eq.1" `
                 -Headers $headers -Body $body | Out-Null
-            $status = if ($paused) { "PAUZA (idle ${idleSeconds}s)" } elseif ($running) { "running" } else { "stopped" }
-            Write-Host "$(Get-Date -Format 'HH:mm:ss')  $status"
+            if ($paused) {
+                $reason = if ($idleSeconds -ge $IdleThreshold) { "mis idle ${([int]$idleSeconds)}s" } else { "fokus drugdje ${([int]$focusSeconds)}s" }
+                Write-Host "$(Get-Date -Format 'HH:mm:ss')  PAUZA ($reason)"
+            } elseif ($running) {
+                Write-Host "$(Get-Date -Format 'HH:mm:ss')  running"
+            } else {
+                Write-Host "$(Get-Date -Format 'HH:mm:ss')  stopped"
+            }
         } catch {
             Write-Host "$(Get-Date -Format 'HH:mm:ss')  Greska: $_"
         }

@@ -17,10 +17,10 @@ public class Win32 {
 "@
 
 function Get-ForegroundProcessName {
-    $hwnd = [Win32]::GetForegroundWindow()
-    $pid  = 0
-    [Win32]::GetWindowThreadProcessId($hwnd, [ref]$pid) | Out-Null
-    $proc = Get-Process -Id $pid -ErrorAction SilentlyContinue
+    $hwnd   = [Win32]::GetForegroundWindow()
+    $winPid = 0
+    [Win32]::GetWindowThreadProcessId($hwnd, [ref]$winPid) | Out-Null
+    $proc = Get-Process -Id $winPid -ErrorAction SilentlyContinue
     return $proc.Name
 }
 

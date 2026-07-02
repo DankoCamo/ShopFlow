@@ -34,19 +34,15 @@ $headers = @{
     "Prefer"        = "return=minimal"
 }
 
-$instanceId          = [System.Guid]::NewGuid().ToString("N").Substring(0, 6)
 $lastRunning         = $null
 $lastPaused          = $null
 $lastMousePos        = [System.Windows.Forms.Cursor]::Position
 $lastMouseMoveTime   = [DateTime]::Now
 $lastDelmiaFocusTime = [DateTime]::Now
 $delmiaContinuousFocusStart = $null
-$verboseCounter      = 0
-
-Write-Host "Delmia tracker pokrenut [$instanceId]. Gledam: $ProcessName (idle/focus pauza: ${IdleThreshold}s)"
+Write-Host "Delmia tracker pokrenut. Gledam: $ProcessName (idle/focus pauza: ${IdleThreshold}s)"
 
 while ($true) {
-    $verboseCounter++
     $running = $null -ne (Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
 
     # Mis idle
@@ -73,11 +69,6 @@ while ($true) {
     $focusSeconds = ([DateTime]::Now - $lastDelmiaFocusTime).TotalSeconds
 
     $paused = $running -and (($idleSeconds -ge $IdleThreshold) -or ($focusSeconds -ge $IdleThreshold))
-
-    # Debug output svake 10 sekundi
-    if ($verboseCounter % 10 -eq 0) {
-        Write-Host "$(Get-Date -Format 'HH:mm:ss')  [debug] focus='$focusedProc' idle=$([int]$idleSeconds)s focuslost=$([int]$focusSeconds)s paused=$paused"
-    }
 
     if ($running -ne $lastRunning -or $paused -ne $lastPaused) {
         $body = "{`"running`":$($running.ToString().ToLower()),`"paused`":$($paused.ToString().ToLower())}"

@@ -886,6 +886,7 @@ body.light #landing-page .final-dim{color:#1f2328}
       <button class="btn btn-sm btn-danger" onclick="clearLogs()" data-i18n="clearAll"></button>
     </div>
   </div>
+  <div id="delmia-status" style="font-size:11px;color:var(--muted);text-align:center;min-height:16px;margin-bottom:4px"></div>
   <div class="timer-hero">
     <div class="timer-display" id="timer-display">00:00:00</div>
     <div class="timer-right">
@@ -2808,17 +2809,21 @@ function _delmiaResumeDisplay(){
   }
 }
 function pollDelmiaWatcher(){
+  var _st=el('delmia-status');
   fetch(SUPABASE_URL+'/rest/v1/tracker_status?id=eq.1&select=running,paused',{
     cache:'no-store',
     headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
   }).then(function(r){return r.json();}).then(function(rows){
     var d=rows[0];if(!d)return;
+    console.log('[Delmia] running='+d.running+' paused='+d.paused+' timer.running='+S.timer.running+' timer.interval='+(!!S.timer.interval));
     var p=S.projects.find(function(pr){return (pr.title||'').trim().toLowerCase()===DELMIA_PROJECT_TITLE.toLowerCase();});
     if(d.running&&!d.paused){
+      if(_st)_st.textContent='Delmia: aktivan';
       if(p){var sel=el('timer-project');if(sel)sel.value=p.id;}
       if(!S.timer.running){toggleTimer();}
       else{_delmiaResumeDisplay();}
     }else if(d.running&&d.paused){
+      if(_st)_st.textContent='Delmia: pauza (fokus izgubljen)';
       if(S.timer.running){
         if(S.timer.interval){clearInterval(S.timer.interval);S.timer.interval=null;}
         if(!_delmiaPauseStart)_delmiaPauseStart=Date.now();
@@ -2826,10 +2831,11 @@ function pollDelmiaWatcher(){
         el('timer-btn').className='btn btn-timer running';
       }
     }else if(!d.running){
+      if(_st)_st.textContent='';
       if(_delmiaPauseStart){S.timer.start+=Date.now()-_delmiaPauseStart;_delmiaPauseStart=null;}
       if(S.timer.running)toggleTimer();
     }
-  }).catch(function(){});
+  }).catch(function(e){console.error('[Delmia] fetch greska:',e);if(_st)_st.textContent='Delmia: greska spajanja';});
 }
 function openManualEntry(){el('manual-id').value='';el('manual-note').value='';el('manual-h').value=0;el('manual-m').value=0;el('manual-date').value=tod();el('manual-title').textContent=t('manualTimeTitle');el('manual-del').style.display='none';refreshProjSel();updateManualPreview();openModal('modal-manual');setTimeout(function(){el('manual-note').focus();},100);}
 function editManualLog(id){var l=S.timeLogs.find(function(l){return l.id===id;});if(!l)return;el('manual-id').value=id;el('manual-note').value=l.note||'';el('manual-h').value=Math.floor(l.duration/3600);el('manual-m').value=Math.floor((l.duration%3600)/60);el('manual-date').value=l.date;el('manual-title').textContent=t('editTaskTitle');el('manual-del').style.display='inline-flex';refreshProjSel();el('manual-project').value=l.projectId||'';updateManualPreview();openModal('modal-manual');}

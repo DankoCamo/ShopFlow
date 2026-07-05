@@ -4316,7 +4316,12 @@ function initApp(){
   S.emailTemplates=[];S.timer={running:false,start:null,interval:null};
   S.settings={appLang:'hr',appTheme:'dark',name:'',email:'',addr:'',uid:'',iban:'',bic:'',rate:75,vat:20,currency:'EUR',note:'',calUsername:''};
   load();
-  if(S.timer) S.timer.interval=null; // interval ID invalid after reload
+  if(S.timer) {
+    S.timer.interval=null;
+    if(S.timer.running && S.timer.start && new Date(S.timer.start).toISOString().slice(0,10)!==tod()){
+      S.timer.running=false;S.timer.start=null;save();
+    }
+  }
   // If user explicitly picked lang/theme before login, that takes priority over saved profile
   // sessionStorage survives OAuth redirects; window flag covers same-session email login
   var pickedLang = window._userPickedLang || sessionStorage.getItem('compallo_lang');

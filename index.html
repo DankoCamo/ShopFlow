@@ -2797,9 +2797,13 @@ function toggleTimer(){
     if(dur>5){var _pid=parseInt(el('timer-project').value)||null;var _today=tod();var _ex=S.timeLogs.find(function(l){return !l.manual&&l.date===_today&&l.projectId===_pid;});if(_ex){_ex.duration+=dur;}else{S.timeLogs.push({id:S.nextId++,projectId:_pid,note:el('timer-note').value,duration:dur,date:_today,manual:false});}el('timer-note').value='';save();renderTracker();}
   }
 }
-// ─── DELMIA AUTO-TRACKER (status ide preko Supabase, vidi scripts/delmia-tracker-watcher.ps1)
-var DELMIA_PROJECT_TITLE='CAM Delmia - Kres';
+// ─── AUTO-TRACKER Delmia + Fusion (status ide preko Supabase, vidi scripts/delmia-tracker-watcher.ps1)
+var TRACKER_APPS=[
+  {id:1,name:'Delmia',projectTitle:'CAM Delmia - Kres'},
+  {id:2,name:'Fusion',projectTitle:'Fusion360'}
+];
 var _delmiaPauseStart=null;
+var _trackerApp=null; // ime aplikacije koja je pokrenula trenutni timer
 function _delmiaResumeDisplay(){
   if(_delmiaPauseStart){S.timer.start+=Date.now()-_delmiaPauseStart;_delmiaPauseStart=null;save();}
   el('timer-display').classList.remove('paused');
@@ -2808,34 +2812,47 @@ function _delmiaResumeDisplay(){
     el('timer-display').classList.add('running');el('timer-btn').className='btn btn-timer running';el('timer-btn').innerHTML='&#9632;';
   }
 }
+function _trackerStop(){
+  if(_delmiaPauseStart){S.timer.start+=Date.now()-_delmiaPauseStart;_delmiaPauseStart=null;}
+  el('timer-display').classList.remove('paused');
+  if(S.timer.running)toggleTimer();
+  _trackerApp=null;
+}
 function pollDelmiaWatcher(){
   var _st=el('delmia-status');
-  fetch(SUPABASE_URL+'/rest/v1/tracker_status?id=eq.1&select=running,paused',{
+  fetch(SUPABASE_URL+'/rest/v1/tracker_status?id=in.('+TRACKER_APPS.map(function(a){return a.id;}).join(',')+')&select=id,running,paused',{
     cache:'no-store',
     headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
   }).then(function(r){return r.json();}).then(function(rows){
-    var d=rows[0];if(!d)return;
-    console.log('[Delmia] running='+d.running+' paused='+d.paused+' timer.running='+S.timer.running+' timer.interval='+(!!S.timer.interval));
-    var p=S.projects.find(function(pr){return (pr.title||'').trim().toLowerCase()===DELMIA_PROJECT_TITLE.toLowerCase();});
-    if(d.running&&!d.paused){
-      if(_st)_st.textContent='Delmia: aktivan';
-      if(p){var sel=el('timer-project');if(sel)sel.value=p.id;}
-      if(!S.timer.running){toggleTimer();}
+    if(!rows||!rows.length)return;
+    var st={};rows.forEach(function(r){st[r.id]=r;});
+    var apps=TRACKER_APPS.filter(function(a){return st[a.id];});
+    var active=apps.find(function(a){return st[a.id].running&&!st[a.id].paused;});
+    var pausedApp=apps.find(function(a){return a.name===_trackerApp&&st[a.id].running&&st[a.id].paused;})||apps.find(function(a){return st[a.id].running&&st[a.id].paused;});
+    if(active){
+      if(_st)_st.textContent=active.name+': aktivan';
+      // prebacivanje s druge aplikacije: zatvori log za stari projekt pa kreni ispocetka
+      if(S.timer.running&&_trackerApp&&_trackerApp!==active.name)_trackerStop();
+      var p=S.projects.find(function(pr){return (pr.title||'').trim().toLowerCase()===active.projectTitle.toLowerCase();});
+      if(!S.timer.running){
+        if(p){var sel=el('timer-project');if(sel)sel.value=p.id;}
+        toggleTimer();
+      }
       else{_delmiaResumeDisplay();}
-    }else if(d.running&&d.paused){
-      if(_st)_st.textContent='Delmia: pauza (fokus izgubljen)';
+      _trackerApp=active.name;
+    }else if(pausedApp){
+      if(_st)_st.textContent=pausedApp.name+': pauza (fokus izgubljen)';
       if(S.timer.running){
         if(S.timer.interval){clearInterval(S.timer.interval);S.timer.interval=null;}
         if(!_delmiaPauseStart)_delmiaPauseStart=Date.now();
         el('timer-display').classList.remove('running');el('timer-display').classList.add('paused');
         el('timer-btn').className='btn btn-timer running';
       }
-    }else if(!d.running){
+    }else{
       if(_st)_st.textContent='';
-      if(_delmiaPauseStart){S.timer.start+=Date.now()-_delmiaPauseStart;_delmiaPauseStart=null;}
-      if(S.timer.running)toggleTimer();
+      _trackerStop();
     }
-  }).catch(function(e){console.error('[Delmia] fetch greska:',e);if(_st)_st.textContent='Delmia: greska spajanja';});
+  }).catch(function(e){console.error('[Tracker] fetch greska:',e);if(_st)_st.textContent='Tracker: greska spajanja';});
 }
 function openManualEntry(){el('manual-id').value='';el('manual-note').value='';el('manual-h').value=0;el('manual-m').value=0;el('manual-date').value=tod();el('manual-title').textContent=t('manualTimeTitle');el('manual-del').style.display='none';refreshProjSel();updateManualPreview();openModal('modal-manual');setTimeout(function(){el('manual-note').focus();},100);}
 function editManualLog(id){var l=S.timeLogs.find(function(l){return l.id===id;});if(!l)return;el('manual-id').value=id;el('manual-note').value=l.note||'';el('manual-h').value=Math.floor(l.duration/3600);el('manual-m').value=Math.floor((l.duration%3600)/60);el('manual-date').value=l.date;el('manual-title').textContent=t('editTaskTitle');el('manual-del').style.display='inline-flex';refreshProjSel();el('manual-project').value=l.projectId||'';updateManualPreview();openModal('modal-manual');}

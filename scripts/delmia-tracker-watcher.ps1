@@ -1,10 +1,11 @@
 # ShopFlow auto-tracker watcher (Delmia + Fusion).
 # Za svaku aplikaciju: pauza ako mis idle >= $IdleThreshold sekundi ILI prozor aplikacije nije u fokusu >= $IdleThreshold sekundi.
 # Ako su obje pokrenute, aktivna je samo ona koja je zadnja bila u fokusu (druga je u pauzi).
+# ExtraFocus: dodatni procesi koji se racunaju kao fokus te aplikacije (dok je ona pokrenuta), npr. Claude desktop uz Fusion.
 
 $Apps = @(
-    @{ Name = "Delmia"; ProcessNames = @("3DEXPERIENCE");              RowId = 1 },
-    @{ Name = "Fusion"; ProcessNames = @("Fusion360", "AutodeskFusion"); RowId = 2 }
+    @{ Name = "Delmia"; ProcessNames = @("3DEXPERIENCE");              ExtraFocus = @();         RowId = 1 },
+    @{ Name = "Fusion"; ProcessNames = @("Fusion360", "AutodeskFusion"); ExtraFocus = @("Claude"); RowId = 2 }
 )
 $IdleThreshold    = 30   # sekundi
 $FocusDebounce    = 3    # aplikacija mora biti u fokusu barem 3s da se pauza resetuje
@@ -68,7 +69,8 @@ while ($true) {
     # Fokus prozora — s debounce: mora biti u fokusu barem $FocusDebounce sekundi
     $focusedProc = Get-ForegroundProcessName
     foreach ($app in $Apps) {
-        if ($app.ProcessNames -contains $focusedProc) {
+        $app.Running = $null -ne (Get-Process -Name $app.ProcessNames -ErrorAction SilentlyContinue)
+        if (($app.ProcessNames -contains $focusedProc) -or ($app.Running -and $app.ExtraFocus -contains $focusedProc)) {
             if ($null -eq $app.ContinuousFocusStart) {
                 $app.ContinuousFocusStart = [DateTime]::Now
             }
@@ -83,7 +85,7 @@ while ($true) {
     }
 
     foreach ($app in $Apps) {
-        $running      = $null -ne (Get-Process -Name $app.ProcessNames -ErrorAction SilentlyContinue)
+        $running      = $app.Running
         if (-not $running -and $activeApp -eq $app.Name) { $activeApp = $null }
         $focusSeconds = ([DateTime]::Now - $app.LastFocusTime).TotalSeconds
         $otherActive  = ($null -ne $activeApp) -and ($activeApp -ne $app.Name)
